@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png'],
+      includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png', 'rest-sw.js'],
       manifest: {
         name: 'GymCals — 12-Week Athletic Plan',
         short_name: 'GymCals',
@@ -26,6 +26,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,woff2}'],
+        // Background rest-timer alarm (see public/rest-sw.js).
+        importScripts: ['rest-sw.js'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         runtimeCaching: [
           {

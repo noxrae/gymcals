@@ -58,7 +58,7 @@ export default function TodayScreen() {
           </div>
         </Link>
       ) : (
-        <div className="hero" style={{ height: 300, background: '#111' }}>
+        <div className="hero" style={{ height: 300, background: 'var(--ink-card)' }}>
           <div className="content">
             <IconMoon size={32} />
             <span className="disp" style={{ fontSize: 60 }}>Rest day</span>
@@ -67,7 +67,7 @@ export default function TodayScreen() {
         </div>
       )}
 
-      {dayId === 'sun' && !beforeStart && <WeekReviewCard week={week} review={weekReview(state, monday, week)} />}
+      {dayId === 'sun' && !beforeStart && start! <= monday && <WeekReviewCard week={week} review={weekReview(state, monday, week)} />}
 
       {tips.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

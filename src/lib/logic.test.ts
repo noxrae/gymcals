@@ -47,6 +47,8 @@ describe('warm-up calculator', () => {
     expect(warmupSets(52.5)).toEqual([{ kg: 20, reps: 10 }, { kg: 30, reps: 5 }, { kg: 40, reps: 3 }])
     expect(warmupSets(100).map((s) => s.kg)).toEqual([20, 50, 70, 85])
     expect(warmupSets(20)).toEqual([{ kg: 20, reps: 10 }])
+    // No pointless tiny jumps (seen on the phone: 20 → 22.5 → 30 for a 40 kg bench).
+    expect(warmupSets(40).map((s) => s.kg)).toEqual([20, 30])
     for (const w of [22.5, 25, 30, 37.5, 45, 60, 77.5, 120]) {
       const sets = warmupSets(w)
       expect(sets.every((s) => s.kg < w || s.kg === 20)).toBe(true)

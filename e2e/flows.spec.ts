@@ -107,12 +107,21 @@ test.describe('workout logging', () => {
     seed.settings = { vibrate: true, sound: false }
     await open(page, seed, { path: '/workout/wed' })
     await page.getByRole('region', { name: 'Dumbbell Curl', exact: true }).getByRole('button', { name: 'Set 1 done' }).click()
-    await expect(page.getByRole('timer')).toContainText('1:15')
-    await page.clock.fastForward(80_000)
+    await expect(page.getByRole('timer')).toContainText(/1:[01]\d/)
+    await page.clock.runFor(80_000)
     await expect(page.getByRole('timer')).toContainText('Go!')
     const v = await page.evaluate(() => (window as unknown as { vibrations: unknown[] }).vibrations)
     expect(v).toContainEqual([250, 120, 250, 120, 400])
-    await page.getByRole('timer').getByRole('button', { name: 'Done' }).click()
+    // The "Rest over" bar clears itself so it never covers the screen (found on the phone).
+    await page.clock.runFor(9_000)
+    await expect(page.getByRole('timer')).toBeHidden()
+  })
+
+  test('pressing −15 past zero skips the rest instead of getting stuck', async ({ page }) => {
+    await open(page, history(), { path: '/workout/wed' })
+    await page.getByRole('region', { name: 'Dumbbell Curl', exact: true }).getByRole('button', { name: 'Set 1 done' }).click()
+    // 75 s rest: five presses reach zero and close the timer.
+    for (let i = 0; i < 5; i++) await page.getByRole('button', { name: '−15' }).click()
     await expect(page.getByRole('timer')).toBeHidden()
   })
 
@@ -226,6 +235,12 @@ test.describe('plan modes and review', () => {
     await expect(review).toContainText('New bests')
     await page.clock.setFixedTime(WED_WEEK6)
     await page.reload()
+    await expect(page.getByRole('region', { name: /in review/ })).toHaveCount(0)
+  })
+
+  test('no week-in-review on the very first day of the plan (found on the phone)', async ({ page }) => {
+    await open(page, { settings: { startDate: '2026-10-11' } }, { at: new Date('2026-10-11T10:00:00') })
+    await expect(page.getByText('Rest day')).toBeVisible()
     await expect(page.getByRole('region', { name: /in review/ })).toHaveCount(0)
   })
 

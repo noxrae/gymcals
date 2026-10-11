@@ -37,26 +37,32 @@ function beep() {
   })
 }
 
-async function notify(label: string) {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return
+/** Hands the alarm to the service worker, which can notify while the app is in the background. */
+async function toServiceWorker(msg: { type: 'rest-start'; endAt: number; label: string } | { type: 'rest-cancel' }) {
   try {
-    const reg = await navigator.serviceWorker?.getRegistration()
-    const opts = { body: `Rest is over. Time for your next set of ${label}.`, icon: 'icon-192.png', tag: 'rest', renotify: true } as NotificationOptions
-    if (reg) await reg.showNotification('GymCals', opts)
-    else new Notification('GymCals', opts)
+    const reg = await navigator.serviceWorker?.ready
+    reg?.active?.postMessage({ ...msg, url: location.href })
   } catch {
-    // notifications unavailable — the in-app alert still fires
+    // no service worker (e.g. dev server) — the in-app alert still works while the app is open
   }
 }
 
 function finish() {
   if (!timer || alerted) return
   alerted = true
+  emit()
+  // Clear the "Rest over" bar by itself after a few seconds.
+  const ended = timer
+  setTimeout(() => {
+    if (timer === ended) restTimer.stop()
+  }, 8000)
+  // In the background the service worker shows a notification instead; vibration and
+  // Web Audio only work while the app is visible.
+  // Also skip when the app was frozen and only noticed late (the notification already alerted).
+  if (document.hidden || Date.now() - timer.endAt > 3000) return
   const { sound, vibrate } = getState().settings
   if (vibrate && 'vibrate' in navigator) navigator.vibrate([250, 120, 250, 120, 400])
   if (sound) beep()
-  if (document.hidden) void notify(timer.label)
-  emit()
 }
 
 setInterval(() => {
@@ -73,18 +79,22 @@ export const restTimer = {
     timer = { endAt: Date.now() + seconds * 1000, total: seconds, label }
     alerted = false
     emit()
+    void toServiceWorker({ type: 'rest-start', endAt: timer.endAt, label })
     if ('Notification' in window && Notification.permission === 'default') void Notification.requestPermission()
   },
   add(seconds: number) {
     if (!timer) return
-    const endAt = Math.max(Date.now(), timer.endAt + seconds * 1000)
+    const endAt = timer.endAt + seconds * 1000
+    // Taking the rest below zero with −15 means "skip the rest" (found on the phone: the bar used to get stuck).
+    if (endAt <= Date.now()) return restTimer.stop()
     timer = { ...timer, endAt, total: Math.max(timer.total + seconds, 1) }
-    alerted = Date.now() >= endAt
     emit()
+    void toServiceWorker({ type: 'rest-start', endAt, label: timer.label })
   },
   stop() {
     timer = null
     emit()
+    void toServiceWorker({ type: 'rest-cancel' })
   },
 }
 

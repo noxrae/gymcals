@@ -14,7 +14,7 @@ export function VideoPlayer({ ex, height = 300 }: { ex: Exercise; height?: numbe
         <iframe
           title={`${ex.name} form video`}
           src={`https://www.youtube-nocookie.com/embed/${ex.video.id}?autoplay=1&rel=0&playsinline=1&modestbranding=1`}
-          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
           allowFullScreen
           style={{ width: '100%', height: '100%', border: 0, display: 'block', animation: 'fade .4s ease both' }}
         />

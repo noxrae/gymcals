@@ -12,7 +12,8 @@ export function warmupSets(work: number): { kg: number; reps: number }[] {
   const ramp = work >= 80 ? [[0.5, 5], [0.7, 3], [0.85, 1]] : work >= 40 ? [[0.55, 5], [0.75, 3]] : [[0.7, 5]]
   for (const [pct, reps] of ramp) {
     const kg = roundTo(work * pct)
-    if (kg > sets[sets.length - 1].kg && kg < work) sets.push({ kg, reps })
+    const prev = sets[sets.length - 1].kg
+    if (kg - prev >= Math.max(5, work * 0.15) && kg < work) sets.push({ kg, reps })
   }
   return sets
 }

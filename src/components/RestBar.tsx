@@ -15,7 +15,7 @@ export function RestBar({ bottom }: { bottom: string }) {
       style={{
         position: 'fixed', left: 0, right: 0, marginInline: 'auto', bottom, zIndex: 20,
         width: 'calc(100% - 24px)', maxWidth: 496, borderRadius: 20, padding: '14px 16px',
-        background: t.done ? 'var(--accent)' : '#111', color: t.done ? '#000' : '#fff',
+        background: t.done ? 'var(--accent)' : 'var(--ink-card)', color: t.done ? '#000' : '#fff',
         boxShadow: '0 10px 30px rgba(0,0,0,.28)', display: 'flex', flexDirection: 'column', gap: 12,
         animation: 'enter .35s var(--ease) both', transition: 'background-color .35s ease, color .35s ease',
       }}

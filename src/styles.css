@@ -29,6 +29,9 @@
 
   --btn: #000000;
   --btn-ink: #ffffff;
+  --ink-card: #000000;
+  --ink-cell: #111111;
+  --ink-line: #2c2c2e;
   --bar: rgba(249, 249, 249, 0.92);
   --scrim: linear-gradient(to top, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.35) 45%, rgba(0, 0, 0, 0) 72%);
   --body-map: none;
@@ -66,6 +69,9 @@
 
     --btn: #ffffff;
     --btn-ink: #000000;
+    --ink-card: #1c1c1e;
+    --ink-cell: #2c2c2e;
+    --ink-line: #3a3a3c;
     --bar: rgba(22, 22, 24, 0.9);
     --body-map: invert(1);
     --body-map-opacity: 0.5;
@@ -225,6 +231,7 @@ a.row:active, button.row:active { transform: none; background: var(--surface-2);
 .hero { position: relative; display: block; border-radius: 20px; overflow: hidden; background: #1a1a1a; color: #fff; isolation: isolate; }
 .hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; animation: fade 0.5s ease both; }
 .hero::before { content: ''; position: absolute; inset: 0; background: var(--scrim); z-index: -1; }
+.hero:not(:has(img))::before { display: none; }
 .hero .content { position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 12px; }
 .media { position: relative; background: #111; overflow: hidden; }
 .media img { width: 100%; height: 100%; object-fit: cover; }

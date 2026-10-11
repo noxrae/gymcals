@@ -21,7 +21,7 @@ export default function PlanScreen() {
     <div className="screen">
       <h1 className="large-title" style={{ padding: '8px 4px 0' }}>Plan</h1>
 
-      <div style={{ borderRadius: 20, background: '#000', color: '#fff', padding: '22px 20px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <div style={{ borderRadius: 20, background: 'var(--ink-card)', color: '#fff', padding: '22px 20px', display: 'flex', flexDirection: 'column', gap: 18 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span className="kicker">{phase.name} phase{week === DELOAD_WEEK ? ' · deload' : ''}</span>

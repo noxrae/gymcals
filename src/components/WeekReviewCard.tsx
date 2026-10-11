@@ -10,14 +10,14 @@ export function WeekReviewCard({ week, review }: { week: number; review: WeekRev
     { label: 'Avg protein', value: review.protein == null ? '—' : `${Math.round(review.protein)} g` },
   ]
   return (
-    <section aria-label={`Week ${week} in review`} style={{ borderRadius: 20, background: '#000', color: '#fff', padding: '22px 20px', display: 'flex', flexDirection: 'column', gap: 18, animation: 'enter .45s var(--ease) both' }}>
+    <section aria-label={`Week ${week} in review`} style={{ borderRadius: 20, background: 'var(--ink-card)', color: '#fff', padding: '22px 20px', display: 'flex', flexDirection: 'column', gap: 18, animation: 'enter .45s var(--ease) both' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <span className="kicker">Sunday recap</span>
         <h2 className="disp" style={{ fontSize: 54 }}>Week {String(week).padStart(2, '0')}<br />in review</h2>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: '#2c2c2e', borderRadius: 14, overflow: 'hidden' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: 'var(--ink-line)', borderRadius: 14, overflow: 'hidden' }}>
         {stats.map((s) => (
-          <div key={s.label} style={{ background: '#111', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div key={s.label} style={{ background: 'var(--ink-cell)', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 2 }}>
             <span className="num" style={{ fontSize: 24, fontWeight: 700 }}>{s.value}</span>
             <span style={{ fontSize: 13, color: '#a1a1a6' }}>{s.label}</span>
           </div>
