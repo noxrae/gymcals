@@ -1,0 +1,136 @@
+import { useRef, useState } from 'react'
+import { NavBar } from '../components/Chrome'
+import { fmtLong, today } from '../lib/dates'
+import { actions, exportData, useStore } from '../lib/store'
+
+export default function SettingsScreen() {
+  const s = useStore((st) => st.settings)
+  const file = useRef<HTMLInputElement>(null)
+  const [msg, setMsg] = useState('')
+  const [perm, setPerm] = useState(typeof Notification !== 'undefined' ? Notification.permission : 'denied')
+
+  const download = () => {
+    const blob = new Blob([exportData()], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `gymcals-backup-${today()}.json`
+    a.click()
+    URL.revokeObjectURL(a.href)
+    setMsg('Backup downloaded.')
+  }
+
+  return (
+    <div className="screen flush no-tabs">
+      <NavBar title="Settings" back="Today" />
+      <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div>
+          <h2 className="sec">Plan</h2>
+          <div className="group">
+            <label className="row">
+              <span style={{ flex: 1 }}>Start date</span>
+              <input type="date" className="field" style={{ width: 150 }} value={s.startDate ?? ''} onChange={(e) => e.target.value && actions.setSettings({ startDate: e.target.value })} />
+            </label>
+          </div>
+          {s.startDate && <p className="sec-foot">Week 1 began {fmtLong(s.startDate)}.</p>}
+        </div>
+
+        <div>
+          <h2 className="sec">Daily targets</h2>
+          <div className="group">
+            <Stepper label="Protein" unit="g" value={s.proteinTarget} step={5} onChange={(v) => actions.setSettings({ proteinTarget: v })} />
+            <Stepper label="Steps" value={s.stepTarget} step={500} onChange={(v) => actions.setSettings({ stepTarget: v })} />
+          </div>
+          <p className="sec-foot">Your plan suggests 125–140 g of protein and 7,000–10,000 steps.</p>
+        </div>
+
+        <div>
+          <h2 className="sec">Rest timer</h2>
+          <div className="group">
+            <Toggle label="Sound" on={s.sound} onChange={(v) => actions.setSettings({ sound: v })} />
+            <Toggle label="Vibration" on={s.vibrate} onChange={(v) => actions.setSettings({ vibrate: v })} />
+            <div className="row">
+              <span style={{ flex: 1 }}>Notifications</span>
+              {perm === 'granted' ? (
+                <span className="value">On</span>
+              ) : perm === 'denied' ? (
+                <span className="value small">Blocked in browser settings</span>
+              ) : (
+                <button type="button" className="link-btn" onClick={async () => setPerm(await Notification.requestPermission())}>Turn on</button>
+              )}
+            </div>
+          </div>
+          <p className="sec-foot">Notifications alert you when rest ends while you’re in another app. On iPhone, add GymCals to your Home Screen first.</p>
+        </div>
+
+        <div>
+          <h2 className="sec">Your data</h2>
+          <div className="group">
+            <button type="button" className="row" onClick={download}><span style={{ color: 'var(--accent-ink)' }}>Export backup</span></button>
+            <button type="button" className="row" onClick={() => file.current?.click()}><span style={{ color: 'var(--accent-ink)' }}>Import backup</span></button>
+            <button
+              type="button"
+              className="row"
+              onClick={() => {
+                if (window.confirm('Erase all workouts, check-ins and settings? This cannot be undone.')) actions.reset()
+              }}
+            >
+              <span style={{ color: '#ff3b30' }}>Erase everything</span>
+            </button>
+          </div>
+          <input
+            ref={file}
+            type="file"
+            accept="application/json"
+            hidden
+            onChange={async (e) => {
+              const f = e.target.files?.[0]
+              if (!f) return
+              try {
+                actions.importData(await f.text())
+                setMsg('Backup restored.')
+              } catch (err) {
+                setMsg(err instanceof Error ? err.message : 'Could not read that file.')
+              }
+              e.target.value = ''
+            }}
+          />
+          <p className="sec-foot" role="status">{msg || 'Everything is stored only on this device. Export a backup now and then.'}</p>
+        </div>
+
+        <div>
+          <h2 className="sec">Credits</h2>
+          <div className="group">
+            <a className="row" href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noreferrer"><span className="grow"><span>Exercise photos</span><span className="sub">free-exercise-db · public domain</span></span></a>
+            <a className="row" href="https://wger.de" target="_blank" rel="noreferrer"><span className="grow"><span>Muscle illustrations</span><span className="sub">wger.de · CC BY-SA 3.0</span></span></a>
+            <div className="row"><span className="grow"><span>Form videos</span><span className="sub">Embedded from each creator’s YouTube channel</span></span></div>
+          </div>
+          <p className="sec-foot">GymCals is educational, not medical advice. Stop and get qualified help if you feel sharp or unusual pain.</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Toggle({ label, on, onChange }: { label: string; on: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button type="button" className="row" role="switch" aria-checked={on} onClick={() => onChange(!on)}>
+      <span style={{ flex: 1 }}>{label}</span>
+      <span aria-hidden style={{ width: 51, height: 31, borderRadius: 16, background: on ? 'var(--good-fill)' : 'var(--fill)', position: 'relative', transition: 'background-color .25s ease' }}>
+        <span style={{ position: 'absolute', top: 2, left: on ? 22 : 2, width: 27, height: 27, borderRadius: 14, background: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,.2)', transition: 'left .25s var(--ease)' }} />
+      </span>
+    </button>
+  )
+}
+
+function Stepper({ label, unit, value, step, onChange }: { label: string; unit?: string; value: number; step: number; onChange: (v: number) => void }) {
+  return (
+    <div className="row">
+      <span style={{ flex: 1 }}>{label}</span>
+      <span className="num" style={{ minWidth: 70, textAlign: 'right' }}>{value.toLocaleString()}{unit ? ` ${unit}` : ''}</span>
+      <span className="seg" style={{ width: 96 }}>
+        <button type="button" aria-label={`Less ${label.toLowerCase()}`} onClick={() => onChange(Math.max(0, value - step))} style={{ fontSize: 18 }}>−</button>
+        <button type="button" aria-label={`More ${label.toLowerCase()}`} onClick={() => onChange(value + step)} style={{ fontSize: 18 }}>+</button>
+      </span>
+    </div>
+  )
+}
