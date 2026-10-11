@@ -3,6 +3,7 @@ import { IconChevronLeft } from '../components/Icons'
 import { fmtNum } from '../lib/coach'
 import { addDays, daysBetween, fmtLong, today } from '../lib/dates'
 import { actions, useStore, type Checkin } from '../lib/store'
+import { undoable } from '../lib/toast'
 
 const FOODS = [
   { name: '3 eggs', g: 18 },
@@ -67,7 +68,7 @@ export default function LogScreen() {
             </div>
             <div style={{ display: 'flex', gap: 8, padding: '0 16px' }}>
               <CustomProtein onAdd={(g) => set({ protein: protein + g })} />
-              {protein > 0 && <button type="button" className="chip" onClick={() => set({ protein: 0 })}>Reset</button>}
+              {protein > 0 && <button type="button" className="chip" onClick={() => { const before = protein; set({ protein: 0 }); undoable('Protein reset', () => set({ protein: before })) }}>Reset</button>}
             </div>
           </div>
         </div>

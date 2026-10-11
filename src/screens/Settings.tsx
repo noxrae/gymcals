@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { NavBar } from '../components/Chrome'
 import { fmtLong, today } from '../lib/dates'
 import { clearPhotos } from '../lib/photos'
@@ -10,14 +11,34 @@ export default function SettingsScreen() {
   const [msg, setMsg] = useState('')
   const [perm, setPerm] = useState(typeof Notification !== 'undefined' ? Notification.permission : 'denied')
 
-  const download = () => {
+  const [params] = useSearchParams()
+  const backupRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (params.get('backup')) backupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [params])
+
+  /** On phones: share sheet (Drive, WhatsApp, Files…). Elsewhere: a normal download. */
+  const download = async () => {
+    const name = `gymcals-backup-${today()}.json`
     const blob = new Blob([exportData()], { type: 'application/json' })
+    const file = new File([blob], name, { type: 'application/json' })
+    try {
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'GymCals backup' })
+        actions.setSettings({ lastBackup: today() })
+        setMsg('Backup shared. Keep it somewhere safe, like Google Drive.')
+        return
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
+    }
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
-    a.download = `gymcals-backup-${today()}.json`
+    a.download = name
     a.click()
     URL.revokeObjectURL(a.href)
-    setMsg('Backup downloaded.')
+    actions.setSettings({ lastBackup: today() })
+    setMsg('Backup saved to your Downloads.')
   }
 
   return (
@@ -55,6 +76,7 @@ export default function SettingsScreen() {
           <div className="group">
             <Toggle label="Sound" on={s.sound} onChange={(v) => actions.setSettings({ sound: v })} />
             <Toggle label="Vibration" on={s.vibrate} onChange={(v) => actions.setSettings({ vibrate: v })} />
+            <Toggle label="Keep screen on during workouts" on={s.keepAwake} onChange={(v) => actions.setSettings({ keepAwake: v })} />
             <div className="row">
               <span style={{ flex: 1 }}>Notifications</span>
               {perm === 'granted' ? (
@@ -69,11 +91,11 @@ export default function SettingsScreen() {
           <p className="sec-foot">Notifications alert you when rest ends while you’re in another app. On iPhone, add GymCals to your Home Screen first.</p>
         </div>
 
-        <div>
+        <div ref={backupRef}>
           <h2 className="sec">Your data</h2>
           <div className="group">
-            <button type="button" className="row" onClick={download}><span style={{ color: 'var(--accent-ink)' }}>Export backup</span></button>
-            <button type="button" className="row" onClick={() => file.current?.click()}><span style={{ color: 'var(--accent-ink)' }}>Import backup</span></button>
+            <button type="button" className="row" onClick={download}><span className="grow"><span style={{ color: 'var(--accent-ink)' }}>Back up now</span><span className="sub">{s.lastBackup ? `Last backup ${fmtLong(s.lastBackup)}` : 'Never backed up'}</span></span></button>
+            <button type="button" className="row" onClick={() => file.current?.click()}><span style={{ color: 'var(--accent-ink)' }}>Restore from a backup</span></button>
             <button
               type="button"
               className="row"

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { daysBetween, fmtShort, today } from '../lib/dates'
 import { deletePhoto, POSES, savePhoto, usePhotos, type Pose } from '../lib/photos'
+import { undoable } from '../lib/toast'
 import { Sheet } from './Chrome'
 
 const LABEL: Record<Pose, string> = { front: 'Front', side: 'Side', back: 'Back' }
@@ -8,7 +9,7 @@ const LABEL: Record<Pose, string> = { front: 'Front', side: 'Side', back: 'Back'
 export function ProgressPhotos() {
   const photos = usePhotos()
   const [pose, setPose] = useState<Pose>('front')
-  const [viewing, setViewing] = useState<{ id: string; url: string; date: string; pose: Pose } | null>(null)
+  const [viewing, setViewing] = useState<{ id: string; url: string; date: string; pose: Pose; blob: Blob } | null>(null)
   const [busy, setBusy] = useState<Pose | null>(null)
   const input = useRef<HTMLInputElement>(null)
   const target = useRef<Pose>('front')
@@ -123,9 +124,10 @@ export function ProgressPhotos() {
               className="link-btn"
               style={{ color: 'var(--danger)' }}
               onClick={async () => {
-                if (!window.confirm('Delete this photo?')) return
-                await deletePhoto(viewing.id)
+                const gone = viewing
+                await deletePhoto(gone.id)
                 setViewing(null)
+                undoable('Photo deleted', () => void savePhoto(gone.date, gone.pose, gone.blob))
               }}
             >
               Delete

@@ -87,7 +87,12 @@ export default function TodayScreen() {
       )}
 
       <div>
-        <h2 className="sec">This week</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginRight: 16 }}>
+          <h2 className="sec">This week</h2>
+          <span className="small muted num" style={{ marginBottom: 8 }}>
+            {daysFor(fiveDay).filter((d, i) => d.groups.length && state.sessions[addDays(monday, i)]?.finishedAt).length} of {daysFor(fiveDay).filter((d) => d.groups.length).length} done
+          </span>
+        </div>
         <div className="group" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', padding: '14px 4px' }}>
           {daysFor(fiveDay).map((d, i) => {
             const dDate = addDays(monday, i)

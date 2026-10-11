@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { Sheet } from '../components/Chrome'
-import { IconCheck, IconChevronLeft, IconInfo, IconSpark } from '../components/Icons'
+import { Chevron, IconCheck, IconChevronLeft, IconInfo, IconSpark } from '../components/Icons'
 import { ExerciseThumb } from '../components/Media'
 import { RestBar } from '../components/RestBar'
 import { ALTERNATIVES, BARBELL, EXERCISES, type Exercise } from '../data/exercises'
 import { MUSCLES } from '../data/muscles'
 import { allItems, dayFor, setsFor, type DayId, type PlanItem } from '../data/plan'
-import { fmtNum, lastSets, rangeText, restText, suggest } from '../lib/coach'
+import { fmtNum, isPersonalBest, lastSets, rangeText, restText, setText, suggest } from '../lib/coach'
 import { fmtClock } from '../lib/dates'
 import { actions, useStore, type SetLog } from '../lib/store'
 import { restTimer } from '../lib/timer'
+import { showToast, undoable } from '../lib/toast'
+import { useWakeLock } from '../lib/wakeLock'
 import { useToday } from '../lib/useToday'
 import { plateText, warmupSets } from '../lib/warmup'
 
@@ -19,6 +21,8 @@ export default function WorkoutScreen() {
   const { date, week, fiveDay } = useToday()
   const day = dayId ? dayFor(dayId, fiveDay) : undefined
   const session = useStore((s) => s.sessions[date])
+  const keepAwake = useStore((s) => s.settings.keepAwake)
+  const state = useStore((s) => s)
   const navigate = useNavigate()
   const [finishing, setFinishing] = useState(false)
   const leaving = useRef(false)
@@ -33,6 +37,8 @@ export default function WorkoutScreen() {
     const id = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(id)
   }, [])
+  // Screen stays on while you train (Settings → Keep screen on).
+  useWakeLock(keepAwake && !!session && !session.finishedAt)
 
   if (!day || !day.groups.length) return <Navigate to="/" replace />
   if (conflict) return <Navigate to={`/workout/${session!.dayId}`} replace />
@@ -45,6 +51,13 @@ export default function WorkoutScreen() {
   const elapsed = ((session.finishedAt ?? now) - session.startedAt) / 1000
   const total = items.reduce((n, it) => n + setsFor(it, week), 0)
   const done = Object.values(session.log).reduce((n, sets) => n + sets.filter((s) => s.done).length, 0)
+  const records = Object.entries(session.log)
+    .filter(([ex, sets]) => sets.some((x) => x.done && isPersonalBest(state, ex, x, date)))
+    .map(([ex]) => EXERCISES[ex].name)
+  const volume = Object.entries(session.log).reduce(
+    (v, [ex, sets]) => v + (EXERCISES[ex].kind === 'weight' ? sets.filter((x) => x.done).reduce((a, x) => a + (x.load ?? 0) * (x.reps ?? 0), 0) : 0),
+    0,
+  )
 
   return (
     <div className="screen flush no-tabs" style={{ background: 'var(--surface)', paddingBottom: 'calc(env(safe-area-inset-bottom) + 140px)' }}>
@@ -73,6 +86,7 @@ export default function WorkoutScreen() {
           return (
             <ExerciseBlock
               key={it.ex}
+              index={i}
               planned={it.ex}
               item={{ ...it, ex: actual }}
               week={week}
@@ -94,6 +108,8 @@ export default function WorkoutScreen() {
           done={done}
           total={total}
           minutes={Math.round(elapsed / 60)}
+          records={records}
+          volume={volume}
           onClose={() => setFinishing(false)}
           onSave={() => {
             actions.finishSession(date)
@@ -101,11 +117,15 @@ export default function WorkoutScreen() {
             navigate('/', { replace: true })
           }}
           onDiscard={() => {
-            if (!window.confirm('Discard this workout? Logged sets will be deleted.')) return
+            const copy = session
             leaving.current = true
             actions.discardSession(date)
             restTimer.stop()
             navigate('/', { replace: true })
+            undoable('Workout discarded', () => {
+              actions.restoreSession(copy)
+              navigate(`/workout/${copy.dayId}`)
+            })
           }}
         />
       )}
@@ -123,7 +143,7 @@ function columns(ex: Exercise) {
   }
 }
 
-function ExerciseBlock({ item, planned, alternatives, week, date, log, isLast }: { item: PlanItem; planned: string; alternatives: string[]; week: number; date: string; log?: SetLog[]; isLast: boolean }) {
+function ExerciseBlock({ item, index, planned, alternatives, week, date, log, isLast }: { item: PlanItem; index: number; planned: string; alternatives: string[]; week: number; date: string; log?: SetLog[]; isLast: boolean }) {
   const ex = EXERCISES[item.ex]
   const [swapping, setSwapping] = useState(false)
   const state = useStore((s) => s)
@@ -144,11 +164,19 @@ function ExerciseBlock({ item, planned, alternatives, week, date, log, isLast }:
   const toggle = (i: number) => {
     const nowDone = !sets[i].done
     patch(i, { done: nowDone })
-    if (nowDone) {
-      if ('vibrate' in navigator) navigator.vibrate(12)
-      const lastSet = i === sets.length - 1
-      if (!(isLast && lastSet) && item.rest[0] > 0) restTimer.start(Math.round((item.rest[0] + item.rest[1]) / 2), ex.name)
-    }
+    if (!nowDone) return
+    const best = isPersonalBest(state, item.ex, sets[i], date)
+    if ('vibrate' in navigator) navigator.vibrate(best ? [30, 60, 30, 60, 60] : 12)
+    if (best) showToast(`New personal best · ${ex.name} ${setText(item.ex, sets[i])}`, { tone: 'good', ms: 4000 })
+    const finishesExercise = sets.every((x, j) => j === i || x.done)
+    if (!(isLast && finishesExercise) && item.rest[0] > 0) restTimer.start(Math.round((item.rest[0] + item.rest[1]) / 2), ex.name)
+    // Glide to the next exercise once this one is complete.
+    if (finishesExercise) setTimeout(() => document.getElementById(`ex-${index + 1}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 450)
+  }
+  const removeSet = () => {
+    const before = sets
+    save(sets.slice(0, -1))
+    undoable('Set removed', () => save(before))
   }
 
   const summary = sets
@@ -158,11 +186,13 @@ function ExerciseBlock({ item, planned, alternatives, week, date, log, isLast }:
 
   if (!open) {
     return (
-      <button type="button" className="row" onClick={() => setOpen(true)} style={{ minHeight: 64, background: 'var(--good-soft)', margin: '0 12px', width: 'auto', borderRadius: 14 }}>
-        <span style={{ width: 28, height: 28, borderRadius: 14, background: 'var(--good-fill)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><IconCheck size={14} /></span>
-        <span className="grow"><span style={{ fontWeight: 600 }}>{ex.name}</span><span className="sub num">{summary}</span></span>
-        <span className="small muted">Edit</span>
-      </button>
+      <div id={`ex-${index}`} className="ex-anchor" style={{ padding: '0 12px' }}>
+        <button type="button" className="row" onClick={() => setOpen(true)} style={{ minHeight: 60, background: 'var(--good-soft)', borderRadius: 14 }}>
+          <span style={{ width: 26, height: 26, borderRadius: 13, background: 'var(--good-fill)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><IconCheck size={13} /></span>
+          <span className="grow"><span style={{ fontWeight: 600 }}>{ex.name}</span><span className="sub num">{summary}</span></span>
+          <span className="small muted">Edit</span>
+        </button>
+      </div>
     )
   }
 
@@ -171,18 +201,18 @@ function ExerciseBlock({ item, planned, alternatives, week, date, log, isLast }:
   const grid = cols.load ? (narrow ? '24px minmax(0,1fr) 62px 48px 40px' : '34px minmax(0,1fr) 78px 62px 44px') : narrow ? '24px minmax(0,1fr) 62px 40px' : '34px minmax(0,1fr) 78px 44px'
 
   return (
-    <section aria-label={ex.name} style={{ padding: '10px 0 14px', borderBottom: '1px solid var(--sep)', animation: 'fade .3s ease both' }}>
+    <section id={`ex-${index}`} className="ex-anchor" aria-label={ex.name} style={{ padding: '12px 0 14px', borderBottom: '1px solid var(--sep)', animation: 'fade .3s ease both' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 8px 8px 16px' }}>
-        <ExerciseThumb ex={ex} size={44} radius={8} />
-        <Link to={`/exercise/${ex.key}`} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <span style={{ fontSize: 17, fontWeight: 600 }}>{ex.name}</span>
+        <ExerciseThumb ex={ex} size={44} radius={10} />
+        <Link to={`/exercise/${ex.key}`} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1, color: 'var(--label)' }}>
+          <span style={{ fontSize: 17, fontWeight: 650, letterSpacing: '-0.015em' }}>{ex.name}</span>
           <span className="small muted">{rangeText(item, count)}{item.rest[0] ? ` · rest ${restText(item.rest)}` : ''}</span>
           {planned !== item.ex && <span className="small" style={{ color: 'var(--accent-ink)' }}>Swapped for {EXERCISES[planned].name}</span>}
         </Link>
         {alternatives.length > 0 && !sets.some((s) => s.done) && (
-          <button type="button" className="chip" style={{ minHeight: 32, padding: '0 12px', fontSize: 13 }} onClick={() => setSwapping(true)}>Swap</button>
+          <button type="button" className="link-btn" style={{ fontSize: 14, fontWeight: 600, minHeight: 40 }} onClick={() => setSwapping(true)}>Swap</button>
         )}
-        <Link to={`/exercise/${ex.key}?tab=muscles`} aria-label={`Muscles and video: ${ex.name}`} style={{ width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconInfo size={22} /></Link>
+        <Link to={`/exercise/${ex.key}?tab=muscles`} aria-label={`Muscles and video: ${ex.name}`} style={{ width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--label-2)' }}><IconInfo size={21} /></Link>
       </div>
 
       {ex.kind !== 'cardio' && (
@@ -224,9 +254,9 @@ function ExerciseBlock({ item, planned, alternatives, week, date, log, isLast }:
         )
       })}
 
-      <div style={{ display: 'flex', gap: 8, padding: '10px 16px 0' }}>
-        <button type="button" className="chip" style={{ flex: 1, minHeight: 40 }} onClick={() => save([...sets, { load: sets.at(-1)?.load ?? tip.load, reps: sets.at(-1)?.reps ?? tip.reps, done: false }])}>+ Add set</button>
-        {sets.length > 1 && <button type="button" className="chip" style={{ minHeight: 40 }} onClick={() => save(sets.slice(0, -1))}>Remove set</button>}
+      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 8px 0' }}>
+        <button type="button" className="link-btn" style={{ fontSize: 15, fontWeight: 600 }} onClick={() => save([...sets, { load: sets.at(-1)?.load ?? tip.load, reps: sets.at(-1)?.reps ?? tip.reps, done: false }])}>+ Add set</button>
+        {sets.length > 1 && <button type="button" className="link-btn" style={{ fontSize: 15, color: 'var(--label-2)' }} onClick={removeSet}>Remove last</button>}
       </div>
 
       {swapping && (
@@ -267,15 +297,22 @@ function ExerciseBlock({ item, planned, alternatives, week, date, log, isLast }:
 
 /** General warm-up from the plan, as a quick checklist. */
 function WarmupCard() {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const [ticks, setTicks] = useState<boolean[]>([false, false, false])
   const steps = ['3–5 min easy walk, bike or elliptical', 'Shoulder circles, band pull-aparts, hip hinges, bodyweight squats', 'Ramp-up sets before your first big lift (shown under it)']
-  const all = ticks.every(Boolean)
+  const count = ticks.filter(Boolean).length
+  const all = count === steps.length
+  useEffect(() => {
+    if (all) setOpen(false)
+  }, [all])
   return (
     <section style={{ margin: '0 12px', borderRadius: 14, background: all ? 'var(--good-soft)' : 'var(--surface-2)', transition: 'background-color .3s ease' }}>
-      <button type="button" className="row" onClick={() => setOpen(!open)} aria-expanded={open} style={{ minHeight: 56 }}>
-        <span className="grow"><span style={{ fontWeight: 600 }}>Warm-up · 8–12 min</span><span className="sub">{all ? 'Done. Ready to lift.' : 'Warm muscles lift more and get hurt less'}</span></span>
-        <span className="small muted">{open ? 'Hide' : 'Show'}</span>
+      <button type="button" className="row" onClick={() => setOpen(!open)} aria-expanded={open} style={{ minHeight: 52 }}>
+        <span style={{ flex: 'none', width: 26, height: 26, borderRadius: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', background: all ? 'var(--good-fill)' : 'var(--surface)', boxShadow: all ? undefined : 'inset 0 0 0 1.5px var(--chevron)', color: all ? '#fff' : 'var(--label)', fontSize: 11, fontWeight: 700 }}>
+          {all ? <IconCheck size={13} /> : `${count}/3`}
+        </span>
+        <span className="grow"><span style={{ fontWeight: 600 }}>{all ? 'Warmed up' : 'Warm-up · 8–12 min'}</span></span>
+        <span style={{ transform: open ? 'rotate(90deg)' : undefined, transition: 'transform .25s var(--ease)', display: 'flex' }}><Chevron /></span>
       </button>
       {open &&
         steps.map((st, i) => (
@@ -351,7 +388,7 @@ function NumBox({ value, onChange, label, integer }: { value?: number; onChange:
   )
 }
 
-function FinishSheet({ done, total, minutes, onClose, onSave, onDiscard }: { done: number; total: number; minutes: number; onClose: () => void; onSave: () => void; onDiscard: () => void }) {
+function FinishSheet({ done, total, minutes, records, volume, onClose, onSave, onDiscard }: { done: number; total: number; minutes: number; records: string[]; volume: number; onClose: () => void; onSave: () => void; onDiscard: () => void }) {
   const pct = total ? Math.round((done / total) * 100) : 0
   return (
     <Sheet onClose={onClose} label="Finish workout">
@@ -362,8 +399,14 @@ function FinishSheet({ done, total, minutes, onClose, onSave, onDiscard }: { don
       <div className="group" style={{ display: 'flex' }}>
         <SheetStat value={`${minutes}`} label="Minutes" />
         <SheetStat value={`${done}/${total}`} label="Sets" />
-        <SheetStat value={`${pct}%`} label="Done" />
+        <SheetStat value={volume >= 1000 ? `${fmtNum(Math.round(volume / 100) / 10)}t` : `${Math.round(volume)}`} label={volume >= 1000 ? 'Lifted' : 'kg lifted'} />
       </div>
+      {records.length > 0 && (
+        <div className="callout good">
+          <IconSpark size={20} style={{ color: 'var(--good)' }} />
+          <div><b>{records.length === 1 ? 'New personal best' : `${records.length} new personal bests`}</b><div style={{ fontSize: 14 }}>{records.join(', ')}</div></div>
+        </div>
+      )}
       {done < total && <p className="muted" style={{ fontSize: 15, padding: '0 4px' }}>Unfinished sets are fine. Consistency beats perfect sessions.</p>}
       <button type="button" className="btn" onClick={onSave}>Save Workout</button>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { TabBar } from './components/Chrome'
 import { RestBar } from './components/RestBar'
+import { ToastBar } from './components/ToastBar'
 import { useStore } from './lib/store'
 import DayScreen from './screens/Day'
 import ExerciseScreen from './screens/Exercise'
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {showTabs && <TabBar />}
+      <ToastBar />
       {!pathname.startsWith('/workout') && <RestBar bottom={showTabs ? 'calc(var(--tabbar-h) + 10px)' : 'calc(env(safe-area-inset-bottom) + 96px)'} />}
     </>
   )

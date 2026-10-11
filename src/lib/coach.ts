@@ -104,6 +104,38 @@ export function suggest(state: State, item: PlanItem, week: number): Suggestion 
   }
 }
 
+// ---------- personal bests ----------
+
+/** Score for comparing single sets: heavier is better; for assistance, less help is better. */
+function setScore(kind: Exercise['kind'], s: SetLog): number | null {
+  if (kind === 'weight') return s.load != null ? s.load * 1000 + (s.reps ?? 0) : null
+  if (kind === 'assist') return s.load != null ? -s.load * 1000 + (s.reps ?? 0) : null
+  if (kind === 'reps' || kind === 'time') return s.reps ?? null
+  return null
+}
+
+/** True when this set beats every set logged for the exercise before `date` (needs some history). */
+export function isPersonalBest(state: State, ex: string, set: SetLog, date: string) {
+  const kind = EXERCISES[ex]?.kind
+  if (!kind) return false
+  const score = setScore(kind, set)
+  if (score == null) return false
+  const before = Object.values(state.sessions)
+    .filter((s) => s.date < date)
+    .flatMap((s) => (s.log[ex] ?? []).filter((x) => x.done))
+    .map((x) => setScore(kind, x))
+    .filter((x): x is number => x != null)
+  return before.length > 0 && score > Math.max(...before)
+}
+
+export const setText = (ex: string, s: SetLog) => {
+  const kind = EXERCISES[ex].kind
+  if (kind === 'weight') return `${fmtNum(s.load ?? 0)} kg × ${s.reps ?? 0}`
+  if (kind === 'assist') return `${fmtNum(s.load ?? 0)} kg assist × ${s.reps ?? 0}`
+  if (kind === 'time') return `${s.reps ?? 0} s`
+  return `${s.reps ?? 0} reps`
+}
+
 // ---------- body-weight trend ----------
 
 export function weightSeries(checkins: Record<string, Checkin>) {
@@ -165,6 +197,12 @@ export function insights(state: State, date = today()): Insight[] {
   if (proteinDays.length >= 3) {
     const avg = proteinDays.reduce((a, b) => a + b, 0) / proteinDays.length
     if (avg < state.settings.proteinTarget * 0.8) out.push({ to: '/log', tone: 'warn', title: 'Protein is low', text: `Averaging ${Math.round(avg)} g. Aim for about ${state.settings.proteinTarget} g to keep muscle while losing fat.` })
+  }
+
+  const sessionsLogged = Object.values(state.sessions).filter((s) => s.finishedAt).length
+  const lastBackup = state.settings.lastBackup
+  if (sessionsLogged >= 2 && (!lastBackup || daysBetween(lastBackup, date) >= 14)) {
+    out.push({ to: '/settings?backup=1', tone: 'accent', title: 'Back up your progress', text: lastBackup ? 'It’s been 2 weeks. One tap saves a copy to Drive, WhatsApp or your Downloads.' : 'Your workouts live only on this phone. One tap saves a copy to Drive, WhatsApp or your Downloads.' })
   }
 
   const lastPhoto = state.photoDates?.at(-1)

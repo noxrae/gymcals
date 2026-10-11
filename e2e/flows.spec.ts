@@ -134,7 +134,7 @@ test.describe('workout logging', () => {
     await expect(curl.getByLabel('Set 4 kg')).toHaveValue('12.5')
     await curl.getByLabel('Set 1 kg').fill('-5')
     expect((await stored(page)).sessions[TODAY].log['dumbbell-curl'][0].load).not.toBe(-5)
-    await curl.getByRole('button', { name: 'Remove set' }).click()
+    await curl.getByRole('button', { name: 'Remove last' }).click()
     await expect(curl.getByLabel('Set 4 kg')).toHaveCount(0)
   })
 
@@ -171,10 +171,27 @@ test.describe('workout logging', () => {
     await open(page, history(), { path: '/workout/wed' })
     await page.getByRole('button', { name: 'Set 1 done' }).first().click()
     await page.getByRole('button', { name: 'Finish' }).click()
-    page.once('dialog', (d) => d.accept())
     await page.getByRole('button', { name: 'Discard' }).click()
     await expect(page).toHaveURL(/#\/$/)
     expect((await stored(page)).sessions[TODAY]).toBeUndefined()
+    // Undo brings the workout back exactly as it was.
+    await page.getByRole('status').getByRole('button', { name: 'Undo' }).click()
+    await expect(page).toHaveURL(/#\/workout\/wed/)
+    expect((await stored(page)).sessions[TODAY].log['dead-hang'][0].done).toBe(true)
+  })
+
+  test('remove set can be undone; warm-up is one line; personal best is celebrated', async ({ page }) => {
+    await open(page, history(), { at: new Date('2026-10-12T18:00:00'), path: '/workout/mon' })
+    await expect(page.getByRole('button', { name: /Warm-up · 8–12 min/ })).toHaveAttribute('aria-expanded', 'false')
+    const bench = page.getByRole('region', { name: 'Bench Press', exact: true })
+    await bench.getByRole('button', { name: 'Remove last' }).click()
+    await expect(bench.getByLabel('Set 3 kg')).toHaveCount(0)
+    await page.getByRole('status').getByRole('button', { name: 'Undo' }).click()
+    await expect(bench.getByLabel('Set 3 kg')).toBeVisible()
+    // Last best was 55 kg × 10; 57.5 kg × 6 beats it.
+    await bench.getByLabel('Set 1 kg').fill('57.5')
+    await bench.getByRole('button', { name: 'Set 1 done' }).click()
+    await expect(page.getByRole('status')).toContainText('New personal best · Bench Press 57.5 kg × 9')
   })
 
   test('swap busy equipment, and the swap carries over to next week', async ({ page }) => {
@@ -242,6 +259,19 @@ test.describe('plan modes and review', () => {
     await open(page, { settings: { startDate: '2026-10-11' } }, { at: new Date('2026-10-11T10:00:00') })
     await expect(page.getByText('Rest day')).toBeVisible()
     await expect(page.getByRole('region', { name: /in review/ })).toHaveCount(0)
+  })
+
+  test('Today shows how many sessions are done this week', async ({ page }) => {
+    await open(page, history(), { at: new Date('2026-10-08T10:00:00') })
+    await expect(page.getByText('3 of 6 done')).toBeVisible()
+  })
+
+  test('backup reminder appears after 2 weeks without a backup and opens Settings', async ({ page }) => {
+    await open(page, history())
+    await page.getByRole('button', { name: /Show \d more/ }).click().catch(() => {})
+    await page.getByRole('link', { name: /Back up your progress/ }).click()
+    await expect(page).toHaveURL(/#\/settings\?backup=1/)
+    await expect(page.getByRole('switch', { name: 'Keep screen on during workouts' })).toHaveAttribute('aria-checked', 'true')
   })
 
   test('coach tips are tappable and show at most two at first', async ({ page }) => {
@@ -371,7 +401,7 @@ test.describe('settings and data', () => {
   test('backup export → erase → import restores everything', async ({ page }) => {
     await open(page, history(), { path: '/settings' })
     const download = page.waitForEvent('download')
-    await page.getByRole('button', { name: 'Export backup' }).click()
+    await page.getByRole('button', { name: /Back up now/ }).click()
     const file = await (await download).path()
     expect((await download).suggestedFilename()).toBe(`gymcals-backup-${TODAY}.json`)
 

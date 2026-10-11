@@ -49,6 +49,10 @@ export interface Settings {
   sound: boolean
   vibrate: boolean
   fiveDay: boolean
+  /** keep the screen on while a workout is open */
+  keepAwake: boolean
+  /** date of the last exported backup */
+  lastBackup?: string
 }
 
 export interface State {
@@ -66,7 +70,7 @@ const KEY = 'gymcals:v1'
 
 const initial: State = {
   version: 1,
-  settings: { startDate: null, proteinTarget: 130, stepTarget: 8000, sound: true, vibrate: true, fiveDay: false },
+  settings: { startDate: null, proteinTarget: 130, stepTarget: 8000, sound: true, vibrate: true, fiveDay: false, keepAwake: true },
   sessions: {},
   checkins: {},
   tests: { pushups: [], deadHang: [], lsit: [] },
@@ -191,6 +195,11 @@ export const actions = {
       if (!session) return s
       return { ...s, sessions: { ...s.sessions, [date]: { ...session, finishedAt: Date.now() } } }
     })
+  },
+
+  /** Puts a session back exactly as it was (used by Undo). */
+  restoreSession(session: Session) {
+    update((s) => ({ ...s, sessions: { ...s.sessions, [session.date]: session } }))
   },
 
   discardSession(date: string) {

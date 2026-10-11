@@ -29,13 +29,6 @@ export default defineConfig({
         // Background rest-timer alarm (see public/rest-sw.js).
         importScripts: ['rest-sw.js'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/,
-            handler: 'CacheFirst',
-            options: { cacheName: 'fonts', expiration: { maxEntries: 20, maxAgeSeconds: 31536000 } },
-          },
-        ],
       },
     }),
   ],

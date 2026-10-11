@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { IconBolt, IconCalendar, IconChevronLeft, IconHome, IconPlusCircle, IconTrend } from './Icons'
@@ -72,6 +72,22 @@ export function BottomBar({ children }: { children: ReactNode }) {
 }
 
 export function Sheet({ onClose, children, label }: { onClose: () => void; children: ReactNode; label: string }) {
+  // Android back (and browser back) closes the sheet first.
+  const close = useRef(onClose)
+  close.current = onClose
+  useEffect(() => {
+    let poppedByBack = false
+    history.pushState({ ...history.state, sheet: true }, '')
+    const onPop = () => {
+      poppedByBack = true
+      close.current()
+    }
+    window.addEventListener('popstate', onPop)
+    return () => {
+      window.removeEventListener('popstate', onPop)
+      if (!poppedByBack && history.state?.sheet) history.back()
+    }
+  }, [])
   return (
     <Portal>
       <div className="sheet-backdrop" onClick={onClose}>
