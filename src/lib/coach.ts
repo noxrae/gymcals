@@ -131,36 +131,42 @@ export function weeklyAverages(checkins: Record<string, Checkin>, start: string 
 
 // ---------- coach insights ----------
 
-export interface Insight { tone: 'good' | 'warn' | 'accent'; title: string; text: string }
+export interface Insight { tone: 'good' | 'warn' | 'accent'; title: string; text: string; to?: string }
 
 export function insights(state: State, date = today()): Insight[] {
   const out: Insight[] = []
   const week = weekOf(date, state.settings.startDate)
 
-  if (week === DELOAD_WEEK) out.push({ tone: 'accent', title: 'Deload week', text: 'About 40% fewer sets at the same weights. It lets your body catch up so weeks 8–12 go better.' })
-  if (week === DELOAD_WEEK - 1) out.push({ tone: 'accent', title: 'Lighter week next', text: 'Week 7 is a deload. Push well this week, but don’t chase personal records.' })
+  if (week === DELOAD_WEEK) out.push({ to: '/plan', tone: 'accent', title: 'Deload week', text: 'About 40% fewer sets at the same weights. It lets your body catch up so weeks 8–12 go better.' })
+  if (week === DELOAD_WEEK - 1) out.push({ to: '/plan', tone: 'accent', title: 'Lighter week next', text: 'Week 7 is a deload. Push well this week, but don’t chase personal records.' })
 
   const now = avgWeight(state.checkins, date)
   const before = avgWeight(state.checkins, addDays(date, -7))
   if (now != null && before != null) {
     const change = now - before
-    if (change < -0.75) out.push({ tone: 'warn', title: 'Losing weight fast', text: `Down ${fmtNum(-change)} kg in a week. Aim for 0.25–0.5 kg. Eat a little more to protect your strength.` })
-    else if (change <= -0.2) out.push({ tone: 'good', title: 'Right on pace', text: `Down ${fmtNum(-change)} kg this week. A steady, sustainable rate.` })
+    if (change < -0.75) out.push({ to: '/progress', tone: 'warn', title: 'Losing weight fast', text: `Down ${fmtNum(-change)} kg in a week. Aim for 0.25–0.5 kg. Eat a little more to protect your strength.` })
+    else if (change <= -0.2) out.push({ to: '/progress', tone: 'good', title: 'Right on pace', text: `Down ${fmtNum(-change)} kg this week. A steady, sustainable rate.` })
   }
   const twoAgo = avgWeight(state.checkins, addDays(date, -14))
   if (now != null && before != null && twoAgo != null && Math.abs(now - before) < 0.15 && Math.abs(before - twoAgo) < 0.15) {
-    out.push({ tone: 'warn', title: 'Weight has stalled', text: 'No change for 2 weeks. Check your waist first. If that’s flat too, make one small change: slightly less food or a bit more walking.' })
+    out.push({ to: '/progress?tab=waist', tone: 'warn', title: 'Weight has stalled', text: 'No change for 2 weeks. Check your waist first. If that’s flat too, make one small change: slightly less food or a bit more walking.' })
   }
 
   const recent = Object.keys(state.checkins).filter((d) => d <= date && daysBetween(d, date) < 4).map((d) => state.checkins[d].recovery).filter((v): v is number => v != null)
   if (recent.length >= 2 && recent.reduce((a, b) => a + b, 0) / recent.length <= 2) {
-    out.push({ tone: 'warn', title: 'Recovery is low', text: 'Skip the optional cardio and one or two accessory exercises today. Keep the main lifts.' })
+    out.push({ to: '/log', tone: 'warn', title: 'Recovery is low', text: 'Skip the optional cardio and one or two accessory exercises today. Keep the main lifts.' })
   }
 
   const proteinDays = Object.keys(state.checkins).filter((d) => d < date && daysBetween(d, date) <= 7).map((d) => state.checkins[d].protein).filter((v): v is number => v != null)
   if (proteinDays.length >= 3) {
     const avg = proteinDays.reduce((a, b) => a + b, 0) / proteinDays.length
-    if (avg < state.settings.proteinTarget * 0.8) out.push({ tone: 'warn', title: 'Protein is low', text: `Averaging ${Math.round(avg)} g. Aim for about ${state.settings.proteinTarget} g to keep muscle while losing fat.` })
+    if (avg < state.settings.proteinTarget * 0.8) out.push({ to: '/log', tone: 'warn', title: 'Protein is low', text: `Averaging ${Math.round(avg)} g. Aim for about ${state.settings.proteinTarget} g to keep muscle while losing fat.` })
+  }
+
+  const lastPhoto = state.photoDates?.at(-1)
+  const sinceStart = state.settings.startDate ? daysBetween(state.settings.startDate, date) : 0
+  if ((lastPhoto ? daysBetween(lastPhoto, date) >= 28 : sinceStart >= 0) && week <= 12) {
+    out.push({ to: '/progress?tab=photos', tone: 'accent', title: 'Progress photos due', text: lastPhoto ? 'It’s been 4 weeks. Take front, side and back photos in the same light and pose.' : 'Take your starting photos: front, side and back. You’ll be glad you did in week 12.' })
   }
 
   return out

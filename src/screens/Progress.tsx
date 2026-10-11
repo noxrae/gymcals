@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Chevron } from '../components/Icons'
+import { ProgressPhotos } from '../components/ProgressPhotos'
 import { LineChart, type Point } from '../components/LineChart'
 import { ExerciseThumb } from '../components/Media'
 import { EXERCISES } from '../data/exercises'
@@ -9,17 +10,18 @@ import { daysBetween, fmtShort, weekOf } from '../lib/dates'
 import { useStore, type State } from '../lib/store'
 import { useToday } from '../lib/useToday'
 
-type Tab = 'weight' | 'waist' | 'strength' | 'tests'
+type Tab = 'weight' | 'waist' | 'strength' | 'tests' | 'photos'
 const LIFTS = ['bench-press', 'incline-bench-press', 'squat', 'romanian-deadlift', 'lat-pulldown', 'dumbbell-shoulder-press', 'assisted-pull-up']
 
 export default function ProgressScreen() {
-  const [tab, setTab] = useState<Tab>('weight')
+  const [params] = useSearchParams()
+  const [tab, setTab] = useState<Tab>((params.get('tab') as Tab) || 'weight')
   const state = useStore((s) => s)
   return (
     <div className="screen">
       <h1 className="large-title" style={{ padding: '8px 4px 0' }}>Progress</h1>
       <div className="seg" role="tablist" aria-label="Metric">
-        {(['weight', 'waist', 'strength', 'tests'] as Tab[]).map((t) => (
+        {(['weight', 'waist', 'strength', 'tests', 'photos'] as Tab[]).map((t) => (
           <button key={t} type="button" role="tab" aria-selected={tab === t} aria-pressed={tab === t} onClick={() => setTab(t)}>{t[0].toUpperCase() + t.slice(1)}</button>
         ))}
       </div>
@@ -28,6 +30,7 @@ export default function ProgressScreen() {
         {tab === 'waist' && <Body state={state} metric="waist" />}
         {tab === 'strength' && <Strength state={state} />}
         {tab === 'tests' && <Tests state={state} />}
+        {tab === 'photos' && <ProgressPhotos />}
       </div>
     </div>
   )

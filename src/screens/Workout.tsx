@@ -4,18 +4,20 @@ import { Sheet } from '../components/Chrome'
 import { IconCheck, IconChevronLeft, IconInfo, IconSpark } from '../components/Icons'
 import { ExerciseThumb } from '../components/Media'
 import { RestBar } from '../components/RestBar'
-import { EXERCISES, type Exercise } from '../data/exercises'
-import { allItems, DAY_BY_ID, setsFor, type DayId, type PlanItem } from '../data/plan'
+import { ALTERNATIVES, BARBELL, EXERCISES, type Exercise } from '../data/exercises'
+import { MUSCLES } from '../data/muscles'
+import { allItems, dayFor, setsFor, type DayId, type PlanItem } from '../data/plan'
 import { fmtNum, lastSets, rangeText, restText, suggest } from '../lib/coach'
 import { fmtClock } from '../lib/dates'
 import { actions, useStore, type SetLog } from '../lib/store'
 import { restTimer } from '../lib/timer'
 import { useToday } from '../lib/useToday'
+import { plateText, warmupSets } from '../lib/warmup'
 
 export default function WorkoutScreen() {
   const { dayId } = useParams<{ dayId: DayId }>()
-  const day = dayId ? DAY_BY_ID[dayId] : undefined
-  const { date, week } = useToday()
+  const { date, week, fiveDay } = useToday()
+  const day = dayId ? dayFor(dayId, fiveDay) : undefined
   const session = useStore((s) => s.sessions[date])
   const navigate = useNavigate()
   const [finishing, setFinishing] = useState(false)
@@ -32,7 +34,9 @@ export default function WorkoutScreen() {
   if (!day || !day.groups.length) return <Navigate to="/" replace />
   if (!session || session.dayId !== day.id) return null
 
+  const swaps = session.swaps ?? {}
   const items = allItems(day)
+  const inDay = new Set(items.map((it) => swaps[it.ex] ?? it.ex))
   const finished = !!session.finishedAt
   const elapsed = ((session.finishedAt ?? now) - session.startedAt) / 1000
   const total = items.reduce((n, it) => n + setsFor(it, week), 0)
@@ -59,9 +63,22 @@ export default function WorkoutScreen() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 12 }}>
-        {items.map((it, i) => (
-          <ExerciseBlock key={it.ex} item={it} week={week} date={date} log={session.log[it.ex]} isLast={i === items.length - 1} />
-        ))}
+        {!finished && <WarmupCard />}
+        {items.map((it, i) => {
+          const actual = swaps[it.ex] ?? it.ex
+          return (
+            <ExerciseBlock
+              key={it.ex}
+              planned={it.ex}
+              item={{ ...it, ex: actual }}
+              week={week}
+              date={date}
+              log={session.log[actual]}
+              isLast={i === items.length - 1}
+              alternatives={[it.ex, ...(ALTERNATIVES[it.ex] ?? [])].filter((k) => k !== actual && (k === it.ex || !inDay.has(k)))}
+            />
+          )
+        })}
       </div>
 
       {day.optionalCardio && <p className="sec-foot" style={{ margin: '20px 16px 0' }}>Optional cardio: {day.optionalCardio}.</p>}
@@ -101,8 +118,9 @@ function columns(ex: Exercise) {
   }
 }
 
-function ExerciseBlock({ item, week, date, log, isLast }: { item: PlanItem; week: number; date: string; log?: SetLog[]; isLast: boolean }) {
+function ExerciseBlock({ item, planned, alternatives, week, date, log, isLast }: { item: PlanItem; planned: string; alternatives: string[]; week: number; date: string; log?: SetLog[]; isLast: boolean }) {
   const ex = EXERCISES[item.ex]
+  const [swapping, setSwapping] = useState(false)
   const state = useStore((s) => s)
   const tip = useMemo(() => suggest(state, item, week), [state, item, week])
   const prev = useMemo(() => lastSets(state, item.ex, date), [state, item.ex, date])
@@ -152,7 +170,11 @@ function ExerciseBlock({ item, week, date, log, isLast }: { item: PlanItem; week
         <Link to={`/exercise/${ex.key}`} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
           <span style={{ fontSize: 17, fontWeight: 600 }}>{ex.name}</span>
           <span className="small muted">{rangeText(item, count)}{item.rest[0] ? ` · rest ${restText(item.rest)}` : ''}</span>
+          {planned !== item.ex && <span className="small" style={{ color: 'var(--accent-ink)' }}>Swapped for {EXERCISES[planned].name}</span>}
         </Link>
+        {alternatives.length > 0 && !sets.some((s) => s.done) && (
+          <button type="button" className="chip" style={{ minHeight: 32, padding: '0 12px', fontSize: 13 }} onClick={() => setSwapping(true)}>Swap</button>
+        )}
         <Link to={`/exercise/${ex.key}?tab=muscles`} aria-label={`Muscles and video: ${ex.name}`} style={{ width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconInfo size={22} /></Link>
       </div>
 
@@ -162,6 +184,8 @@ function ExerciseBlock({ item, week, date, log, isLast }: { item: PlanItem; week
           <span>{tip.text}</span>
         </div>
       )}
+
+      {BARBELL.has(item.ex) && (sets[0]?.load ?? 0) > 20 && <WarmupSets work={sets[0].load!} />}
 
       <div style={{ display: 'grid', gridTemplateColumns: grid, gap: 8, alignItems: 'center', padding: '0 16px', minHeight: 26, fontSize: 12, fontWeight: 600, color: 'var(--label-2)', letterSpacing: '.04em' }}>
         <span>SET</span>
@@ -197,7 +221,100 @@ function ExerciseBlock({ item, week, date, log, isLast }: { item: PlanItem; week
         <button type="button" className="chip" style={{ flex: 1, minHeight: 40 }} onClick={() => save([...sets, { load: sets.at(-1)?.load ?? tip.load, reps: sets.at(-1)?.reps ?? tip.reps, done: false }])}>+ Add set</button>
         {sets.length > 1 && <button type="button" className="chip" style={{ minHeight: 40 }} onClick={() => save(sets.slice(0, -1))}>Remove set</button>}
       </div>
+
+      {swapping && (
+        <Sheet onClose={() => setSwapping(false)} label={`Swap ${ex.name}`}>
+          <div style={{ padding: '4px 4px 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span className="kicker" style={{ color: 'var(--accent-ink)' }}>Equipment busy?</span>
+            <h2 className="disp" style={{ fontSize: 44 }}>Swap {ex.name}</h2>
+            <p className="muted" style={{ fontSize: 15 }}>These work the same main muscles. The app remembers your choice for next time.</p>
+          </div>
+          <div className="group">
+            {alternatives.map((k) => {
+              const alt = EXERCISES[k]
+              return (
+                <button
+                  key={k}
+                  type="button"
+                  className="row"
+                  style={{ ['--inset' as string]: '84px', minHeight: 72 }}
+                  onClick={() => {
+                    actions.setSwap(date, planned, k === planned ? null : k)
+                    setSwapping(false)
+                  }}
+                >
+                  <ExerciseThumb ex={alt} />
+                  <span className="grow">
+                    <span style={{ fontWeight: 600 }}>{alt.name}{k === planned ? ' · planned' : ''}</span>
+                    <span className="sub">{alt.primary.map((m) => MUSCLES[m].name).join(' · ')} · {alt.equipment}</span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </Sheet>
+      )}
     </section>
+  )
+}
+
+/** General warm-up from the plan, as a quick checklist. */
+function WarmupCard() {
+  const [open, setOpen] = useState(true)
+  const [ticks, setTicks] = useState<boolean[]>([false, false, false])
+  const steps = ['3–5 min easy walk, bike or elliptical', 'Shoulder circles, band pull-aparts, hip hinges, bodyweight squats', 'Ramp-up sets before your first big lift (shown under it)']
+  const all = ticks.every(Boolean)
+  return (
+    <section style={{ margin: '0 12px', borderRadius: 14, background: all ? 'var(--good-soft)' : 'var(--surface-2)', transition: 'background-color .3s ease' }}>
+      <button type="button" className="row" onClick={() => setOpen(!open)} aria-expanded={open} style={{ minHeight: 56 }}>
+        <span className="grow"><span style={{ fontWeight: 600 }}>Warm-up · 8–12 min</span><span className="sub">{all ? 'Done. Ready to lift.' : 'Warm muscles lift more and get hurt less'}</span></span>
+        <span className="small muted">{open ? 'Hide' : 'Show'}</span>
+      </button>
+      {open &&
+        steps.map((st, i) => (
+          <button
+            key={st}
+            type="button"
+            className="row"
+            aria-pressed={ticks[i]}
+            onClick={() => setTicks(ticks.map((t, j) => (j === i ? !t : t)))}
+            style={{ alignItems: 'flex-start' }}
+          >
+            <span style={{ flex: 'none', width: 24, height: 24, borderRadius: 12, marginTop: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: ticks[i] ? 'var(--good-fill)' : 'transparent', border: ticks[i] ? 0 : '2px solid var(--chevron)', color: '#fff', transition: 'background-color .2s ease' }}>
+              {ticks[i] && <IconCheck size={12} />}
+            </span>
+            <span style={{ fontSize: 15, lineHeight: 1.4, color: ticks[i] ? 'var(--label-2)' : 'var(--label)' }}>{st}</span>
+          </button>
+        ))}
+    </section>
+  )
+}
+
+/** Ramp-up sets with plate loading for barbell lifts. */
+function WarmupSets({ work }: { work: number }) {
+  const [open, setOpen] = useState(false)
+  const sets = warmupSets(work)
+  return (
+    <div style={{ margin: '0 16px 10px', borderRadius: 12, background: 'var(--surface-2)' }}>
+      <button type="button" className="row" onClick={() => setOpen(!open)} aria-expanded={open} style={{ minHeight: 44, fontSize: 15 }}>
+        <span style={{ flex: 1, fontWeight: 600 }}>Warm-up sets · {sets.length}</span>
+        <span className="small muted">{open ? 'Hide' : `${sets.map((w) => fmtNum(w.kg)).join(' → ')} kg`}</span>
+      </button>
+      {open && (
+        <>
+          {sets.map((w, i) => (
+            <div key={i} className="row" style={{ minHeight: 44, fontSize: 15 }}>
+              <span className="num" style={{ width: 92, fontWeight: 600 }}>{fmtNum(w.kg)} kg × {w.reps}</span>
+              <span className="small muted">{plateText(w.kg)}</span>
+            </div>
+          ))}
+          <div className="row" style={{ minHeight: 44, fontSize: 15 }}>
+            <span className="num" style={{ width: 92, fontWeight: 600, color: 'var(--accent-ink)' }}>{fmtNum(work)} kg</span>
+            <span className="small muted">Working sets: {plateText(work)}</span>
+          </div>
+        </>
+      )}
+    </div>
   )
 }
 

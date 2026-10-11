@@ -288,4 +288,31 @@ export const EXERCISES: Record<string, Exercise> = Object.fromEntries(
   ]),
 )
 
-export const photoUrl = (key: string, i = 0) => `exercises/${key}-${i}.jpg`
+/** Equivalent exercises for when equipment is busy (same main muscles). */
+export const ALTERNATIVES: Record<string, string[]> = {
+  squat: ['hack-squat', 'leg-press'],
+  'hack-squat': ['squat', 'leg-press'],
+  'leg-press': ['hack-squat', 'squat'],
+  'bench-press': ['chest-press', 'incline-dumbbell-press'],
+  'chest-press': ['bench-press', 'incline-dumbbell-press'],
+  'incline-bench-press': ['incline-dumbbell-press', 'chest-press'],
+  'incline-dumbbell-press': ['incline-bench-press', 'chest-press'],
+  'lat-pulldown': ['assisted-pull-up'],
+  'assisted-pull-up': ['lat-pulldown', 'negative-pull-up'],
+  'seated-cable-row': ['chest-supported-row', 'one-arm-dumbbell-row'],
+  'chest-supported-row': ['seated-cable-row', 'one-arm-dumbbell-row'],
+  'one-arm-dumbbell-row': ['chest-supported-row', 'seated-cable-row'],
+  'triceps-pushdown': ['triceps-extension'],
+  'triceps-extension': ['triceps-pushdown'],
+  'dumbbell-curl': ['hammer-curl'],
+  'hammer-curl': ['dumbbell-curl'],
+  'face-pull': ['reverse-fly'],
+  'reverse-fly': ['face-pull'],
+  'bulgarian-split-squat': ['walking-lunge', 'leg-press'],
+  'cable-crunch': ['dead-bug', 'plank'],
+  'hanging-knee-raise': ['dead-bug', 'plank'],
+}
+
+export const BARBELL = new Set(['bench-press', 'incline-bench-press', 'squat', 'romanian-deadlift'])
+
+export const photoUrl =(key: string, i = 0) => `exercises/${key}-${i}.jpg`

@@ -7,7 +7,7 @@ import { LineChart } from '../components/LineChart'
 import { VideoCredit, VideoPlayer } from '../components/Media'
 import { EXERCISES, photoUrl } from '../data/exercises'
 import { MUSCLES, type MuscleId } from '../data/muscles'
-import { allItems, DAY_BY_ID, setsFor, type DayId } from '../data/plan'
+import { allItems, dayFor, setsFor, type DayId } from '../data/plan'
 import { fmtNum, history, rangeText, restText, suggest, unitOf } from '../lib/coach'
 import { fmtShort, weekOf } from '../lib/dates'
 import { useStore } from '../lib/store'
@@ -26,10 +26,10 @@ export default function ExerciseScreen() {
   const ex = EXERCISES[key]
   const tab = (params.get('tab') as Tab) || 'how'
   const dayId = params.get('day') as DayId | null
-  const { week } = useToday()
+  const { week, fiveDay } = useToday()
   if (!ex) return <Navigate to="/" replace />
 
-  const item = dayId ? allItems(DAY_BY_ID[dayId]).find((i) => i.ex === key) : undefined
+  const item = dayId ? allItems(dayFor(dayId, fiveDay)).find((i) => i.ex === key) : undefined
   const setTab = (t: Tab) => setParams((p) => { p.set('tab', t); return p }, { replace: true })
   const muscleNames = [...ex.primary, ...ex.secondary].map((m) => MUSCLES[m].name).join(' · ')
 

@@ -31,7 +31,13 @@ export default function SettingsScreen() {
               <input type="date" className="field" style={{ width: 150 }} value={s.startDate ?? ''} onChange={(e) => e.target.value && actions.setSettings({ startDate: e.target.value })} />
             </label>
           </div>
-          {s.startDate && <p className="sec-foot">Week 1 began {fmtLong(s.startDate)}.</p>}
+          <div className="group" style={{ marginTop: 12 }}>
+            <Toggle label="5-day mode" on={s.fiveDay} onChange={(v) => actions.setSettings({ fiveDay: v })} />
+          </div>
+          <p className="sec-foot">
+            {s.startDate ? `Week 1 began ${fmtLong(s.startDate)}. ` : ''}
+            5-day mode makes Thursday a recovery day, spreads its skill and core work over Mon/Wed/Fri/Sat and drops optional cardio. Use it for weeks when six days feels like too much.
+          </p>
         </div>
 
         <div>

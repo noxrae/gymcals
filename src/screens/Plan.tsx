@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Chevron, IconCheckCircle, IconMoon } from '../components/Icons'
 import { ExerciseThumb } from '../components/Media'
 import { EXERCISES } from '../data/exercises'
-import { DAYS, DELOAD_WEEK, PHASES, phaseOf, TOTAL_WEEKS, WEEK_FOCUS } from '../data/plan'
+import { daysFor, DELOAD_WEEK, PHASES, phaseOf, TOTAL_WEEKS, WEEK_FOCUS } from '../data/plan'
 import { addDays, mondayOf } from '../lib/dates'
 import { useStore } from '../lib/store'
 import { useToday } from '../lib/useToday'
@@ -11,7 +11,7 @@ import { useToday } from '../lib/useToday'
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 export default function PlanScreen() {
-  const { date, week, dayId } = useToday()
+  const { date, week, dayId, fiveDay } = useToday()
   const sessions = useStore((s) => s.sessions)
   const [view, setView] = useState<'week' | 'all'>('week')
   const phase = phaseOf(week)
@@ -45,7 +45,7 @@ export default function PlanScreen() {
       <div key={view} style={{ animation: 'fade .3s ease both', display: 'flex', flexDirection: 'column', gap: 24 }}>
         {view === 'week' ? (
           <div className="group">
-            {DAYS.map((d, i) => {
+            {daysFor(fiveDay).map((d, i) => {
               const dDate = addDays(monday, i)
               const done = !!sessions[dDate]?.finishedAt
               const isToday = d.id === dayId

@@ -258,3 +258,4 @@ a.row:active, button.row:active { transform: none; background: var(--surface-2);
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 .icon-btn:disabled, .link-btn:disabled { opacity: 0.35; }
+.callout .chev { align-self: center; }

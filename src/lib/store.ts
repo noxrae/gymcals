@@ -17,6 +17,8 @@ export interface Session {
   startedAt: number
   finishedAt?: number
   log: Record<string, SetLog[]>
+  /** planned exercise -> exercise actually done (busy equipment) */
+  swaps?: Record<string, string>
 }
 
 export interface Checkin {
@@ -46,6 +48,7 @@ export interface Settings {
   stepTarget: number
   sound: boolean
   vibrate: boolean
+  fiveDay: boolean
 }
 
 export interface State {
@@ -55,13 +58,15 @@ export interface State {
   sessions: Record<string, Session>
   checkins: Record<string, Checkin>
   tests: Record<SkillTestId, SkillTest[]>
+  /** dates that have progress photos (the photos themselves live in IndexedDB) */
+  photoDates?: string[]
 }
 
 const KEY = 'gymcals:v1'
 
 const initial: State = {
   version: 1,
-  settings: { startDate: null, proteinTarget: 130, stepTarget: 8000, sound: true, vibrate: true },
+  settings: { startDate: null, proteinTarget: 130, stepTarget: 8000, sound: true, vibrate: true, fiveDay: false },
   sessions: {},
   checkins: {},
   tests: { pushups: [], deadHang: [], lsit: [] },
@@ -140,7 +145,9 @@ export const actions = {
     update((s) => {
       const existing = s.sessions[date]
       if (existing && existing.dayId === dayId) return s
-      return { ...s, sessions: { ...s.sessions, [date]: { date, dayId, startedAt: Date.now(), log: {} } } }
+      // Carry over equipment swaps from the last time this day was trained.
+      const prev = Object.values(s.sessions).filter((x) => x.dayId === dayId && x.date < date).sort((a, b) => b.date.localeCompare(a.date))[0]
+      return { ...s, sessions: { ...s.sessions, [date]: { date, dayId, startedAt: Date.now(), log: {}, swaps: prev?.swaps } } }
     })
   },
 
@@ -149,6 +156,21 @@ export const actions = {
       const session = s.sessions[date]
       if (!session) return s
       return { ...s, sessions: { ...s.sessions, [date]: { ...session, log: { ...session.log, [ex]: sets } } } }
+    })
+  },
+
+  /** Swap a planned exercise for an alternative (`to` = null swaps back). Unfinished sets of the old one are dropped. */
+  setSwap(date: string, planned: string, to: string | null) {
+    update((s) => {
+      const session = s.sessions[date]
+      if (!session) return s
+      const current = session.swaps?.[planned] ?? planned
+      const log = { ...session.log }
+      if (!log[current]?.some((x) => x.done)) delete log[current]
+      const swaps = { ...session.swaps }
+      if (to && to !== planned) swaps[planned] = to
+      else delete swaps[planned]
+      return { ...s, sessions: { ...s.sessions, [date]: { ...session, log, swaps } } }
     })
   },
 

@@ -3,15 +3,15 @@ import { BottomBar, FloatingBack } from '../components/Chrome'
 import { Chevron, IconInfo } from '../components/Icons'
 import { ExerciseThumb } from '../components/Media'
 import { EXERCISES, photoUrl } from '../data/exercises'
-import { allItems, DAY_BY_ID, DELOAD_WEEK, setsFor, type DayId } from '../data/plan'
+import { allItems, dayFor, DELOAD_WEEK, setsFor, type DayId } from '../data/plan'
 import { rangeText } from '../lib/coach'
 import { actions, useStore } from '../lib/store'
 import { useToday } from '../lib/useToday'
 
 export default function DayScreen() {
   const { dayId } = useParams<{ dayId: DayId }>()
-  const day = dayId ? DAY_BY_ID[dayId] : undefined
-  const { date, week, dayId: todayId } = useToday()
+  const { date, week, dayId: todayId, fiveDay } = useToday()
+  const day = dayId ? dayFor(dayId, fiveDay) : undefined
   const session = useStore((s) => s.sessions[date])
   const navigate = useNavigate()
   if (!day) return <Navigate to="/" replace />
@@ -24,7 +24,7 @@ export default function DayScreen() {
 
   const start = () => {
     if (session && session.dayId !== day.id && Object.keys(session.log).length) {
-      const other = DAY_BY_ID[session.dayId].short
+      const other = dayFor(session.dayId, fiveDay).short
       if (!window.confirm(`You already logged ${other} today. Replace it with ${day.short}?`)) return
       actions.discardSession(date)
     }
@@ -37,8 +37,8 @@ export default function DayScreen() {
       <div className="screen no-tabs">
         <FloatingBack />
         <div style={{ paddingTop: 60, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <span className="kicker" style={{ color: 'var(--accent-ink)' }}>Sunday</span>
-          <h1 className="disp" style={{ fontSize: 64 }}>Rest day</h1>
+          <span className="kicker" style={{ color: 'var(--accent-ink)' }}>{day.id === 'thu' ? 'Thursday · 5-day mode' : 'Sunday'}</span>
+          <h1 className="disp" style={{ fontSize: 64 }}>{day.name}</h1>
           <p className="muted" style={{ lineHeight: 1.5 }}>No structured gym session and no hard calisthenics. Normal walking is fine. Prioritise sleep, food and water.</p>
         </div>
       </div>

@@ -1,19 +1,24 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { photoUrl } from '../data/exercises'
-import { allItems, DAYS, DELOAD_WEEK, setsFor } from '../data/plan'
+import { allItems, daysFor, DELOAD_WEEK, setsFor } from '../data/plan'
 import { avgWeight, fmtNum, insights } from '../lib/coach'
 import { addDays, daysBetween, fmtLong, mondayOf } from '../lib/dates'
 import { useStore } from '../lib/store'
+import { weekReview } from '../lib/review'
 import { useToday } from '../lib/useToday'
+import { WeekReviewCard } from '../components/WeekReviewCard'
 import { Chevron, IconAlert, IconCheck, IconGear, IconMoon, IconPlay, IconSpark } from '../components/Icons'
 
 export default function TodayScreen() {
-  const { date, week, beforeStart, finished, start, day } = useToday()
+  const { date, week, beforeStart, finished, start, day, fiveDay, dayId } = useToday()
   const state = useStore((s) => s)
   const session = state.sessions[date]
   const checkin = state.checkins[date] ?? {}
   const avg = avgWeight(state.checkins, date)
-  const tips = insights(state, date)
+  const rank = { warn: 0, accent: 1, good: 2 }
+  const tips = insights(state, date).sort((a, b) => rank[a.tone] - rank[b.tone])
+  const [allTips, setAllTips] = useState(false)
   const monday = mondayOf(date)
   const totalSets = allItems(day).reduce((n, it) => n + setsFor(it, week), 0)
 
@@ -60,21 +65,29 @@ export default function TodayScreen() {
         </div>
       )}
 
+      {dayId === 'sun' && !beforeStart && <WeekReviewCard week={week} review={weekReview(state, monday, week)} />}
+
       {tips.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {tips.map((t) => (
-            <div key={t.title} className={`callout ${t.tone}`}>
+          {(allTips ? tips : tips.slice(0, 2)).map((t) => (
+            <Link key={t.title} to={t.to ?? '/'} className={`callout ${t.tone}`} style={{ color: 'var(--label)' }}>
               {t.tone === 'warn' ? <IconAlert size={20} style={{ color: 'var(--warn)' }} /> : <IconSpark size={20} style={{ color: t.tone === 'good' ? 'var(--good)' : 'var(--accent-ink)' }} />}
-              <div><b>{t.title}</b><div className="muted" style={{ fontSize: 14 }}>{t.text}</div></div>
-            </div>
+              <div style={{ flex: 1 }}><b>{t.title}</b><div className="muted" style={{ fontSize: 14 }}>{t.text}</div></div>
+              <Chevron />
+            </Link>
           ))}
+          {tips.length > 2 && (
+            <button type="button" className="link-btn" style={{ alignSelf: 'flex-start', fontSize: 15 }} onClick={() => setAllTips(!allTips)}>
+              {allTips ? 'Show less' : `Show ${tips.length - 2} more`}
+            </button>
+          )}
         </div>
       )}
 
       <div>
         <h2 className="sec">This week</h2>
         <div className="group" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', padding: '14px 4px' }}>
-          {DAYS.map((d, i) => {
+          {daysFor(fiveDay).map((d, i) => {
             const dDate = addDays(monday, i)
             const done = !!state.sessions[dDate]?.finishedAt
             const isToday = dDate === date
@@ -84,12 +97,12 @@ export default function TodayScreen() {
                 <span
                   style={{
                     width: 32, height: 32, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600,
-                    background: done ? 'var(--label)' : d.id === 'sun' ? 'transparent' : 'var(--surface-2)',
+                    background: done ? 'var(--label)' : !d.groups.length ? 'transparent' : 'var(--surface-2)',
                     color: done ? 'var(--bg)' : 'var(--label-2)',
                     boxShadow: isToday && !done ? 'inset 0 0 0 2px var(--accent)' : undefined,
                   }}
                 >
-                  {done ? <IconCheck size={13} /> : d.id === 'sun' ? <IconMoon size={16} /> : Number(dDate.slice(8))}
+                  {done ? <IconCheck size={13} /> : !d.groups.length ? <IconMoon size={16} /> : Number(dDate.slice(8))}
                 </span>
               </Link>
             )

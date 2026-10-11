@@ -94,6 +94,27 @@ export const DAYS: PlanDay[] = [
   },
 ]
 
+// 5-day mode (from the PDF: "a consistent five-day week beats an unsustainable six-day week"):
+// Thursday becomes a recovery day, its skill and core work is spread across the other days,
+// and optional cardio is dropped.
+const FIVE_DAY_EXTRAS: Partial<Record<DayId, PlanGroup>> = {
+  mon: { title: 'Skill', items: [r('pike-push-up', 2, 5, 10, [90, 150])] },
+  wed: { title: 'Core', items: [r('hanging-knee-raise', 3, 8, 12, [60, 90])] },
+  fri: { title: 'Skill', items: [r('tuck-l-sit', 2, 10, 20, [90, 150])] },
+  sat: { title: 'Core', items: [r('side-plank', 2, 30, 45, [45, 60], { perSide: true })] },
+}
+
+const FIVE_DAYS: PlanDay[] = DAYS.map((d) => {
+  if (d.id === 'thu') {
+    return { ...d, name: 'Recovery Day', short: 'Recovery', focus: 'Easy walk · Mobility · Sleep', minutes: 0, hero: '', groups: [] }
+  }
+  const extra = FIVE_DAY_EXTRAS[d.id]
+  return { ...d, optionalCardio: undefined, groups: extra ? [...d.groups, extra] : d.groups }
+})
+
+export const daysFor = (fiveDay: boolean) => (fiveDay ? FIVE_DAYS : DAYS)
+export const dayFor = (id: DayId, fiveDay: boolean) => daysFor(fiveDay).find((d) => d.id === id)!
+
 export const DAY_BY_ID = Object.fromEntries(DAYS.map((d) => [d.id, d])) as Record<DayId, PlanDay>
 export const JS_DAY: DayId[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 
