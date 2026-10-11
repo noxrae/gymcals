@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { Sheet } from '../components/Chrome'
 import { IconCheck, IconChevronLeft, IconInfo, IconSpark } from '../components/Icons'
@@ -21,17 +21,21 @@ export default function WorkoutScreen() {
   const session = useStore((s) => s.sessions[date])
   const navigate = useNavigate()
   const [finishing, setFinishing] = useState(false)
+  const leaving = useRef(false)
   const [now, setNow] = useState(Date.now())
 
+  // Another day's workout already has sets logged today: never overwrite it silently.
+  const conflict = !!(day && session && session.dayId !== day.id && Object.keys(session.log).length)
   useEffect(() => {
-    if (day && (!session || session.dayId !== day.id)) actions.startSession(date, day.id)
-  }, [day, session, date])
+    if (!leaving.current && day && !conflict && (!session || session.dayId !== day.id)) actions.startSession(date, day.id)
+  }, [day, session, date, conflict])
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(id)
   }, [])
 
   if (!day || !day.groups.length) return <Navigate to="/" replace />
+  if (conflict) return <Navigate to={`/workout/${session!.dayId}`} replace />
   if (!session || session.dayId !== day.id) return null
 
   const swaps = session.swaps ?? {}
@@ -98,6 +102,7 @@ export default function WorkoutScreen() {
           }}
           onDiscard={() => {
             if (!window.confirm('Discard this workout? Logged sets will be deleted.')) return
+            leaving.current = true
             actions.discardSession(date)
             restTimer.stop()
             navigate('/', { replace: true })
@@ -161,10 +166,12 @@ function ExerciseBlock({ item, planned, alternatives, week, date, log, isLast }:
     )
   }
 
-  const grid = cols.load ? '34px minmax(0,1fr) 78px 62px 44px' : '34px minmax(0,1fr) 78px 44px'
+  // Narrower inputs on small phones (≤ 360 px) so the Previous column stays on one line.
+  const narrow = typeof window !== 'undefined' && window.innerWidth <= 360
+  const grid = cols.load ? (narrow ? '24px minmax(0,1fr) 62px 48px 40px' : '34px minmax(0,1fr) 78px 62px 44px') : narrow ? '24px minmax(0,1fr) 62px 40px' : '34px minmax(0,1fr) 78px 44px'
 
   return (
-    <section style={{ padding: '10px 0 14px', borderBottom: '1px solid var(--sep)', animation: 'fade .3s ease both' }}>
+    <section aria-label={ex.name} style={{ padding: '10px 0 14px', borderBottom: '1px solid var(--sep)', animation: 'fade .3s ease both' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 8px 8px 16px' }}>
         <ExerciseThumb ex={ex} size={44} radius={8} />
         <Link to={`/exercise/${ex.key}`} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -187,7 +194,7 @@ function ExerciseBlock({ item, planned, alternatives, week, date, log, isLast }:
 
       {BARBELL.has(item.ex) && (sets[0]?.load ?? 0) > 20 && <WarmupSets work={sets[0].load!} />}
 
-      <div style={{ display: 'grid', gridTemplateColumns: grid, gap: 8, alignItems: 'center', padding: '0 16px', minHeight: 26, fontSize: 12, fontWeight: 600, color: 'var(--label-2)', letterSpacing: '.04em' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: grid, gap: 8, alignItems: 'center', padding: narrow ? '0 12px' : '0 16px', minHeight: 26, fontSize: 12, fontWeight: 600, color: 'var(--label-2)', letterSpacing: '.04em' }}>
         <span>SET</span>
         <span>PREVIOUS</span>
         {cols.load && <span style={{ textAlign: 'center' }}>{cols.load}</span>}
@@ -197,11 +204,11 @@ function ExerciseBlock({ item, planned, alternatives, week, date, log, isLast }:
 
       {sets.map((s, i) => {
         const p = prev?.sets[i]
-        const prevText = p ? (cols.load && p.load != null ? `${fmtNum(p.load)} × ${p.reps ?? 0}` : `${p.reps ?? 0}`) : '—'
+        const prevText = p ? (cols.load && p.load != null ? `${fmtNum(p.load)}×${p.reps ?? 0}` : `${p.reps ?? 0}`) : '—'
         return (
-          <div key={i} style={{ display: 'grid', gridTemplateColumns: grid, gap: 8, alignItems: 'center', padding: '5px 16px', background: s.done ? 'var(--good-soft)' : 'transparent', transition: 'background-color .3s ease' }}>
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: grid, gap: 8, alignItems: 'center', padding: narrow ? '5px 12px' : '5px 16px', background: s.done ? 'var(--good-soft)' : 'transparent', transition: 'background-color .3s ease' }}>
             <span className="num" style={{ fontWeight: 600 }}>{i + 1}</span>
-            <span className="num muted" style={{ fontSize: 15 }}>{prevText}</span>
+            <span className="num muted" style={{ fontSize: 15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{prevText}</span>
             {cols.load && <NumBox label={`Set ${i + 1} ${cols.load.toLowerCase()}`} value={s.load} onChange={(v) => patch(i, { load: v })} />}
             <NumBox label={`Set ${i + 1} ${cols.reps.toLowerCase()}`} value={s.reps} onChange={(v) => patch(i, { reps: v })} integer />
             <button
@@ -337,7 +344,7 @@ function NumBox({ value, onChange, label, integer }: { value?: number; onChange:
         setText(v)
         if (v.trim() === '') return onChange(undefined)
         const n = parseFloat(v.replace(',', '.'))
-        if (Number.isFinite(n)) onChange(n)
+        if (Number.isFinite(n) && n >= 0) onChange(n)
       }}
       style={{ minHeight: 38, width: '100%', border: 0, borderRadius: 10, background: 'var(--surface-2)', textAlign: 'center', fontSize: 17, fontWeight: 600 }}
     />

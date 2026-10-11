@@ -72,12 +72,23 @@ const initial: State = {
   tests: { pushups: [], deadHang: [], lsit: [] },
 }
 
+/** Fills in defaults for anything an older or partial save/backup is missing. */
+export function mergeState(parsed: Partial<State>): State {
+  return {
+    ...initial,
+    ...parsed,
+    version: 1,
+    settings: { ...initial.settings, ...parsed.settings },
+    sessions: parsed.sessions ?? {},
+    checkins: parsed.checkins ?? {},
+    tests: { ...initial.tests, ...parsed.tests },
+  }
+}
+
 function load(): State {
   try {
     const raw = localStorage.getItem(KEY)
-    if (!raw) return initial
-    const parsed = JSON.parse(raw) as State
-    return { ...initial, ...parsed, settings: { ...initial.settings, ...parsed.settings }, tests: { ...initial.tests, ...parsed.tests } }
+    return raw ? mergeState(JSON.parse(raw) as State) : initial
   } catch {
     return initial
   }
@@ -198,9 +209,14 @@ export const actions = {
   },
 
   importData(json: string) {
-    const parsed = JSON.parse(json) as State
-    if (parsed.version !== 1 || !parsed.settings) throw new Error('This file is not a GymCals backup.')
-    update(() => ({ ...initial, ...parsed }))
+    let parsed: State
+    try {
+      parsed = JSON.parse(json) as State
+    } catch {
+      throw new Error('This file is not a GymCals backup.')
+    }
+    if (!parsed || parsed.version !== 1 || typeof parsed.settings !== 'object') throw new Error('This file is not a GymCals backup.')
+    update(() => mergeState(parsed))
   },
 
   reset() {

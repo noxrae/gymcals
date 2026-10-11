@@ -32,6 +32,19 @@ To open it on your phone, connect it to the same Wi-Fi as your computer and open
 
 Installing as an app and offline mode need HTTPS. A free host such as GitHub Pages or Netlify gives you that. The build uses relative paths, so `dist/` works from any folder.
 
+## Testing
+
+```bash
+npm test           # 31 unit tests: coach logic, dates, warm-up maths, weekly review, plan data integrity
+npm run e2e        # 42 end-to-end tests in Microsoft Edge at phone size (builds and serves the app)
+```
+
+The end-to-end suite uses a fixed clock and seeded data. It covers:
+
+- onboarding, workouts, the rest timer and its alert, swaps, deload week and 5-day mode
+- the Sunday review, check-in autosave, progress photos, skills, and backup export, import and erase
+- every day and exercise page, accessibility (axe, light and dark), layouts from 320 to 1280 px, touch-target sizes, offline use and the install manifest
+
 ## Free sources
 
 | What | Source | Licence |

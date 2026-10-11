@@ -94,10 +94,18 @@ export default function LogScreen() {
 }
 
 function NumRow({ label, unit, value, onChange, integer, placeholder = '—' }: { label: string; unit?: string; value?: number; onChange: (v: number | undefined) => void; integer?: boolean; placeholder?: string }) {
-  const [text, setText] = useState(value != null ? (integer ? value.toLocaleString() : fmtNum(value)) : '')
+  const show = (v?: number) => (v != null ? (integer ? v.toLocaleString() : fmtNum(v)) : '')
+  const parse = (t: string) => parseFloat(integer ? t.replace(/[,\s]/g, '') : t.replace(',', '.'))
+  const [text, setText] = useState(show(value))
+  // Sync from outside changes only; keep partial input like "75." while typing.
   useEffect(() => {
-    setText(value != null ? (integer ? value.toLocaleString() : fmtNum(value)) : '')
-  }, [value, integer])
+    if ((value ?? NaN) !== parse(text) && !(value == null && text.trim() === '')) setText(show(value))
+  }, [value])
+  const commit = (t: string) => {
+    if (t.trim() === '') return onChange(undefined)
+    const n = parse(t)
+    if (Number.isFinite(n) && n >= 0) onChange(n)
+  }
   const id = `f-${label.replace(/\W/g, '')}`
   return (
     <label className="row" htmlFor={id}>
@@ -108,11 +116,11 @@ function NumRow({ label, unit, value, onChange, integer, placeholder = '—' }: 
         inputMode={integer ? 'numeric' : 'decimal'}
         placeholder={placeholder}
         value={text}
-        onChange={(e) => setText(e.target.value)}
-        onBlur={() => {
-          const n = parseFloat(text.replace(/,/g, integer ? '' : '.'))
-          onChange(text.trim() === '' || !Number.isFinite(n) ? undefined : n)
+        onChange={(e) => {
+          setText(e.target.value)
+          commit(e.target.value)
         }}
+        onBlur={() => setText(show(value))}
         onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
       />
       {unit && <span className="muted" style={{ minWidth: 22 }}>{unit}</span>}

@@ -25,9 +25,16 @@ function open(): Promise<IDBDatabase> {
 async function tx<T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRequest<T>): Promise<T> {
   const db = await open()
   return new Promise((resolve, reject) => {
-    const req = fn(db.transaction(STORE, mode).objectStore(STORE))
-    req.onsuccess = () => resolve(req.result)
-    req.onerror = () => reject(req.error)
+    const t = db.transaction(STORE, mode)
+    const req = fn(t.objectStore(STORE))
+    t.oncomplete = () => {
+      db.close()
+      resolve(req.result)
+    }
+    t.onerror = () => {
+      db.close()
+      reject(t.error ?? req.error)
+    }
   })
 }
 
@@ -66,6 +73,11 @@ export async function savePhoto(date: string, pose: Pose, file: Blob) {
 export async function deletePhoto(id: string) {
   await tx('readwrite', (s) => s.delete(id))
   syncDates(await listPhotos())
+  listeners.forEach((l) => l())
+}
+
+export async function clearPhotos() {
+  await tx('readwrite', (s) => s.clear())
   listeners.forEach((l) => l())
 }
 

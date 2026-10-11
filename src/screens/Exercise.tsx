@@ -50,7 +50,7 @@ export default function ExerciseScreen() {
         {ex.kind !== 'cardio' && (
           <div className="seg" role="tablist" aria-label="Exercise sections">
             {TABS.map((t) => (
-              <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} aria-pressed={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>
+              <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>
             ))}
           </div>
         )}
@@ -142,7 +142,7 @@ function Muscles({ primary, secondary }: { primary: MuscleId[]; secondary: Muscl
                 <span className="grow" style={{ gap: 3 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <span style={{ fontWeight: 600 }}>{info.name}</span>
-                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', padding: '2px 8px', borderRadius: 999, background: m.primary ? 'var(--accent-soft)' : 'var(--fill)', color: m.primary ? 'var(--accent-ink)' : 'var(--label-2)' }}>{m.primary ? 'PRIMARY' : 'SECONDARY'}</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', padding: '2px 8px', borderRadius: 999, background: m.primary ? 'var(--accent-soft)' : 'transparent', boxShadow: m.primary ? undefined : 'inset 0 0 0 1px var(--chevron)', color: m.primary ? 'var(--accent-ink)' : 'var(--label-2)' }}>{m.primary ? 'PRIMARY' : 'SECONDARY'}</span>
                   </span>
                   <span className="sub" style={{ lineHeight: 1.35 }}>{info.latin}. {info.does}</span>
                 </span>
@@ -167,7 +167,8 @@ function History({ exKey }: { exKey: string }) {
 
   const best = (sets: typeof h[number]['sets']) =>
     ex.kind === 'assist' ? Math.min(...sets.map((s) => s.load ?? 0)) : ex.kind === 'weight' ? Math.max(...sets.map((s) => s.load ?? 0)) : Math.max(...sets.map((s) => s.reps ?? 0))
-  const points = [...h].reverse().map((e) => ({ x: weekOf(e.date, state.settings.startDate), y: best(e.sets) }))
+  const loadKind = ex.kind === 'weight' || ex.kind === 'assist'
+  const points = [...h].reverse().filter((e) => !loadKind || e.sets.some((s) => s.load != null)).map((e) => ({ x: weekOf(e.date, state.settings.startDate), y: best(loadKind ? e.sets.filter((s) => s.load != null) : e.sets) }))
   const chartUnit = ex.kind === 'weight' || ex.kind === 'assist' ? 'kg' : unit
 
   return (

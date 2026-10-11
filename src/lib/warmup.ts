@@ -32,5 +32,8 @@ export function platesPerSide(total: number): number[] {
 
 export const plateText = (total: number) => {
   const p = platesPerSide(total)
-  return p.length ? `${p.join(' + ')} each side` : 'Empty bar'
+  const loaded = BAR + 2 * p.reduce((a, b) => a + b, 0)
+  const text = p.length ? `${p.join(' + ')} each side` : 'Empty bar'
+  // Standard plates go down to 1.25 kg, so totals load in 2.5 kg steps.
+  return total - loaded > 0.01 ? `${text} (= ${loaded} kg; ${+(total - loaded).toFixed(2)} kg needs micro-plates)` : text
 }

@@ -75,7 +75,7 @@ export function ProgressPhotos() {
           <div className="group" style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div className="seg" role="tablist" aria-label="Pose">
               {POSES.map((p) => (
-                <button key={p} type="button" role="tab" aria-selected={pose === p} aria-pressed={pose === p} onClick={() => setPose(p)}>{LABEL[p]}</button>
+                <button key={p} type="button" role="tab" aria-selected={pose === p} onClick={() => setPose(p)}>{LABEL[p]}</button>
               ))}
             </div>
             <div key={pose} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, animation: 'fade .3s ease both' }}>
@@ -121,7 +121,7 @@ export function ProgressPhotos() {
             <button
               type="button"
               className="link-btn"
-              style={{ color: '#ff3b30' }}
+              style={{ color: 'var(--danger)' }}
               onClick={async () => {
                 if (!window.confirm('Delete this photo?')) return
                 await deletePhoto(viewing.id)

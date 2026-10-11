@@ -25,8 +25,12 @@ const TRACKS = [
 
 function pullAssistNow(state: State) {
   const h = history(state, 'assisted-pull-up')
-  const last = h.at(-1)
-  return last ? Math.min(...last.sets.map((s) => s.load ?? 0)) : null
+  // Only sessions where the assistance was actually entered count.
+  for (let i = h.length - 1; i >= 0; i--) {
+    const loads = h[i].sets.map((s) => s.load).filter((l): l is number => l != null)
+    if (loads.length) return Math.min(...loads)
+  }
+  return null
 }
 
 function levelOf(state: State, id: string) {
@@ -48,7 +52,7 @@ export default function SkillsScreen() {
   const { date } = useToday()
   const [testing, setTesting] = useState<(typeof TRACKS)[number] | null>(null)
 
-  const startAssist = state.baseline?.pullAssist ?? history(state, 'assisted-pull-up')[0]?.sets.reduce((m, s) => Math.max(m, s.load ?? 0), 0)
+  const startAssist = state.baseline?.pullAssist ?? (history(state, 'assisted-pull-up').flatMap((e) => e.sets.map((s) => s.load)).find((l): l is number => l != null) || undefined)
   const nowAssist = pullAssistNow(state)
   const pct = startAssist && nowAssist != null ? Math.min(100, Math.max(0, Math.round(((startAssist - nowAssist) / startAssist) * 100))) : 0
 

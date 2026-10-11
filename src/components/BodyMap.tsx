@@ -26,7 +26,7 @@ export function BodyMap({ muscles, focus, compact }: { muscles: MapMuscle[]; foc
     const mk = MUSCLES[m.id].marker
     if (!mk) continue
     let { x, y } = mk
-    while (spots.some((s) => s.view === mk.view && Math.abs(s.x - x) < 9 && Math.abs(s.y - y) < 5)) y += 6
+    while (spots.some((s) => s.view === mk.view && Math.abs(s.x - x) < 9 && Math.abs(s.y - y) < 8)) y += 9
     spots.push({ view: mk.view, x, y })
     placed[m.id] = { x, y }
   }

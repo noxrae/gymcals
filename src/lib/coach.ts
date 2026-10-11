@@ -60,9 +60,13 @@ export function suggest(state: State, item: PlanItem, week: number): Suggestion 
     return { reps: item.min, text: first, up: false }
   }
 
-  const loads = last.sets.map((s) => s.load ?? 0)
-  const lastLoad = ex.kind === 'assist' ? Math.min(...loads) : Math.max(...loads)
+  const loads = last.sets.map((s) => s.load).filter((l): l is number => l != null)
   const reps = last.sets.map((s) => s.reps ?? 0)
+  if ((ex.kind === 'weight' || ex.kind === 'assist') && !loads.length && !deload) {
+    // Sets were ticked without a weight: coach on reps only and ask for the weight.
+    return { reps: Math.min(item.max, Math.max(item.min, Math.min(...reps) + 1)), text: `Last time: ${reps.join(', ')} reps. Enter the ${ex.kind === 'assist' ? 'assistance' : 'weight'} you use so the coach can track it.`, up: false }
+  }
+  const lastLoad = loads.length ? (ex.kind === 'assist' ? Math.min(...loads) : Math.max(...loads)) : 0
   const topped = reps.length >= Math.min(item.sets, 2) && reps.every((r) => r >= item.max)
   const repsTarget = Math.min(item.max, Math.max(item.min, Math.min(...reps) + 1))
   const was = reps.join(', ')

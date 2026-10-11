@@ -29,7 +29,7 @@ export default function PlanScreen() {
           </div>
           <span style={{ fontSize: 15, color: '#a1a1a6', paddingBottom: 6 }}>of 12</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 4 }} aria-label={`Week ${week} of 12`}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gap: 4 }} role="img" aria-label={`Week ${week} of 12`}>
           {Array.from({ length: TOTAL_WEEKS }, (_, i) => (
             <span key={i} style={{ height: 6, borderRadius: 3, background: i + 1 < week ? '#fff' : i + 1 === week ? 'var(--accent)' : '#3a3a3c' }} />
           ))}
@@ -38,8 +38,8 @@ export default function PlanScreen() {
       </div>
 
       <div className="seg" role="tablist" aria-label="Plan view">
-        <button type="button" role="tab" aria-selected={view === 'week'} aria-pressed={view === 'week'} onClick={() => setView('week')}>This week</button>
-        <button type="button" role="tab" aria-selected={view === 'all'} aria-pressed={view === 'all'} onClick={() => setView('all')}>All 12 weeks</button>
+        <button type="button" role="tab" aria-selected={view === 'week'} onClick={() => setView('week')}>This week</button>
+        <button type="button" role="tab" aria-selected={view === 'all'} onClick={() => setView('all')}>All 12 weeks</button>
       </div>
 
       <div key={view} style={{ animation: 'fade .3s ease both', display: 'flex', flexDirection: 'column', gap: 24 }}>

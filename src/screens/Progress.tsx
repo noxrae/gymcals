@@ -22,7 +22,7 @@ export default function ProgressScreen() {
       <h1 className="large-title" style={{ padding: '8px 4px 0' }}>Progress</h1>
       <div className="seg" role="tablist" aria-label="Metric">
         {(['weight', 'waist', 'strength', 'tests', 'photos'] as Tab[]).map((t) => (
-          <button key={t} type="button" role="tab" aria-selected={tab === t} aria-pressed={tab === t} onClick={() => setTab(t)}>{t[0].toUpperCase() + t.slice(1)}</button>
+          <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>{t[0].toUpperCase() + t.slice(1)}</button>
         ))}
       </div>
       <div key={tab} style={{ animation: 'fade .3s ease both', display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -124,8 +124,8 @@ function Strength({ state }: { state: State }) {
             <span style={{ flex: 1 }}>{ex.name}</span>
             {last ? (
               <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                <span className="num" style={{ fontWeight: 600 }}>{fmtNum(last.load ?? 0)} kg{ex.kind === 'assist' ? ' assist' : ''} × {last.reps}</span>
-                {first && <Delta from={first.load ?? 0} to={last.load ?? 0} invert={ex.kind === 'assist'} />}
+                <span className="num" style={{ fontWeight: 600 }}>{last.load != null ? `${fmtNum(last.load)} kg${ex.kind === 'assist' ? ' assist' : ''} × ${last.reps}` : `${last.reps} reps`}</span>
+                {first?.load != null && last.load != null && <Delta from={first.load} to={last.load} invert={ex.kind === 'assist'} />}
               </span>
             ) : (
               <span className="small muted">Not yet</span>

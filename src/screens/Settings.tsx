@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { NavBar } from '../components/Chrome'
 import { fmtLong, today } from '../lib/dates'
+import { clearPhotos } from '../lib/photos'
 import { actions, exportData, useStore } from '../lib/store'
 
 export default function SettingsScreen() {
@@ -77,10 +78,12 @@ export default function SettingsScreen() {
               type="button"
               className="row"
               onClick={() => {
-                if (window.confirm('Erase all workouts, check-ins and settings? This cannot be undone.')) actions.reset()
+                if (!window.confirm('Erase all workouts, check-ins, photos and settings? This cannot be undone.')) return
+                void clearPhotos().catch(() => {})
+                actions.reset()
               }}
             >
-              <span style={{ color: '#ff3b30' }}>Erase everything</span>
+              <span style={{ color: 'var(--danger)' }}>Erase everything</span>
             </button>
           </div>
           <input

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { photoUrl } from '../data/exercises'
-import { allItems, daysFor, DELOAD_WEEK, setsFor } from '../data/plan'
+import { allItems, dayFor, daysFor, DELOAD_WEEK, setsFor } from '../data/plan'
 import { avgWeight, fmtNum, insights } from '../lib/coach'
 import { addDays, daysBetween, fmtLong, mondayOf } from '../lib/dates'
 import { useStore } from '../lib/store'
@@ -20,7 +20,9 @@ export default function TodayScreen() {
   const tips = insights(state, date).sort((a, b) => rank[a.tone] - rank[b.tone])
   const [allTips, setAllTips] = useState(false)
   const monday = mondayOf(date)
-  const totalSets = allItems(day).reduce((n, it) => n + setsFor(it, week), 0)
+  // If a different day's workout was done today (e.g. a missed session), show that one.
+  const shown = session ? dayFor(session.dayId, fiveDay) : day
+  const totalSets = allItems(shown).reduce((n, it) => n + setsFor(it, week), 0)
 
   return (
     <div className="screen">
@@ -39,15 +41,15 @@ export default function TodayScreen() {
         </div>
       </div>
 
-      {day.groups.length ? (
-        <Link to={`/day/${day.id}`} className="hero" style={{ height: 'min(118vw, 470px)' }}>
-          <img src={photoUrl(day.hero)} alt="" style={{ objectPosition: '50% 30%' }} />
+      {shown.groups.length ? (
+        <Link to={session ? `/workout/${shown.id}` : `/day/${shown.id}`} className="hero" style={{ height: 'min(118vw, 470px)' }}>
+          <img src={photoUrl(shown.hero)} alt="" style={{ objectPosition: '50% 30%' }} />
           <div className="content">
-            <span className="kicker">{week === DELOAD_WEEK ? 'Deload week · lighter' : `${day.short} day`}</span>
-            <span className="disp" style={{ fontSize: 'clamp(48px, 15vw, 64px)' }}>{day.name}</span>
+            <span className="kicker">{week === DELOAD_WEEK ? 'Deload week · lighter' : `${shown.short} day`}</span>
+            <span className="disp" style={{ fontSize: 'clamp(48px, 15vw, 64px)' }}>{shown.name}</span>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
               <span style={{ fontSize: 15, color: 'rgba(255,255,255,.85)' }}>
-                {session?.finishedAt ? `Done · ${Math.round((session.finishedAt - session.startedAt) / 60000)} min` : `${allItems(day).length} exercises · ${totalSets} sets · ${day.minutes} min`}
+                {session?.finishedAt ? `Done · ${Math.round((session.finishedAt - session.startedAt) / 60000)} min` : `${allItems(shown).length} exercises · ${totalSets} sets · ${shown.minutes} min`}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6, minHeight: 44, padding: '0 20px', borderRadius: 999, background: '#fff', color: '#000', fontSize: 16, fontWeight: 600, flex: 'none' }}>
                 {session?.finishedAt ? <>Review</> : session ? <>Continue</> : <>Start <IconPlay size={14} /></>}

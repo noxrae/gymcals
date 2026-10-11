@@ -1,5 +1,5 @@
 import type { MuscleId } from './muscles'
-import videos from './videos.json'
+import videos from './videos.json' with { type: 'json' }
 
 // How a set is logged:
 //   weight — kg × reps         assist — assistance kg × reps (less is harder)
