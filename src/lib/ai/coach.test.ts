@@ -33,6 +33,12 @@ describe('built-in coach', () => {
     const moved = { ...state, sessions: { ...state.sessions, '2026-10-13': { date: '2026-10-13', dayId: 'wed', startedAt: 0, log: {} } } }
     expect(localAnswer('what is my workout today', coachCtx(moved, '2026-10-13')).text).toContain('Pull + Pull-up Progression')
   })
+  it('after doing tomorrow’s workout early, tomorrow is the moved day', () => {
+    const moved = { ...state, sessions: { ...state.sessions, '2026-10-13': { date: '2026-10-13', dayId: 'wed', startedAt: 0, log: {} } } }
+    const a = localAnswer('what is my workout tomorrow', coachCtx(moved, '2026-10-13')).text
+    expect(a).toMatch(/^You did tomorrow’s workout today/)
+    expect(a).toContain('Lower A + Cardio')
+  })
   it('puts safety first', () => {
     expect(ans('I have chest pain when running')).toMatch(/doctor/)
     expect(ans('my knee hurts on squats')).toMatch(/sharp, joint or worsening pain is not/)

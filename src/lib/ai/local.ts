@@ -2,10 +2,10 @@
 // from evidence-based guidance plus the user's own data. No network, no model download.
 import { ALTERNATIVES, EXERCISES, type Exercise } from '../../data/exercises'
 import { MUSCLES } from '../../data/muscles'
-import { isDeload, nextDeload, phaseOf, PROGRAMS } from '../../data/plan'
+import { dayFor, isDeload, nextDeload, phaseOf, PROGRAMS } from '../../data/plan'
 import { absZone, V_TARGET } from '../body'
 import { fmtNum, history } from '../coach'
-import { addDays } from '../dates'
+import { addDays, dayIdOf } from '../dates'
 import { coachCtx, personalBests, stats, todaysPlanLines, type CoachCtx } from './context'
 
 export interface Answer { text: string; links?: { label: string; to: string }[] }
@@ -75,9 +75,13 @@ export function localAnswer(question: string, c: CoachCtx): Answer {
 
   // ---- today / plan ----
   if (has(q, /tomorrow/) && has(q, /workout|train|plan|what|session|day/)) {
-    const t = coachCtx(c.state, addDays(c.date, 1))
+    let t = coachCtx(c.state, addDays(c.date, 1))
+    // Did tomorrow's workout early today? Then tomorrow is for the day that was moved.
+    const movedFrom = c.state.sessions[c.date]?.dayId === t.day.id ? dayIdOf(c.date) : null
+    const moved = !!movedFrom && movedFrom !== t.day.id
+    if (moved) t = { ...t, day: dayFor(movedFrom, c.state.settings.fiveDay, { week: t.week, program: t.program }) }
     const lines = todaysPlanLines(t).map((l) => l.replace(/^Today is/, 'Tomorrow is'))
-    return { text: `Tomorrow · week ${t.week}. **${t.day.name}**:\n${lines.join('\n')}`, links: t.day.groups.length ? [{ label: 'Open it', to: `/day/${t.day.id}` }] : undefined }
+    return { text: `${moved ? 'You did tomorrow’s workout today, so do the one you moved. ' : ''}Tomorrow · week ${t.week}. **${t.day.name}**:\n${lines.join('\n')}`, links: t.day.groups.length ? [{ label: 'Open it', to: `/day/${t.day.id}` }] : undefined }
   }
   if (has(q, /(only|just) (have |got )?\d+ ?min|short on time|quick workout|less time|in \d+ ?min|\d+ ?minutes? (only|workout)|no time today/)) {
     const main = c.day.groups.flatMap((g) => g.items).filter((i) => EXERCISES[i.ex].kind !== 'cardio').slice(0, 4)
