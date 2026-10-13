@@ -29,6 +29,10 @@ describe('built-in coach', () => {
     expect(a).toMatch(/Same 30 kg assist/)
     expect(ans('what should I do today')).toContain('Pull + Pull-up Progression')
   })
+  it('follows a workout moved to another day', () => {
+    const moved = { ...state, sessions: { ...state.sessions, '2026-10-13': { date: '2026-10-13', dayId: 'wed', startedAt: 0, log: {} } } }
+    expect(localAnswer('what is my workout today', coachCtx(moved, '2026-10-13')).text).toContain('Pull + Pull-up Progression')
+  })
   it('puts safety first', () => {
     expect(ans('I have chest pain when running')).toMatch(/doctor/)
     expect(ans('my knee hurts on squats')).toMatch(/sharp, joint or worsening pain is not/)
