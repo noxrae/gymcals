@@ -16,6 +16,7 @@ export interface PlanItem {
   added?: boolean
 }
 
+/** Each group holds one kind of training (gym, calisthenics or cardio) so the app can label it clearly. */
 export interface PlanGroup { title: string; items: PlanItem[] }
 
 export interface PlanDay {
@@ -39,7 +40,7 @@ export const DAYS: PlanDay[] = [
       { title: 'Main lifts', items: [r('bench-press', 3, 6, 10, [120, 180], { note: 'Controlled descent' }), r('incline-dumbbell-press', 3, 8, 12, [90, 150])] },
       { title: 'Back', items: [r('lat-pulldown', 3, 8, 12, [90, 150]), r('seated-cable-row', 3, 8, 12, [90, 150])] },
       { title: 'Shoulders & arms', items: [r('lateral-raise', 3, 12, 15, [60, 90]), r('triceps-pushdown', 2, 10, 15, [60, 90])] },
-      { title: 'Calisthenics', items: [r('push-up', 3, 6, 12, [90, 120], { note: 'Stop 2–3 reps short' }), r('scapular-push-up', 2, 10, 15, [60, 60])] },
+      { title: 'Push foundation', items: [r('push-up', 3, 6, 12, [90, 120], { note: 'Stop 2–3 reps short' }), r('scapular-push-up', 2, 10, 15, [60, 60])] },
     ],
   },
   {
@@ -65,7 +66,8 @@ export const DAYS: PlanDay[] = [
     id: 'thu', name: 'Skills · Core · Cardio', short: 'Skills', focus: 'Body control · Abs · Conditioning', minutes: 60, hero: 'hanging-knee-raise',
     groups: [
       { title: 'Skills first · while fresh', items: [r('pike-push-up', 3, 5, 10, [90, 150]), r('tuck-l-sit', 3, 10, 20, [90, 150])] },
-      { title: 'Core', items: [r('hanging-knee-raise', 3, 8, 12, [60, 90]), r('cable-crunch', 3, 10, 15, [60, 90]), r('dead-bug', 3, 10, 10, [45, 60], { perSide: true }), r('side-plank', 3, 30, 45, [45, 60], { perSide: true })] },
+      { title: 'Core · bodyweight', items: [r('hanging-knee-raise', 3, 8, 12, [60, 90]), r('dead-bug', 3, 10, 10, [45, 60], { perSide: true }), r('side-plank', 3, 30, 45, [45, 60], { perSide: true })] },
+      { title: 'Core · cable', items: [r('cable-crunch', 3, 10, 15, [60, 90])] },
       { title: 'Cardio', items: [r('incline-walk', 1, 30, 40, [0, 0])] },
     ],
   },
@@ -77,7 +79,7 @@ export const DAYS: PlanDay[] = [
       { title: 'Main lifts', items: [r('incline-bench-press', 3, 8, 10, [120, 180]), r('chest-press', 2, 10, 12, [90, 120]), r('lat-pulldown', 3, 8, 12, [90, 150]), r('seated-cable-row', 2, 10, 12, [90, 120])] },
       { title: 'Shoulders', items: [r('dumbbell-shoulder-press', 3, 8, 10, [120, 120]), r('lateral-raise', 3, 12, 15, [60, 90]), r('reverse-fly', 2, 12, 15, [60, 90], { added: true })] },
       { title: 'Arms', items: [r('dumbbell-curl', 2, 10, 12, [60, 90]), r('triceps-extension', 2, 10, 12, [60, 90])] },
-      { title: 'Calisthenics', items: [r('push-up', 2, 8, 15, [90, 90], { note: 'Leave ~2 reps in reserve' })] },
+      { title: 'Push-ups', items: [r('push-up', 2, 8, 15, [90, 90], { note: 'Leave ~2 reps in reserve' })] },
     ],
   },
   {
@@ -86,7 +88,9 @@ export const DAYS: PlanDay[] = [
     groups: [
       { title: 'Main lifts', items: [r('bulgarian-split-squat', 3, 8, 10, [120, 120], { perSide: true }), r('romanian-deadlift', 3, 8, 10, [120, 180])] },
       { title: 'Accessories', items: [r('leg-extension', 2, 12, 15, [60, 90]), r('leg-curl', 2, 12, 15, [60, 90]), r('calf-raise', 3, 12, 15, [60, 90])] },
-      { title: 'Athletic', items: [r('farmers-carry', 3, 30, 45, [90, 120]), r('walking-lunge', 2, 10, 10, [90, 90], { perSide: true }), r('mountain-climber', 3, 30, 30, [60, 60])] },
+      { title: 'Shoulders · V-taper', items: [r('lateral-raise', 3, 12, 15, [60, 90], { added: true, note: 'Extra width work for the V-taper' })] },
+      { title: 'Loaded carry', items: [r('farmers-carry', 3, 30, 45, [90, 120])] },
+      { title: 'Conditioning', items: [r('walking-lunge', 2, 10, 10, [90, 90], { perSide: true }), r('mountain-climber', 3, 30, 30, [60, 60])] },
     ],
   },
   {

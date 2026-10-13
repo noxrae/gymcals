@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Chevron, IconCheckCircle, IconMoon } from '../components/Icons'
 import { ExerciseThumb } from '../components/Media'
+import { WhyPlan } from '../components/WhyPlan'
 import { EXERCISES } from '../data/exercises'
 import { daysFor, DELOAD_WEEK, PHASES, phaseOf, TOTAL_WEEKS, WEEK_FOCUS } from '../data/plan'
 import { addDays, mondayOf } from '../lib/dates'
@@ -82,6 +83,8 @@ export default function PlanScreen() {
           ))
         )}
       </div>
+
+      <WhyPlan />
     </div>
   )
 }

@@ -331,7 +331,7 @@ test.describe('progress, skills and photos', () => {
     const errors = await open(page, history(), { path: '/progress' })
     await expect(page.getByRole('img', { name: /weight weekly averages/ })).toBeVisible()
     await expect(page.getByText(/started at 76.7 kg/)).toBeVisible()
-    await page.getByRole('tab', { name: 'Waist' }).click()
+    await page.getByRole('tab', { name: 'Body' }).click()
     await expect(page.getByText(/started at 88 cm/)).toBeVisible()
     await page.getByRole('tab', { name: 'Strength' }).click()
     await expect(page.getByRole('link', { name: /Bench Press.*55 kg × 10/ })).toBeVisible()

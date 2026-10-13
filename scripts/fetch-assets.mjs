@@ -48,6 +48,7 @@ const PHOTOS = {
   'mountain-climber': ['Mountain_Climbers', [0, 1]],
   'reverse-fly': ['Reverse_Flyes', [0, 1]],
   plank: ['Plank', [0, 1]],
+  'incline-walk': ['Jogging_Treadmill', [0, 1]],
 }
 
 // Exercises with no free-exercise-db photo use their form video's thumbnail instead.

@@ -269,7 +269,6 @@ const DEFS: Record<string, Def> = {
     primary: [], secondary: [],
     steps: ['Pick an incline walk, bike or elliptical.', 'Keep a pace where you can still speak in short sentences.', 'Stay steady. This is conditioning, not punishment.'],
     mistake: 'Turning easy cardio into a hard interval session.',
-    photos: 0,
   },
 }
 
@@ -312,6 +311,21 @@ export const ALTERNATIVES: Record<string, string[]> = {
   'cable-crunch': ['dead-bug', 'plank'],
   'hanging-knee-raise': ['dead-bug', 'plank'],
 }
+
+/** Gym (machines, barbells, dumbbells, cables) vs calisthenics (bodyweight / bar skills) vs cardio. */
+export type ExType = 'gym' | 'cali' | 'cardio'
+const CALISTHENICS = new Set([
+  'push-up', 'scapular-push-up', 'pike-push-up', 'dead-hang', 'scapular-pull-up', 'assisted-pull-up', 'negative-pull-up',
+  'hanging-knee-raise', 'dead-bug', 'side-plank', 'plank', 'tuck-l-sit', 'walking-lunge', 'mountain-climber',
+])
+export const typeOf = (key: string): ExType => (EXERCISES[key]?.kind === 'cardio' ? 'cardio' : CALISTHENICS.has(key) ? 'cali' : 'gym')
+export const TYPE_LABEL: Record<ExType, string> = { gym: 'Gym', cali: 'Calisthenics', cardio: 'Cardio' }
+
+/** How the form demo animates: a held position, or start ↔ finish reps (fast for climbers). */
+export const HOLDS = new Set(['dead-hang', 'plank', 'side-plank', 'tuck-l-sit', 'farmers-carry'])
+export const FAST = new Set(['mountain-climber'])
+/** No free photos exist for these, so the demo is an animated figure. */
+export const FIGURE_DEMO = new Set(['pike-push-up', 'scapular-push-up', 'tuck-l-sit'])
 
 export const BARBELL = new Set(['bench-press', 'incline-bench-press', 'squat', 'romanian-deadlift'])
 

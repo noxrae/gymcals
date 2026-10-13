@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { BodyStats } from '../components/BodyStats'
 import { Chevron } from '../components/Icons'
 import { ProgressPhotos } from '../components/ProgressPhotos'
 import { LineChart, type Point } from '../components/LineChart'
@@ -10,7 +11,7 @@ import { daysBetween, fmtShort, weekOf } from '../lib/dates'
 import { useStore, type State } from '../lib/store'
 import { useToday } from '../lib/useToday'
 
-type Tab = 'weight' | 'waist' | 'strength' | 'tests' | 'photos'
+type Tab = 'weight' | 'body' | 'strength' | 'tests' | 'photos'
 const LIFTS = ['bench-press', 'incline-bench-press', 'squat', 'romanian-deadlift', 'lat-pulldown', 'dumbbell-shoulder-press', 'assisted-pull-up']
 
 export default function ProgressScreen() {
@@ -21,13 +22,18 @@ export default function ProgressScreen() {
     <div className="screen">
       <h1 className="large-title" style={{ padding: '8px 4px 0' }}>Progress</h1>
       <div className="seg" role="tablist" aria-label="Metric">
-        {(['weight', 'waist', 'strength', 'tests', 'photos'] as Tab[]).map((t) => (
+        {(['weight', 'body', 'strength', 'tests', 'photos'] as Tab[]).map((t) => (
           <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>{t[0].toUpperCase() + t.slice(1)}</button>
         ))}
       </div>
       <div key={tab} style={{ animation: 'fade .3s ease both', display: 'flex', flexDirection: 'column', gap: 24 }}>
         {tab === 'weight' && <Body state={state} metric="weight" />}
-        {tab === 'waist' && <Body state={state} metric="waist" />}
+        {tab === 'body' && (
+          <>
+            <BodyStats state={state} />
+            <Body state={state} metric="waist" />
+          </>
+        )}
         {tab === 'strength' && <Strength state={state} />}
         {tab === 'tests' && <Tests state={state} />}
         {tab === 'photos' && <ProgressPhotos />}

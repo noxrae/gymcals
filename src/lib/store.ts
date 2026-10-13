@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import type { DayId } from '../data/plan'
+import type { Profile } from './body'
 
 // All data lives on the device (localStorage). Export/import gives a JSON backup.
 
@@ -24,6 +25,11 @@ export interface Session {
 export interface Checkin {
   weight?: number
   waist?: number
+  /** monthly tape measurements (cm) for the V-taper ratio and body-fat estimate */
+  shoulders?: number
+  neck?: number
+  hip?: number
+  calories?: number
   protein?: number
   steps?: number
   sleep?: number
@@ -53,6 +59,10 @@ export interface Settings {
   keepAwake: boolean
   /** date of the last exported backup */
   lastBackup?: string
+  /** height, age, sex, activity — for the calorie target and body-fat estimate */
+  profile?: Profile
+  /** manual fine-tune of the calorie target, kcal */
+  calorieAdjust?: number
 }
 
 export interface State {

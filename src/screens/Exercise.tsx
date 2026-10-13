@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { BodyMap, MapLegend, numberMuscles } from '../components/BodyMap'
 import { FloatingBack } from '../components/Chrome'
+import { FormDemo, hasDemo } from '../components/FormDemo'
 import { IconAlert } from '../components/Icons'
 import { LineChart } from '../components/LineChart'
 import { VideoCredit, VideoPlayer } from '../components/Media'
-import { EXERCISES, photoUrl } from '../data/exercises'
+import { EXERCISES } from '../data/exercises'
 import { MUSCLES, type MuscleId } from '../data/muscles'
 import { allItems, dayFor, setsFor, type DayId } from '../data/plan'
 import { fmtNum, history, rangeText, restText, suggest, unitOf } from '../lib/coach'
@@ -82,14 +83,10 @@ function HowTo({ exKey, item, week }: { exKey: string; item?: ReturnType<typeof 
         </div>
       )}
 
-      {ex.photos > 1 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          {['Start', 'Finish'].map((label, i) => (
-            <figure key={label} style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <img src={photoUrl(ex.key, i)} alt={`${ex.name} ${label.toLowerCase()} position`} loading="lazy" style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', objectPosition: '50% 25%', borderRadius: 12 }} />
-              <figcaption className="small muted">{label}</figcaption>
-            </figure>
-          ))}
+      {hasDemo(ex) && (
+        <div>
+          <h2 className="sec" style={{ marginLeft: 0 }}>Form demo</h2>
+          <FormDemo ex={ex} />
         </div>
       )}
 

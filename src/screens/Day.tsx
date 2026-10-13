@@ -2,6 +2,7 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { BottomBar, FloatingBack } from '../components/Chrome'
 import { Chevron, IconInfo } from '../components/Icons'
 import { ExerciseThumb } from '../components/Media'
+import { dayMix, groupType, TypeBadge } from '../components/TypeBadge'
 import { EXERCISES, photoUrl } from '../data/exercises'
 import { allItems, dayFor, DELOAD_WEEK, setsFor, type DayId } from '../data/plan'
 import { rangeText } from '../lib/coach'
@@ -57,7 +58,9 @@ export default function DayScreen() {
       </div>
 
       <div style={{ display: 'flex', padding: '18px 16px', borderBottom: '1px solid var(--sep)' }}>
-        <Stat value={items.length} label="Exercises" />
+        <Stat value={dayMix(day).gym} label="Gym" />
+        <span style={{ width: 1, background: 'var(--sep)' }} />
+        <Stat value={dayMix(day).cali} label="Calisthenics" />
         <span style={{ width: 1, background: 'var(--sep)' }} />
         <Stat value={sets} label="Sets" />
         <span style={{ width: 1, background: 'var(--sep)' }} />
@@ -72,7 +75,10 @@ export default function DayScreen() {
 
       {day.groups.map((g) => (
         <section key={g.title}>
-          <h2 className="sec" style={{ margin: 0, padding: '22px 16px 6px' }}>{g.title}</h2>
+          <h2 className="sec" style={{ margin: 0, padding: '22px 16px 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <TypeBadge type={groupType(g)} />
+            <span>{g.title}</span>
+          </h2>
           {g.items.map((it) => {
             const ex = EXERCISES[it.ex]
             return (

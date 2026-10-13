@@ -1,6 +1,7 @@
 import { EXERCISES, type Exercise } from '../data/exercises'
 import { DELOAD_WEEK, type PlanItem } from '../data/plan'
 import { addDays, daysBetween, today, weekOf } from './dates'
+import { calories, profileComplete } from './body'
 import type { Checkin, SetLog, State } from './store'
 
 export const fmtNum = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1))
@@ -180,12 +181,12 @@ export function insights(state: State, date = today()): Insight[] {
   const before = avgWeight(state.checkins, addDays(date, -7))
   if (now != null && before != null) {
     const change = now - before
-    if (change < -0.75) out.push({ to: '/progress', tone: 'warn', title: 'Losing weight fast', text: `Down ${fmtNum(-change)} kg in a week. Aim for 0.25–0.5 kg. Eat a little more to protect your strength.` })
+    if (change < -0.75) out.push({ to: '/settings?profile=1', tone: 'warn', title: 'Losing weight fast', text: `Down ${fmtNum(-change)} kg in a week. Aim for 0.25–0.5 kg. Eat about 150 kcal more a day to protect your muscle.` })
     else if (change <= -0.2) out.push({ to: '/progress', tone: 'good', title: 'Right on pace', text: `Down ${fmtNum(-change)} kg this week. A steady, sustainable rate.` })
   }
   const twoAgo = avgWeight(state.checkins, addDays(date, -14))
   if (now != null && before != null && twoAgo != null && Math.abs(now - before) < 0.15 && Math.abs(before - twoAgo) < 0.15) {
-    out.push({ to: '/progress?tab=waist', tone: 'warn', title: 'Weight has stalled', text: 'No change for 2 weeks. Check your waist first. If that’s flat too, make one small change: slightly less food or a bit more walking.' })
+    out.push({ to: '/progress?tab=body', tone: 'warn', title: 'Weight has stalled', text: 'No change for 2 weeks. Check your waist first. If that’s flat too, make one small change: about 150 kcal less a day, or 2,000 more steps.' })
   }
 
   const recent = Object.keys(state.checkins).filter((d) => d <= date && daysBetween(d, date) < 4).map((d) => state.checkins[d].recovery).filter((v): v is number => v != null)
@@ -197,6 +198,10 @@ export function insights(state: State, date = today()): Insight[] {
   if (proteinDays.length >= 3) {
     const avg = proteinDays.reduce((a, b) => a + b, 0) / proteinDays.length
     if (avg < state.settings.proteinTarget * 0.8) out.push({ to: '/log', tone: 'warn', title: 'Protein is low', text: `Averaging ${Math.round(avg)} g. Aim for about ${state.settings.proteinTarget} g to keep muscle while losing fat.` })
+  }
+
+  if (!profileComplete(state.settings.profile)) {
+    out.push({ to: '/settings?profile=1', tone: 'accent', title: 'Set your calorie target', text: 'Belly and side fat only go with a steady calorie deficit. Add your height and age once to get a daily target.' })
   }
 
   const sessionsLogged = Object.values(state.sessions).filter((s) => s.finishedAt).length
@@ -212,4 +217,13 @@ export function insights(state: State, date = today()): Insight[] {
   }
 
   return out
+}
+
+/** Today's fat-loss calorie target from the 7-day weight average (null until the profile is filled in). */
+export function calorieTarget(state: State, date = today()) {
+  const p = state.settings.profile
+  if (!profileComplete(p)) return null
+  const weight = avgWeight(state.checkins, date) ?? weightSeries(state.checkins).at(-1)?.value ?? state.baseline?.weight
+  if (!weight) return null
+  return { weight, ...calories(weight, p, state.settings.calorieAdjust ?? 0) }
 }

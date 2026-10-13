@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { photoUrl } from '../data/exercises'
-import { allItems, dayFor, daysFor, DELOAD_WEEK, setsFor } from '../data/plan'
-import { avgWeight, fmtNum, insights } from '../lib/coach'
+import { dayFor, daysFor, DELOAD_WEEK } from '../data/plan'
+import { avgWeight, calorieTarget, fmtNum, insights } from '../lib/coach'
 import { addDays, daysBetween, fmtLong, mondayOf } from '../lib/dates'
 import { useStore } from '../lib/store'
 import { weekReview } from '../lib/review'
 import { useToday } from '../lib/useToday'
 import { WeekReviewCard } from '../components/WeekReviewCard'
+import { mixText } from '../components/TypeBadge'
 import { Chevron, IconAlert, IconCheck, IconGear, IconMoon, IconPlay, IconSpark } from '../components/Icons'
 
 export default function TodayScreen() {
@@ -16,13 +17,13 @@ export default function TodayScreen() {
   const session = state.sessions[date]
   const checkin = state.checkins[date] ?? {}
   const avg = avgWeight(state.checkins, date)
+  const cal = calorieTarget(state, date)
   const rank = { warn: 0, accent: 1, good: 2 }
   const tips = insights(state, date).sort((a, b) => rank[a.tone] - rank[b.tone])
   const [allTips, setAllTips] = useState(false)
   const monday = mondayOf(date)
   // If a different day's workout was done today (e.g. a missed session), show that one.
   const shown = session ? dayFor(session.dayId, fiveDay) : day
-  const totalSets = allItems(shown).reduce((n, it) => n + setsFor(it, week), 0)
 
   return (
     <div className="screen">
@@ -49,7 +50,7 @@ export default function TodayScreen() {
             <span className="disp" style={{ fontSize: 'clamp(48px, 15vw, 64px)' }}>{shown.name}</span>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
               <span style={{ fontSize: 15, color: 'rgba(255,255,255,.85)' }}>
-                {session?.finishedAt ? `Done · ${Math.round((session.finishedAt - session.startedAt) / 60000)} min` : `${allItems(shown).length} exercises · ${totalSets} sets · ${shown.minutes} min`}
+                {session?.finishedAt ? `Done · ${Math.round((session.finishedAt - session.startedAt) / 60000)} min` : `${mixText(shown)} · ${shown.minutes} min`}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6, minHeight: 44, padding: '0 20px', borderRadius: 999, background: '#fff', color: '#000', fontSize: 16, fontWeight: 600, flex: 'none' }}>
                 {session?.finishedAt ? <>Review</> : session ? <>Continue</> : <>Start <IconPlay size={14} /></>}
@@ -120,6 +121,11 @@ export default function TodayScreen() {
       <div>
         <h2 className="sec">Daily targets</h2>
         <div className="group">
+          <Link to={cal ? '/log' : '/settings?profile=1'} className="row">
+            <span style={{ flex: 1 }}>Calories</span>
+            <span className="value num">{cal ? `${(checkin.calories ?? 0).toLocaleString()} of ${cal.target.toLocaleString()} kcal` : 'Set your target'}</span>
+            <Chevron />
+          </Link>
           <Link to="/log" className="row">
             <span style={{ flex: 1 }}>Protein</span>
             <span className="value num">{checkin.protein ?? 0} of {state.settings.proteinTarget} g</span>

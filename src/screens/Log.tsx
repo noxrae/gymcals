@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { IconChevronLeft } from '../components/Icons'
-import { fmtNum } from '../lib/coach'
+import { calorieTarget, fmtNum } from '../lib/coach'
 import { addDays, daysBetween, fmtLong, today } from '../lib/dates'
 import { actions, useStore, type Checkin } from '../lib/store'
 import { undoable } from '../lib/toast'
@@ -26,6 +26,11 @@ export default function LogScreen() {
   const set = (patch: Partial<Checkin>) => actions.setCheckin(date, patch)
   const isToday = date === today()
 
+  const state = useStore((s) => s)
+  const cal = calorieTarget(state, date)
+  const female = settings.profile?.sex === 'female'
+  const lastShoulders = Object.keys(checkins).filter((d) => checkins[d].shoulders != null && d < date).sort().at(-1)
+  const measureDue = !lastShoulders || daysBetween(lastShoulders, date) >= 28
   const lastWaist = Object.keys(checkins).filter((d) => checkins[d].waist != null && d < date).sort().at(-1)
   const waistDue = !lastWaist || daysBetween(lastWaist, date) >= 14
   const protein = c.protein ?? 0
@@ -49,12 +54,18 @@ export default function LogScreen() {
           <div className="group">
             <NumRow label="Morning weight" unit="kg" value={c.weight} onChange={(v) => set({ weight: v })} />
             <NumRow label="Waist at navel" unit="cm" value={c.waist} onChange={(v) => set({ waist: v })} placeholder={waistDue ? 'Due' : '—'} />
+            <NumRow label="Shoulders (widest)" unit="cm" value={c.shoulders} onChange={(v) => set({ shoulders: v })} placeholder={measureDue ? 'Due' : '—'} />
+            <NumRow label="Neck" unit="cm" value={c.neck} onChange={(v) => set({ neck: v })} placeholder={measureDue ? 'Due' : '—'} />
+            {female && <NumRow label="Hip (widest)" unit="cm" value={c.hip} onChange={(v) => set({ hip: v })} placeholder={measureDue ? 'Due' : '—'} />}
           </div>
-          <p className="sec-foot">Weigh in after waking. Measure your waist every 2 weeks{waistDue ? ' (due now)' : ''}.</p>
+          <p className="sec-foot">Weigh in after waking. Waist every 2 weeks{waistDue ? ' (due now)' : ''}; shoulders and neck once a month for your V-taper ratio and body-fat estimate.</p>
         </div>
 
         <div>
-          <h2 className="sec">Protein</h2>
+          <h2 className="sec">Food</h2>
+          <div className="group" style={{ marginBottom: 10 }}>
+            <NumRow label={cal ? `Calories eaten · target ${cal.target.toLocaleString()}` : 'Calories eaten'} unit="kcal" value={c.calories} onChange={(v) => set({ calories: v != null ? Math.round(v) : undefined })} integer />
+          </div>
           <div className="group" style={{ padding: '14px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '0 16px' }}>
               <span className="num" style={{ fontSize: 30, fontWeight: 700 }}>{protein} g</span>

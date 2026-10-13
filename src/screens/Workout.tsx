@@ -4,6 +4,7 @@ import { Sheet } from '../components/Chrome'
 import { Chevron, IconCheck, IconChevronLeft, IconInfo, IconSpark } from '../components/Icons'
 import { ExerciseThumb } from '../components/Media'
 import { RestBar } from '../components/RestBar'
+import { groupType, TypeBadge } from '../components/TypeBadge'
 import { ALTERNATIVES, BARBELL, EXERCISES, type Exercise } from '../data/exercises'
 import { MUSCLES } from '../data/muscles'
 import { allItems, dayFor, setsFor, type DayId, type PlanItem } from '../data/plan'
@@ -81,22 +82,31 @@ export default function WorkoutScreen() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 12 }}>
         {!finished && <WarmupCard />}
-        {items.map((it, i) => {
-          const actual = swaps[it.ex] ?? it.ex
-          return (
-            <ExerciseBlock
-              key={it.ex}
-              index={i}
-              planned={it.ex}
-              item={{ ...it, ex: actual }}
-              week={week}
-              date={date}
-              log={session.log[actual]}
-              isLast={i === items.length - 1}
-              alternatives={[it.ex, ...(ALTERNATIVES[it.ex] ?? [])].filter((k) => k !== actual && (k === it.ex || !inDay.has(k)))}
-            />
-          )
-        })}
+        {day.groups.map((g) => (
+          <div key={g.title} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <h2 className="sec" style={{ margin: '10px 0 0', padding: '0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <TypeBadge type={groupType(g)} />
+              <span>{g.title}</span>
+            </h2>
+            {g.items.map((it) => {
+              const i = items.indexOf(it)
+              const actual = swaps[it.ex] ?? it.ex
+              return (
+                <ExerciseBlock
+                  key={it.ex}
+                  index={i}
+                  planned={it.ex}
+                  item={{ ...it, ex: actual }}
+                  week={week}
+                  date={date}
+                  log={session.log[actual]}
+                  isLast={i === items.length - 1}
+                  alternatives={[it.ex, ...(ALTERNATIVES[it.ex] ?? [])].filter((k) => k !== actual && (k === it.ex || !inDay.has(k)))}
+                />
+              )
+            })}
+          </div>
+        ))}
       </div>
 
       {day.optionalCardio && <p className="sec-foot" style={{ margin: '20px 16px 0' }}>Optional cardio: {day.optionalCardio}.</p>}

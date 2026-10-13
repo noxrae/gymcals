@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { BodyProfile } from '../components/BodyProfile'
 import { NavBar } from '../components/Chrome'
 import { fmtLong, today } from '../lib/dates'
 import { clearPhotos } from '../lib/photos'
@@ -13,8 +14,10 @@ export default function SettingsScreen() {
 
   const [params] = useSearchParams()
   const backupRef = useRef<HTMLDivElement>(null)
+  const profileRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (params.get('backup')) backupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (params.get('profile')) profileRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [params])
 
   /** On phones: share sheet (Drive, WhatsApp, Files…). Elsewhere: a normal download. */
@@ -60,6 +63,11 @@ export default function SettingsScreen() {
             {s.startDate ? `Week 1 began ${fmtLong(s.startDate)}. ` : ''}
             5-day mode makes Thursday a recovery day, spreads its skill and core work over Mon/Wed/Fri/Sat and drops optional cardio. Use it for weeks when six days feels like too much.
           </p>
+        </div>
+
+        <div ref={profileRef} style={{ scrollMarginTop: 70 }}>
+          <h2 className="sec">Your body · calories</h2>
+          <BodyProfile />
         </div>
 
         <div>
