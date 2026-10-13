@@ -1,5 +1,5 @@
 import { EXERCISES } from '../data/exercises'
-import { daysFor, WEEK_FOCUS } from '../data/plan'
+import { daysFor, programOf, weekFocus } from '../data/plan'
 import { avgWeight } from './coach'
 import { addDays } from './dates'
 import type { SetLog, State } from './store'
@@ -55,6 +55,6 @@ export function weekReview(state: State, monday: string, week: number): WeekRevi
     waist: waists.at(-1) ?? null,
     protein: avg(days.map((c) => c.protein).filter((v): v is number => v != null)),
     sleep: avg(days.map((c) => c.sleep).filter((v): v is number => v != null)),
-    nextFocus: WEEK_FOCUS[Math.min(12, week + 1)] ?? 'Plan complete. Compare your numbers with week 1 and plan your next block.',
+    nextFocus: weekFocus(week + 1, programOf(state.settings.program)) || 'Plan complete. Compare your numbers with week 1 and choose your next program in Settings.',
   }
 }

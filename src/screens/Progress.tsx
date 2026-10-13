@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { BodyStats } from '../components/BodyStats'
+import { AskCoach } from '../components/CoachBits'
 import { Chevron } from '../components/Icons'
 import { ProgressPhotos } from '../components/ProgressPhotos'
 import { LineChart, type Point } from '../components/LineChart'
@@ -26,6 +27,7 @@ export default function ProgressScreen() {
           <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>{t[0].toUpperCase() + t.slice(1)}</button>
         ))}
       </div>
+      <AskCoach title="Coach summary" questions={['How am I doing?', 'When will my abs show?', 'How do I lose belly fat?', 'How do I get a V-taper?']} />
       <div key={tab} style={{ animation: 'fade .3s ease both', display: 'flex', flexDirection: 'column', gap: 24 }}>
         {tab === 'weight' && <Body state={state} metric="weight" />}
         {tab === 'body' && (

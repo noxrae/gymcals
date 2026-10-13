@@ -7,7 +7,7 @@ import { RestBar } from '../components/RestBar'
 import { groupType, TypeBadge } from '../components/TypeBadge'
 import { ALTERNATIVES, BARBELL, EXERCISES, type Exercise } from '../data/exercises'
 import { MUSCLES } from '../data/muscles'
-import { allItems, dayFor, setsFor, type DayId, type PlanItem } from '../data/plan'
+import { allItems, dayFor, programOf, setsFor, type DayId, type PlanItem } from '../data/plan'
 import { fmtNum, isPersonalBest, lastSets, rangeText, restText, setText, suggest } from '../lib/coach'
 import { fmtClock } from '../lib/dates'
 import { actions, useStore, type SetLog } from '../lib/store'
@@ -19,8 +19,8 @@ import { plateText, warmupSets } from '../lib/warmup'
 
 export default function WorkoutScreen() {
   const { dayId } = useParams<{ dayId: DayId }>()
-  const { date, week, fiveDay } = useToday()
-  const day = dayId ? dayFor(dayId, fiveDay) : undefined
+  const { date, week, fiveDay, ctx, program } = useToday()
+  const day = dayId ? dayFor(dayId, fiveDay, ctx) : undefined
   const session = useStore((s) => s.sessions[date])
   const keepAwake = useStore((s) => s.settings.keepAwake)
   const state = useStore((s) => s)
@@ -50,7 +50,7 @@ export default function WorkoutScreen() {
   const inDay = new Set(items.map((it) => swaps[it.ex] ?? it.ex))
   const finished = !!session.finishedAt
   const elapsed = ((session.finishedAt ?? now) - session.startedAt) / 1000
-  const total = items.reduce((n, it) => n + setsFor(it, week), 0)
+  const total = items.reduce((n, it) => n + setsFor(it, week, program), 0)
   const done = Object.values(session.log).reduce((n, sets) => n + sets.filter((s) => s.done).length, 0)
   const records = Object.entries(session.log)
     .filter(([ex, sets]) => sets.some((x) => x.done && isPersonalBest(state, ex, x, date)))
@@ -159,7 +159,7 @@ function ExerciseBlock({ item, index, planned, alternatives, week, date, log, is
   const state = useStore((s) => s)
   const tip = useMemo(() => suggest(state, item, week), [state, item, week])
   const prev = useMemo(() => lastSets(state, item.ex, date), [state, item.ex, date])
-  const count = setsFor(item, week)
+  const count = setsFor(item, week, programOf(state.settings.program))
   const sets: SetLog[] = log ?? Array.from({ length: count }, () => ({ load: tip.load, reps: tip.reps, done: false }))
   const allDone = sets.length > 0 && sets.every((s) => s.done)
   const [open, setOpen] = useState(!allDone)
@@ -418,6 +418,7 @@ function FinishSheet({ done, total, minutes, records, volume, onClose, onSave, o
         </div>
       )}
       {done < total && <p className="muted" style={{ fontSize: 15, padding: '0 4px' }}>Unfinished sets are fine. Consistency beats perfect sessions.</p>}
+      <Link to="/coach?q=How%20am%20I%20doing%3F" className="small" style={{ alignSelf: 'center' }}>Ask your coach how you’re progressing →</Link>
       <button type="button" className="btn" onClick={onSave}>Save Workout</button>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <button type="button" className="link-btn" onClick={onClose}>Keep going</button>

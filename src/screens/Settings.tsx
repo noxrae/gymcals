@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { AiSettings } from '../components/AiSettings'
 import { BodyProfile } from '../components/BodyProfile'
 import { NavBar } from '../components/Chrome'
 import { fmtLong, today } from '../lib/dates'
@@ -15,9 +16,15 @@ export default function SettingsScreen() {
   const [params] = useSearchParams()
   const backupRef = useRef<HTMLDivElement>(null)
   const profileRef = useRef<HTMLDivElement>(null)
+  const aiRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    if (params.get('backup')) backupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    if (params.get('profile')) profileRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    // Wait for the app's scroll-to-top on navigation before jumping to a section.
+    const t = setTimeout(() => {
+      if (params.get('backup')) backupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      if (params.get('profile')) profileRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      if (params.get('ai')) aiRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+    return () => clearTimeout(t)
   }, [params])
 
   /** On phones: share sheet (Drive, WhatsApp, Files…). Elsewhere: a normal download. */
@@ -68,6 +75,11 @@ export default function SettingsScreen() {
         <div ref={profileRef} style={{ scrollMarginTop: 70 }}>
           <h2 className="sec">Your body · calories</h2>
           <BodyProfile />
+        </div>
+
+        <div ref={aiRef} style={{ scrollMarginTop: 70 }}>
+          <h2 className="sec">AI coach</h2>
+          <AiSettings />
         </div>
 
         <div>
@@ -141,6 +153,7 @@ export default function SettingsScreen() {
           <div className="group">
             <a className="row" href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noreferrer"><span className="grow"><span>Exercise photos</span><span className="sub">free-exercise-db · public domain</span></span></a>
             <a className="row" href="https://wger.de" target="_blank" rel="noreferrer"><span className="grow"><span>Muscle illustrations</span><span className="sub">wger.de · CC BY-SA 3.0</span></span></a>
+            <div className="row"><span className="grow"><span>AI coach</span><span className="sub">Built-in rules; optional Google Gemini (your free key) or Chrome on-device AI</span></span></div>
             <div className="row"><span className="grow"><span>Form videos</span><span className="sub">Embedded from each creator’s YouTube channel</span></span></div>
           </div>
           <p className="sec-foot">GymCals is educational, not medical advice. Stop and get qualified help if you feel sharp or unusual pain.</p>

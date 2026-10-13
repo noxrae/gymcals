@@ -27,9 +27,33 @@ const HOLD: Phase[] = [
 // ---------- animated figure poses (side view, facing left; floor at y = 136) ----------
 type P = [number, number]
 interface Pose { head: P; shoulder: P; back: P; elbow: P; wrist: P; hip: P; knee: P; ankle: P; toe: P }
-interface Figure { a: Pose; b: Pose; phases: Phase[]; accent: ('arms' | 'torso' | 'upper')[]; props?: 'parallettes' }
+interface Figure { a: Pose; b: Pose; phases: Phase[]; accent: ('arms' | 'torso' | 'upper')[]; props?: 'parallettes' | 'box' }
 
 const FIGURES: Record<string, Figure> = {
+  'elevated-pike-push-up': {
+    a: { head: [74, 100], shoulder: [86, 94], back: [104, 70], elbow: [78, 115], wrist: [70, 136], hip: [118, 48], knee: [146, 64], ankle: [172, 84], toe: [181, 88] },
+    b: { head: [62, 124], shoulder: [80, 112], back: [100, 86], elbow: [98, 121], wrist: [70, 136], hip: [116, 62], knee: [146, 72], ankle: [172, 84], toe: [181, 88] },
+    phases: [
+      { secs: 0.8, caption: 'Feet on the box · hips stacked high', from: 0, to: 0 },
+      { secs: 2.0, caption: 'Lower your head in front of your hands · ~2 s', from: 0, to: 1 },
+      { secs: 0.5, caption: 'Elbows at ~45°', from: 1, to: 1 },
+      { secs: 1.1, caption: 'Press back up', from: 1, to: 0 },
+    ],
+    accent: ['arms', 'upper'],
+    props: 'box',
+  },
+  'advanced-tuck-l-sit': {
+    a: { head: [100, 60], shoulder: [101, 76], back: [103, 98], elbow: [94, 95], wrist: [92, 114], hip: [106, 120], knee: [80, 104], ankle: [90, 122], toe: [82, 124] },
+    b: { head: [101, 60], shoulder: [102, 76], back: [104, 98], elbow: [94, 95], wrist: [92, 114], hip: [108, 118], knee: [80, 112], ankle: [74, 130], toe: [66, 128] },
+    phases: [
+      { secs: 0.9, caption: 'Start in a tuck L-sit', from: 0, to: 0 },
+      { secs: 1.0, caption: 'Open the tuck · thighs level, knees away', from: 0, to: 1 },
+      { secs: 2.6, caption: 'Hold · shoulders down, hips lifted', from: 1, to: 1 },
+      { secs: 1.0, caption: 'Back to the tuck', from: 1, to: 0 },
+    ],
+    accent: ['torso'],
+    props: 'parallettes',
+  },
   'pike-push-up': {
     a: { head: [74, 98], shoulder: [88, 92], back: [110, 70], elbow: [79, 114], wrist: [70, 136], hip: [132, 48], knee: [156, 90], ankle: [178, 132], toe: [189, 136] },
     b: { head: [62, 122], shoulder: [82, 110], back: [106, 84], elbow: [100, 120], wrist: [70, 136], hip: [128, 62], knee: [154, 98], ankle: [178, 132], toe: [189, 136] },
@@ -175,6 +199,7 @@ function FigureSvg({ figure, mix }: { figure: Figure; mix: number }) {
   return (
     <svg viewBox="20 30 220 115" width="100%" height="100%" role="img" aria-label="Animated figure showing the movement" style={{ position: 'absolute', inset: 0 }}>
       <line x1="10" y1="137" x2="230" y2="137" stroke="var(--sep)" strokeWidth="2" />
+      {figure.props === 'box' && <rect x="164" y="88" width="40" height="48" rx="4" fill="var(--fill)" stroke="var(--label-3)" strokeWidth="2" opacity="0.8" />}
       {figure.props === 'parallettes' && (
         <g stroke="var(--label-3)" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.45">
           <line x1="76" y1="136" x2="82" y2="115" />

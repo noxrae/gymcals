@@ -63,6 +63,8 @@ export interface Settings {
   profile?: Profile
   /** manual fine-tune of the calorie target, kcal */
   calorieAdjust?: number
+  /** program length in weeks: 12, 16 (4 months) or 24 (6 months) */
+  program?: number
 }
 
 export interface State {
@@ -141,10 +143,10 @@ export function useStore<T>(select: (s: State) => T): T {
 // ---------- actions ----------
 
 export const actions = {
-  finishSetup(startDate: string, baseline: Baseline) {
+  finishSetup(startDate: string, baseline: Baseline, program = 12) {
     update((s) => ({
       ...s,
-      settings: { ...s.settings, startDate },
+      settings: { ...s.settings, startDate, program },
       baseline,
       checkins: {
         ...s.checkins,

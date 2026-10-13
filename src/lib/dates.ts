@@ -1,4 +1,4 @@
-import { JS_DAY, TOTAL_WEEKS, type DayId } from '../data/plan'
+import { JS_DAY, type DayId } from '../data/plan'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
@@ -23,7 +23,6 @@ export const weekOf = (date: string, start: string | null) => {
   if (diff < 0) return 0
   return Math.floor(diff / 7) + 1
 }
-export const clampWeek = (w: number) => Math.min(TOTAL_WEEKS, Math.max(1, w))
 
 /** Monday of the week containing a date. */
 export const mondayOf = (s: string) => {

@@ -4,6 +4,8 @@ import { TabBar } from './components/Chrome'
 import { RestBar } from './components/RestBar'
 import { ToastBar } from './components/ToastBar'
 import { useStore } from './lib/store'
+import { CoachFab } from './components/CoachBits'
+import CoachScreen from './screens/Coach'
 import DayScreen from './screens/Day'
 import ExerciseScreen from './screens/Exercise'
 import LogScreen from './screens/Log'
@@ -40,9 +42,11 @@ export default function App() {
         <Route path="/exercise/:key" element={<ExerciseScreen />} />
         <Route path="/workout/:dayId" element={<WorkoutScreen />} />
         <Route path="/settings" element={<SettingsScreen />} />
+        <Route path="/coach" element={<CoachScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {showTabs && <TabBar />}
+      {showTabs && <CoachFab />}
       <ToastBar />
       {!pathname.startsWith('/workout') && <RestBar bottom={showTabs ? 'calc(var(--tabbar-h) + 10px)' : 'calc(env(safe-area-inset-bottom) + 96px)'} />}
     </>

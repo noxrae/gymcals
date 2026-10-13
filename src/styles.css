@@ -124,13 +124,13 @@ a:active, button:active:not(:disabled), .pressable:active { transform: scale(0.9
 /* ---------- screens ---------- */
 .screen {
   min-height: 100dvh;
-  padding: calc(env(safe-area-inset-top) + 16px) 16px calc(var(--tabbar-h) + 28px);
+  padding: calc(env(safe-area-inset-top) + 16px) 16px calc(var(--tabbar-h) + 84px);
   display: flex;
   flex-direction: column;
   gap: 24px;
   animation: enter 0.38s var(--ease) both;
 }
-.screen.flush { padding: 0 0 calc(var(--tabbar-h) + 28px); gap: 0; }
+.screen.flush { padding: 0 0 calc(var(--tabbar-h) + 84px); gap: 0; }
 .screen.no-tabs { padding-bottom: calc(env(safe-area-inset-bottom) + 110px); }
 .screen.flush.no-tabs { padding-bottom: calc(env(safe-area-inset-bottom) + 110px); }
 @keyframes enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }

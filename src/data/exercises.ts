@@ -264,6 +264,42 @@ const DEFS: Record<string, Def> = {
     steps: ['Forearms under your shoulders, legs straight.', 'Squeeze your glutes and brace your abs.', 'Keep a straight line from head to heels.', 'Breathe steadily and hold.'],
     mistake: 'Hips sagging or piking high.',
   },
+  'pull-up': {
+    name: 'Pull-up', kind: 'reps', step: 0, equipment: 'Pull-up bar',
+    primary: ['lats'], secondary: ['biceps', 'mid-back', 'brachialis'],
+    steps: ['Hang with hands just wider than shoulders, palms away.', 'Pull your shoulder blades down, then drive your elbows to your ribs.', 'Chin clears the bar with no kicking or swinging.', 'Lower all the way to a dead hang in 2–3 seconds.'],
+    mistake: 'Half reps or kipping. Use a band until every rep is full and clean.',
+  },
+  'decline-push-up': {
+    name: 'Decline Push-up', kind: 'reps', step: 0, equipment: 'Bench or box for the feet',
+    primary: ['chest', 'front-delts'], secondary: ['triceps', 'abs'],
+    steps: ['Feet on a bench, hands on the floor slightly wider than shoulders.', 'Brace so your body stays one straight line.', 'Lower until your chest is close to the floor, elbows at about 45°.', 'Press back up to straight arms.'],
+    mistake: 'Hips sagging or piking. Lower the bench if you can’t hold a straight line.',
+  },
+  'hanging-leg-raise': {
+    name: 'Hanging Leg Raise', kind: 'reps', step: 0, equipment: 'Pull-up bar',
+    primary: ['abs'], secondary: ['hip-flexors', 'obliques', 'forearms'],
+    steps: ['Hang with shoulders pulled down, legs together.', 'Raise straight legs to hip height or higher, curling your pelvis up.', 'Pause for a moment at the top.', 'Lower slowly without swinging.'],
+    mistake: 'Swinging the legs up with momentum. Bend the knees slightly if needed.',
+  },
+  'diamond-push-up': {
+    name: 'Diamond Push-up', kind: 'reps', step: 0, equipment: 'Bodyweight',
+    primary: ['triceps', 'chest'], secondary: ['front-delts', 'abs'],
+    steps: ['Hands together under your chest, thumbs and index fingers forming a diamond.', 'Body in one straight line, abs braced.', 'Lower until your chest nearly touches your hands, elbows close to your sides.', 'Press back up to straight arms.'],
+    mistake: 'Elbows flaring wide. Keep them close to the ribs.',
+  },
+  'elevated-pike-push-up': {
+    name: 'Elevated Pike Push-up', kind: 'reps', step: 0, equipment: 'Box or bench for the feet',
+    primary: ['front-delts', 'side-delts'], secondary: ['triceps', 'traps'],
+    steps: ['Feet on a box, hands on the floor, hips stacked high over your shoulders.', 'Bend your elbows to lower your head to a point in front of your hands.', 'Keep your elbows at about 45°.', 'Press back up to straight arms.'],
+    mistake: 'Hips drifting back down into a push-up position.',
+  },
+  'advanced-tuck-l-sit': {
+    name: 'Advanced Tuck L-sit', kind: 'time', step: 0, equipment: 'Parallettes or dip bars',
+    primary: ['abs'], secondary: ['triceps', 'hip-flexors'],
+    steps: ['Start in a tuck L-sit with arms locked and shoulders pushed down.', 'Open the tuck: knees away from the chest, thighs level with the floor.', 'Keep your back tall and hips lifted.', 'Hold, breathing steadily.'],
+    mistake: 'Shoulders shrugging up or hips dropping toward the floor.',
+  },
   'incline-walk': {
     name: 'Incline Walk / Bike', kind: 'cardio', step: 0, equipment: 'Treadmill, bike or elliptical',
     primary: [], secondary: [],
@@ -272,7 +308,7 @@ const DEFS: Record<string, Def> = {
   },
 }
 
-const PHOTO_COUNT: Record<string, number> = { 'dead-hang': 1, 'scapular-push-up': 1, 'pike-push-up': 1, 'tuck-l-sit': 1 }
+const PHOTO_COUNT: Record<string, number> = { 'dead-hang': 1, 'scapular-push-up': 1, 'pike-push-up': 1, 'tuck-l-sit': 1, 'elevated-pike-push-up': 0, 'advanced-tuck-l-sit': 0 }
 const VIDEOS = videos as Record<string, { id: string; title: string; channel: string } | null>
 
 export const EXERCISES: Record<string, Exercise> = Object.fromEntries(
@@ -298,6 +334,12 @@ export const ALTERNATIVES: Record<string, string[]> = {
   'incline-dumbbell-press': ['incline-bench-press', 'chest-press'],
   'lat-pulldown': ['assisted-pull-up'],
   'assisted-pull-up': ['lat-pulldown', 'negative-pull-up'],
+  'pull-up': ['assisted-pull-up', 'negative-pull-up'],
+  'decline-push-up': ['push-up'],
+  'diamond-push-up': ['push-up'],
+  'hanging-leg-raise': ['hanging-knee-raise'],
+  'elevated-pike-push-up': ['pike-push-up'],
+  'advanced-tuck-l-sit': ['tuck-l-sit'],
   'seated-cable-row': ['chest-supported-row', 'one-arm-dumbbell-row'],
   'chest-supported-row': ['seated-cable-row', 'one-arm-dumbbell-row'],
   'one-arm-dumbbell-row': ['chest-supported-row', 'seated-cable-row'],
@@ -317,15 +359,16 @@ export type ExType = 'gym' | 'cali' | 'cardio'
 const CALISTHENICS = new Set([
   'push-up', 'scapular-push-up', 'pike-push-up', 'dead-hang', 'scapular-pull-up', 'assisted-pull-up', 'negative-pull-up',
   'hanging-knee-raise', 'dead-bug', 'side-plank', 'plank', 'tuck-l-sit', 'walking-lunge', 'mountain-climber',
+  'pull-up', 'decline-push-up', 'hanging-leg-raise', 'diamond-push-up', 'elevated-pike-push-up', 'advanced-tuck-l-sit',
 ])
 export const typeOf = (key: string): ExType => (EXERCISES[key]?.kind === 'cardio' ? 'cardio' : CALISTHENICS.has(key) ? 'cali' : 'gym')
 export const TYPE_LABEL: Record<ExType, string> = { gym: 'Gym', cali: 'Calisthenics', cardio: 'Cardio' }
 
 /** How the form demo animates: a held position, or start ↔ finish reps (fast for climbers). */
-export const HOLDS = new Set(['dead-hang', 'plank', 'side-plank', 'tuck-l-sit', 'farmers-carry'])
+export const HOLDS = new Set(['dead-hang', 'plank', 'side-plank', 'tuck-l-sit', 'advanced-tuck-l-sit', 'farmers-carry'])
 export const FAST = new Set(['mountain-climber'])
 /** No free photos exist for these, so the demo is an animated figure. */
-export const FIGURE_DEMO = new Set(['pike-push-up', 'scapular-push-up', 'tuck-l-sit'])
+export const FIGURE_DEMO = new Set(['pike-push-up', 'scapular-push-up', 'tuck-l-sit', 'elevated-pike-push-up', 'advanced-tuck-l-sit'])
 
 export const BARBELL = new Set(['bench-press', 'incline-bench-press', 'squat', 'romanian-deadlift'])
 

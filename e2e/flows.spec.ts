@@ -257,7 +257,7 @@ test.describe('plan modes and review', () => {
 
   test('no week-in-review on the very first day of the plan (found on the phone)', async ({ page }) => {
     await open(page, { settings: { startDate: '2026-10-11' } }, { at: new Date('2026-10-11T10:00:00') })
-    await expect(page.getByText('Rest day')).toBeVisible()
+    await expect(page.getByText('Rest day', { exact: true })).toBeVisible()
     await expect(page.getByRole('region', { name: /in review/ })).toHaveCount(0)
   })
 

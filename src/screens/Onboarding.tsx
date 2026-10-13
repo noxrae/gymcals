@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BottomBar } from '../components/Chrome'
 import { photoUrl } from '../data/exercises'
+import { PROGRAMS, type ProgramId } from '../data/plan'
 import { addDays, fmtLong, mondayOf, today } from '../lib/dates'
 import { actions, type Baseline } from '../lib/store'
 
@@ -16,6 +17,7 @@ export default function Onboarding() {
   const thisMonday = mondayOf(today())
   const nextMonday = addDays(thisMonday, 7)
   const [start, setStart] = useState(thisMonday)
+  const [program, setProgram] = useState<ProgramId>(12)
   const [b, setB] = useState({ weight: '76.7', waist: '', pushups: '', deadHang: '', pullAssist: '' })
 
   const finish = () => {
@@ -27,7 +29,7 @@ export default function Onboarding() {
       deadHang: num(b.deadHang),
       pullAssist: num(b.pullAssist),
     }
-    actions.finishSetup(start, baseline)
+    actions.finishSetup(start, baseline, program)
   }
 
   if (step === 'welcome') {
@@ -77,6 +79,15 @@ export default function Onboarding() {
               <input type="date" value={start} onChange={(e) => e.target.value && setStart(e.target.value)} className="field" style={{ width: 150 }} />
             </label>
           </div>
+          <div>
+            <h2 className="sec">How long?</h2>
+            <div className="seg" role="group" aria-label="Program length">
+              {([12, 16, 24] as ProgramId[]).map((id) => (
+                <button key={id} type="button" aria-pressed={program === id} onClick={() => setProgram(id)}>{PROGRAMS[id].name}</button>
+              ))}
+            </div>
+            <p className="sec-foot">{PROGRAMS[program].summary} You can switch later in Plan.</p>
+          </div>
           <BottomBar><button type="button" className="btn" onClick={() => setStep('baseline')}>Continue</button></BottomBar>
         </>
       ) : (
@@ -103,7 +114,7 @@ export default function Onboarding() {
           </div>
           <BottomBar>
             <button type="button" className="btn secondary" style={{ width: 'auto' }} onClick={() => setStep('start')}>Back</button>
-            <button type="button" className="btn" onClick={finish}>Start my 12 weeks</button>
+            <button type="button" className="btn" onClick={finish}>Start my {PROGRAMS[program].name}</button>
           </BottomBar>
         </>
       )}

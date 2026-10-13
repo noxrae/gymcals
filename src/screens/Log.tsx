@@ -4,6 +4,7 @@ import { calorieTarget, fmtNum } from '../lib/coach'
 import { addDays, daysBetween, fmtLong, today } from '../lib/dates'
 import { actions, useStore, type Checkin } from '../lib/store'
 import { undoable } from '../lib/toast'
+import { checkinFeedback, CoachIcon } from '../components/CoachBits'
 
 const FOODS = [
   { name: '3 eggs', g: 18 },
@@ -98,6 +99,15 @@ export default function LogScreen() {
               </div>
             </div>
           </div>
+          {isToday && (
+            <div className="callout accent" style={{ marginTop: 16 }}>
+              <span style={{ color: 'var(--accent-ink)', display: 'flex' }}><CoachIcon size={20} /></span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <b>Coach</b>
+                {checkinFeedback(state).map((t) => <span key={t} style={{ fontSize: 14 }}>{t}</span>)}
+              </div>
+            </div>
+          )}
           <p className="sec-foot">Everything saves automatically. Low recovery two days in a row? The coach will suggest an easier session.</p>
         </div>
       </div>

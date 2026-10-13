@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { photoUrl } from '../data/exercises'
-import { dayFor, daysFor, DELOAD_WEEK } from '../data/plan'
+import { dayFor, daysFor } from '../data/plan'
 import { avgWeight, calorieTarget, fmtNum, insights } from '../lib/coach'
 import { addDays, daysBetween, fmtLong, mondayOf } from '../lib/dates'
 import { useStore } from '../lib/store'
@@ -9,10 +9,11 @@ import { weekReview } from '../lib/review'
 import { useToday } from '../lib/useToday'
 import { WeekReviewCard } from '../components/WeekReviewCard'
 import { mixText } from '../components/TypeBadge'
+import { CoachBriefing } from '../components/CoachBits'
 import { Chevron, IconAlert, IconCheck, IconGear, IconMoon, IconPlay, IconSpark } from '../components/Icons'
 
 export default function TodayScreen() {
-  const { date, week, beforeStart, finished, start, day, fiveDay, dayId } = useToday()
+  const { date, week, beforeStart, finished, start, day, fiveDay, dayId, ctx, program, deload } = useToday()
   const state = useStore((s) => s)
   const session = state.sessions[date]
   const checkin = state.checkins[date] ?? {}
@@ -23,7 +24,7 @@ export default function TodayScreen() {
   const [allTips, setAllTips] = useState(false)
   const monday = mondayOf(date)
   // If a different day's workout was done today (e.g. a missed session), show that one.
-  const shown = session ? dayFor(session.dayId, fiveDay) : day
+  const shown = session ? dayFor(session.dayId, fiveDay, ctx) : day
 
   return (
     <div className="screen">
@@ -34,7 +35,7 @@ export default function TodayScreen() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontSize: 15 }}>
-            {beforeStart ? `Starts in ${daysBetween(date, start!)} d` : finished ? 'Plan complete' : <><b>Week {week}</b> <span className="muted">of 12</span></>}
+            {beforeStart ? `Starts in ${daysBetween(date, start!)} d` : finished ? 'Plan complete' : <><b>Week {week}</b> <span className="muted">of {program.weeks}</span></>}
           </span>
           <Link to="/settings" aria-label="Settings" style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--label-2)' }}>
             <IconGear size={22} />
@@ -46,7 +47,7 @@ export default function TodayScreen() {
         <Link to={session ? `/workout/${shown.id}` : `/day/${shown.id}`} className="hero" style={{ height: 'min(118vw, 470px)' }}>
           <img src={photoUrl(shown.hero)} alt="" style={{ objectPosition: '50% 30%' }} />
           <div className="content">
-            <span className="kicker">{week === DELOAD_WEEK ? 'Deload week · lighter' : `${shown.short} day`}</span>
+            <span className="kicker">{deload ? 'Deload week · lighter' : `${shown.short} day`}</span>
             <span className="disp" style={{ fontSize: 'clamp(48px, 15vw, 64px)' }}>{shown.name}</span>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
               <span style={{ fontSize: 15, color: 'rgba(255,255,255,.85)' }}>
@@ -67,6 +68,8 @@ export default function TodayScreen() {
           </div>
         </div>
       )}
+
+      <CoachBriefing state={state} />
 
       {dayId === 'sun' && !beforeStart && start! <= monday && <WeekReviewCard week={week} review={weekReview(state, monday, week)} />}
 
@@ -91,11 +94,11 @@ export default function TodayScreen() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginRight: 16 }}>
           <h2 className="sec">This week</h2>
           <span className="small muted num" style={{ marginBottom: 8 }}>
-            {daysFor(fiveDay).filter((d, i) => d.groups.length && state.sessions[addDays(monday, i)]?.finishedAt).length} of {daysFor(fiveDay).filter((d) => d.groups.length).length} done
+            {daysFor(fiveDay, ctx).filter((d, i) => d.groups.length && state.sessions[addDays(monday, i)]?.finishedAt).length} of {daysFor(fiveDay, ctx).filter((d) => d.groups.length).length} done
           </span>
         </div>
         <div className="group" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', padding: '14px 4px' }}>
-          {daysFor(fiveDay).map((d, i) => {
+          {daysFor(fiveDay, ctx).map((d, i) => {
             const dDate = addDays(monday, i)
             const done = !!state.sessions[dDate]?.finishedAt
             const isToday = dDate === date

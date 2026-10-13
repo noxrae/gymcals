@@ -3,12 +3,13 @@ import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { BodyMap, MapLegend, numberMuscles } from '../components/BodyMap'
 import { FloatingBack } from '../components/Chrome'
 import { FormDemo, hasDemo } from '../components/FormDemo'
+import { AskCoach } from '../components/CoachBits'
 import { IconAlert } from '../components/Icons'
 import { LineChart } from '../components/LineChart'
 import { VideoCredit, VideoPlayer } from '../components/Media'
 import { EXERCISES } from '../data/exercises'
 import { MUSCLES, type MuscleId } from '../data/muscles'
-import { allItems, dayFor, setsFor, type DayId } from '../data/plan'
+import { allItems, dayFor, programOf, setsFor, type DayId } from '../data/plan'
 import { fmtNum, history, rangeText, restText, suggest, unitOf } from '../lib/coach'
 import { fmtShort, weekOf } from '../lib/dates'
 import { useStore } from '../lib/store'
@@ -27,10 +28,10 @@ export default function ExerciseScreen() {
   const ex = EXERCISES[key]
   const tab = (params.get('tab') as Tab) || 'how'
   const dayId = params.get('day') as DayId | null
-  const { week, fiveDay } = useToday()
+  const { week, fiveDay, ctx } = useToday()
   if (!ex) return <Navigate to="/" replace />
 
-  const item = dayId ? allItems(dayFor(dayId, fiveDay)).find((i) => i.ex === key) : undefined
+  const item = dayId ? allItems(dayFor(dayId, fiveDay, ctx)).find((i) => i.ex === key) : undefined
   const setTab = (t: Tab) => setParams((p) => { p.set('tab', t); return p }, { replace: true })
   const muscleNames = [...ex.primary, ...ex.secondary].map((m) => MUSCLES[m].name).join(' · ')
 
@@ -76,7 +77,7 @@ function HowTo({ exKey, item, week }: { exKey: string; item?: ReturnType<typeof 
         <div>
           <h2 className="sec" style={{ marginLeft: 0 }}>Today</h2>
           <div className="group" style={{ background: 'var(--surface-2)' }}>
-            <div className="row"><span style={{ flex: 1 }}>Target</span><span className="value" style={{ color: 'var(--label)', fontWeight: 600 }}>{rangeText(item, setsFor(item, week))}</span></div>
+            <div className="row"><span style={{ flex: 1 }}>Target</span><span className="value" style={{ color: 'var(--label)', fontWeight: 600 }}>{rangeText(item, setsFor(item, week, programOf(state.settings.program)))}</span></div>
             {item.rest[0] > 0 && <div className="row"><span style={{ flex: 1 }}>Rest</span><span className="value">{restText(item.rest)}</span></div>}
             {tip && <div className="row"><span style={{ flex: 1, fontSize: 15, lineHeight: 1.4 }}>{tip.text}</span></div>}
           </div>
@@ -107,6 +108,7 @@ function HowTo({ exKey, item, week }: { exKey: string; item?: ReturnType<typeof 
         <div><b>Common mistake</b><div style={{ fontSize: 15 }}>{ex.mistake}</div></div>
       </div>
       <p className="small muted">Equipment: {ex.equipment}</p>
+      <AskCoach questions={[`How do I do ${ex.name.toLowerCase()} properly?`, `What muscles does ${ex.name.toLowerCase()} work?`, `Easier alternative to ${ex.name.toLowerCase()}`, `${ex.name} hurts`]} />
     </>
   )
 }

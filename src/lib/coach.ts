@@ -1,5 +1,5 @@
 import { EXERCISES, type Exercise } from '../data/exercises'
-import { DELOAD_WEEK, type PlanItem } from '../data/plan'
+import { isDeload, isMaintenance, nextDeload, programOf, type PlanItem } from '../data/plan'
 import { addDays, daysBetween, today, weekOf } from './dates'
 import { calories, profileComplete } from './body'
 import type { Checkin, SetLog, State } from './store'
@@ -47,7 +47,7 @@ export interface Suggestion { load?: number; reps: number; text: string; up: boo
 export function suggest(state: State, item: PlanItem, week: number): Suggestion {
   const ex = EXERCISES[item.ex]
   const last = lastSets(state, item.ex)
-  const deload = week === DELOAD_WEEK
+  const deload = isDeload(week, programOf(state.settings.program))
 
   if (!last) {
     const first =
@@ -174,8 +174,10 @@ export function insights(state: State, date = today()): Insight[] {
   const out: Insight[] = []
   const week = weekOf(date, state.settings.startDate)
 
-  if (week === DELOAD_WEEK) out.push({ to: '/plan', tone: 'accent', title: 'Deload week', text: 'About 40% fewer sets at the same weights. It lets your body catch up so weeks 8–12 go better.' })
-  if (week === DELOAD_WEEK - 1) out.push({ to: '/plan', tone: 'accent', title: 'Lighter week next', text: 'Week 7 is a deload. Push well this week, but don’t chase personal records.' })
+  const program = programOf(state.settings.program)
+  if (isDeload(week, program)) out.push({ to: '/plan', tone: 'accent', title: 'Deload week', text: 'About 40% fewer sets at the same weights. It lets your body catch up so the next weeks go better.' })
+  if (nextDeload(week, program) === week + 1) out.push({ to: '/plan', tone: 'accent', title: 'Lighter week next', text: `Week ${week + 1} is a deload. Push well this week, but don’t chase personal records.` })
+  if (isMaintenance(week, program)) out.push({ to: '/settings?profile=1', tone: 'accent', title: 'Maintenance-calorie week', text: 'Eat at maintenance this week (your calorie target already shows it). A planned break makes a long fat-loss phase easier to stick to and protects strength.' })
 
   const now = avgWeight(state.checkins, date)
   const before = avgWeight(state.checkins, addDays(date, -7))
@@ -225,5 +227,8 @@ export function calorieTarget(state: State, date = today()) {
   if (!profileComplete(p)) return null
   const weight = avgWeight(state.checkins, date) ?? weightSeries(state.checkins).at(-1)?.value ?? state.baseline?.weight
   if (!weight) return null
-  return { weight, ...calories(weight, p, state.settings.calorieAdjust ?? 0) }
+  const c = calories(weight, p, state.settings.calorieAdjust ?? 0)
+  // Planned maintenance weeks in the 4- and 6-month programs.
+  const maintenanceWeek = isMaintenance(weekOf(date, state.settings.startDate), programOf(state.settings.program))
+  return { weight, ...c, target: maintenanceWeek ? c.maintenance : c.target, maintenanceWeek }
 }

@@ -49,6 +49,10 @@ const PHOTOS = {
   'reverse-fly': ['Reverse_Flyes', [0, 1]],
   plank: ['Plank', [0, 1]],
   'incline-walk': ['Jogging_Treadmill', [0, 1]],
+  'pull-up': ['Pullups', [0, 1]],
+  'decline-push-up': ['Decline_Push-Up', [0, 1]],
+  'hanging-leg-raise': ['Hanging_Leg_Raise', [0, 1]],
+  'diamond-push-up': ['Push-Ups_-_Close_Triceps_Position', [0, 1]],
 }
 
 // Exercises with no free-exercise-db photo use their form video's thumbnail instead.

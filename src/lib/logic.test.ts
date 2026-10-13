@@ -2,7 +2,9 @@ import { existsSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { ALTERNATIVES, EXERCISES } from '../data/exercises'
 import { MUSCLES } from '../data/muscles'
-import { allItems, DAYS, daysFor, DELOAD_WEEK, setsFor, WEEK_FOCUS, type PlanItem } from '../data/plan'
+import { allItems, DAYS, daysFor, PROGRAMS, setsFor, weekFocus, type PlanItem } from '../data/plan'
+
+const DELOAD_WEEK = 7
 import { avgWeight, insights, rangeText, restText, suggest, weeklyAverages } from './coach'
 import { addDays, daysBetween, fmtClock, mondayOf, weekOf } from './dates'
 import { weekReview } from './review'
@@ -139,8 +141,8 @@ describe('plan data integrity', () => {
     expect(setsFor(item('bench-press', 6, 10, 3), 6)).toBe(3)
     expect(setsFor(item('incline-walk', 20, 25, 1), DELOAD_WEEK)).toBe(1)
   })
-  it('has a focus text for all 12 weeks', () => {
-    for (let w = 1; w <= 12; w++) expect(WEEK_FOCUS[w]).toBeTruthy()
+  it('has a focus text for every week of every program', () => {
+    for (const p of Object.values(PROGRAMS)) for (let w = 1; w <= p.weeks; w++) expect(weekFocus(w, p), `${p.id}:${w}`).toBeTruthy()
   })
   it('every exercise has steps, a mistake, valid muscles, photos on disk and a video', () => {
     for (const ex of Object.values(EXERCISES)) {

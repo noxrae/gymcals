@@ -4,28 +4,28 @@ import { Chevron, IconInfo } from '../components/Icons'
 import { ExerciseThumb } from '../components/Media'
 import { dayMix, groupType, TypeBadge } from '../components/TypeBadge'
 import { EXERCISES, photoUrl } from '../data/exercises'
-import { allItems, dayFor, DELOAD_WEEK, setsFor, type DayId } from '../data/plan'
+import { allItems, dayFor, setsFor, type DayId } from '../data/plan'
 import { rangeText } from '../lib/coach'
 import { actions, useStore } from '../lib/store'
 import { useToday } from '../lib/useToday'
 
 export default function DayScreen() {
   const { dayId } = useParams<{ dayId: DayId }>()
-  const { date, week, dayId: todayId, fiveDay } = useToday()
-  const day = dayId ? dayFor(dayId, fiveDay) : undefined
+  const { date, week, dayId: todayId, fiveDay, ctx, program, deload, phase } = useToday()
+  const day = dayId ? dayFor(dayId, fiveDay, ctx) : undefined
   const session = useStore((s) => s.sessions[date])
   const navigate = useNavigate()
   if (!day) return <Navigate to="/" replace />
 
   const items = allItems(day)
-  const sets = items.reduce((n, it) => n + setsFor(it, week), 0)
+  const sets = items.reduce((n, it) => n + setsFor(it, week, program), 0)
   const isToday = day.id === todayId
   const inProgress = session && session.dayId === day.id && !session.finishedAt
   const doneToday = session && session.dayId === day.id && session.finishedAt
 
   const start = () => {
     if (session && session.dayId !== day.id && Object.keys(session.log).length) {
-      const other = dayFor(session.dayId, fiveDay).short
+      const other = dayFor(session.dayId, fiveDay, ctx).short
       if (!window.confirm(`You already logged ${other} today. Replace it with ${day.short}?`)) return
       actions.discardSession(date)
     }
@@ -52,7 +52,7 @@ export default function DayScreen() {
         <img src={photoUrl(day.hero)} alt="" style={{ objectPosition: '50% 28%' }} />
         <FloatingBack />
         <div className="content" style={{ left: 16, right: 16, bottom: 18, gap: 8 }}>
-          <span className="kicker">{day.id.toUpperCase()} · Week {week}{week === DELOAD_WEEK ? ' · deload' : ''}</span>
+          <span className="kicker">{day.id.toUpperCase()} · Week {week} · {phase.name}{deload ? ' · deload' : ''}</span>
           <h1 className="disp" style={{ fontSize: 'clamp(44px, 14vw, 58px)' }}>{day.name}</h1>
         </div>
       </div>
@@ -67,7 +67,7 @@ export default function DayScreen() {
         <Stat value={day.minutes} label="Minutes" />
       </div>
 
-      {week === DELOAD_WEEK && (
+      {deload && (
         <div className="callout accent" style={{ margin: '16px 16px 0' }}>
           <span>Deload week: sets are cut by about 40%. Keep the same weights and stop well short of failure.</span>
         </div>
@@ -90,7 +90,7 @@ export default function DayScreen() {
                       {ex.name}
                       {it.added && <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-ink)', background: 'var(--accent-soft)', padding: '2px 7px', borderRadius: 999 }}>NEW</span>}
                     </span>
-                    <span className="sub">{rangeText(it, setsFor(it, week))}{it.note ? ` · ${it.note}` : ''}</span>
+                    <span className="sub">{rangeText(it, setsFor(it, week, program))}{it.note ? ` · ${it.note}` : ''}</span>
                   </span>
                 </Link>
                 {ex.primary.length > 0 && (
