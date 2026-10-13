@@ -59,7 +59,7 @@ export default function CoachScreen() {
       <div style={{ padding: '16px 16px 8px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
           <span className="small muted" style={{ padding: '4px 10px', borderRadius: 999, background: 'var(--surface)' }}>{SOURCE_LABEL[source]}</span>
-          {source === 'builtin' && <Link to="/settings?ai=1" className="small">Turn on full AI (free)</Link>}
+          {source === 'builtin' && <Link to="/settings?ai=1" className="small" style={{ padding: '8px 4px', fontWeight: 600 }}>Turn on full AI (free)</Link>}
         </div>
 
         {messages.length === 0 && (

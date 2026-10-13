@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 import { history, open } from './helpers'
 
-const ROUTES = ['/', '/plan', '/progress', '/skills', '/log', '/settings', '/day/wed', '/workout/wed', '/exercise/bench-press', '/exercise/bench-press?tab=muscles']
+const ROUTES = ['/', '/plan', '/progress', '/skills', '/log', '/settings', '/day/wed', '/workout/wed', '/exercise/bench-press', '/exercise/bench-press?tab=muscles', '/coach', '/coach?q=How%20am%20I%20doing%3F']
 
 for (const scheme of ['light', 'dark'] as const) {
   test(`accessibility (${scheme}): no serious or critical axe violations`, async ({ page }) => {

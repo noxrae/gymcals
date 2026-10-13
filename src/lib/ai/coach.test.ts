@@ -76,10 +76,61 @@ describe('Gemini (optional, user’s free key)', () => {
     vi.stubGlobal('fetch', fetchMock)
     expect(await askGemini('k', 's', [{ role: 'user', text: 'q' }])).toBe('second model')
   })
+  it('tells a bad key apart from other bad requests (real server bodies)', async () => {
+    const invalid = JSON.stringify({ error: { code: 400, message: 'API key not valid. Please pass a valid API key.', status: 'INVALID_ARGUMENT', details: [{ reason: 'API_KEY_INVALID' }] } })
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(invalid, { status: 400 })))
+    await expect(askGemini('k', 's', [{ role: 'user', text: 'q' }])).rejects.toMatchObject({ kind: 'key' })
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: { status: 'INVALID_ARGUMENT', message: 'contents is empty' } }), { status: 400 })))
+    await expect(askGemini('k', 's', [{ role: 'user', text: 'q' }])).rejects.toMatchObject({ kind: 'other' })
+  })
+  it('handles no internet and a hung connection', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('Failed to fetch') }))
+    await expect(askGemini('k', 's', [{ role: 'user', text: 'q' }])).rejects.toMatchObject({ kind: 'network', message: 'No internet connection.' })
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new DOMException('timed out', 'TimeoutError') }))
+    await expect(askGemini('k', 's', [{ role: 'user', text: 'q' }])).rejects.toMatchObject({ kind: 'network', message: 'Gemini took too long to answer.' })
+  })
+  it('starts the conversation with a user turn and sends the system prompt', async () => {
+    const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => ok('fine'))
+    vi.stubGlobal('fetch', fetchMock)
+    await askGemini('k', 'SYSTEM', [{ role: 'coach', text: 'old answer' }, { role: 'user', text: 'new question' }])
+    const body = JSON.parse(fetchMock.mock.calls[0][1]!.body as string)
+    expect(body.contents).toEqual([{ role: 'user', parts: [{ text: 'new question' }] }])
+    expect(body.system_instruction.parts[0].text).toBe('SYSTEM')
+  })
   it('reports quota and bad keys clearly', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 429 })))
     await expect(askGemini('k', 's', [{ role: 'user', text: 'q' }])).rejects.toMatchObject({ kind: 'quota' })
     vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 400 })))
     await expect(askGemini('k', 's', [{ role: 'user', text: 'q' }])).rejects.toBeInstanceOf(AiError)
   })
+})
+
+describe('built-in coach understands everyday questions', () => {
+  const cases: [string, RegExp][] = [
+    ['what is my workout tomorrow', /^Tomorrow · week 6\. \*\*Skills/],
+    ['I only have 30 minutes', /^Short session plan/],
+    ['I have no time today, what to do', /^Short session plan/],
+    ['what should I eat for dinner', /paneer/],
+    ['is whey protein safe', /Whey/],
+    ['how much water should i drink', /2\.5–3\.5 L/],
+    ['can I drink beer on weekend', /weekly average/],
+    ['why is my weight not going down', /plateau/],
+    ['weight increased today why', /7-day average/],
+    ['best ab exercises', /already trains abs/],
+    ['can i train abs every day', /already trains abs/],
+    ['how to get v shape body', /V-taper/],
+    ['how to get bigger arms', /progressive overload/],
+    ['deadlift tips', /Romanian Deadlift/],
+    ['I slept only 5 hours', /feel drained/],
+    ['I cant do a single pull up', /Path to the first pull-up/],
+    ['how to increase push ups', /Build to 3 × 15–20/],
+    ['is running good for fat loss', /calorie deficit matters more/],
+    ['what happens after 12 weeks', /4 months/],
+    ['progress photos', /every 4 weeks/],
+    ['stretching after workout', /dynamic warm-ups/],
+    ['can i do workout twice a day', /Once a day/],
+    ['is lateral raise enough for shoulders', /Lateral Raise/],
+    ['should I change my program', /12 weeks/],
+  ]
+  it.each(cases)('%s', (q, re) => expect(ans(q)).toMatch(re))
 })

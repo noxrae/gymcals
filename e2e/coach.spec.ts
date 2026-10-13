@@ -83,7 +83,8 @@ test.describe('AI coach', () => {
   })
 
   test('a bad Gemini key is rejected and the built-in coach keeps working', async ({ page }) => {
-    await page.route('https://generativelanguage.googleapis.com/**', (r) => r.fulfill({ status: 400, body: '{}' }))
+    // The real server's answer to a wrong key (checked against generativelanguage.googleapis.com).
+    await page.route('https://generativelanguage.googleapis.com/**', (r) => r.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ error: { code: 400, message: 'API key not valid. Please pass a valid API key.', status: 'INVALID_ARGUMENT', details: [{ reason: 'API_KEY_INVALID' }] } }) }))
     const errors = await open(page, history(), { path: '/settings?ai=1' })
     await page.getByLabel('Gemini API key').fill('not-a-real-key')
     await page.getByRole('button', { name: 'Connect' }).click()
@@ -109,5 +110,65 @@ test.describe('AI coach', () => {
     await input.press('Enter')
     await expect(page.getByText(/of 130 g/).last()).toBeVisible()
     await expect(page.getByText(/Answered by the built-in coach/)).toBeVisible()
+  })
+})
+
+test.describe('AI coach · on-device and offline', () => {
+  test('uses Chrome’s on-device AI when the browser offers it', async ({ page }) => {
+    await page.addInitScript(() => {
+      ;(globalThis as unknown as { LanguageModel: unknown }).LanguageModel = {
+        availability: async () => 'available',
+        create: async (o: { initialPrompts: { role: string; content: string }[] }) => ({
+          prompt: async (q: string) => `On-device answer to "${q}" (knows week: ${o.initialPrompts[0].content.includes('currently week 6')})`,
+          destroy: () => {},
+        }),
+      }
+    })
+    const errors = await open(page, history(), { path: '/coach' })
+    await expect(page.getByText('On-device AI', { exact: true })).toBeVisible()
+    const input = page.getByRole('textbox', { name: 'Ask your coach' })
+    await input.fill('motivate me')
+    await input.press('Enter')
+    await expect(page.getByText('On-device answer to "motivate me" (knows week: true)')).toBeVisible()
+    await noErrors(errors)
+  })
+
+  test('built-in coach answers with no internet at all', async ({ page, context }) => {
+    const errors = await open(page, history(), { path: '/coach' })
+    await expect(page.getByRole('textbox', { name: 'Ask your coach' })).toBeVisible()
+    await context.setOffline(true)
+    const input = page.getByRole('textbox', { name: 'Ask your coach' })
+    await input.fill('what should I eat for dinner')
+    await input.press('Enter')
+    await expect(page.getByText(/paneer bhurji/)).toBeVisible()
+    await context.setOffline(false)
+    await noErrors(errors)
+  })
+
+  test('Gemini with no internet falls back to the built-in coach', async ({ page, context }) => {
+    await open(page, history(), { path: '/coach' })
+    await page.evaluate(() => localStorage.setItem('gymcals:gemini-key', 'test-key'))
+    await page.reload()
+    await expect(page.getByText('Gemini · online')).toBeVisible()
+    await context.setOffline(true)
+    const input = page.getByRole('textbox', { name: 'Ask your coach' })
+    await input.fill('how much water should i drink')
+    await input.press('Enter')
+    await expect(page.getByText(/2\.5–3\.5 L/)).toBeVisible()
+    await expect(page.getByText(/No internet connection\. Answered by the built-in coach/)).toBeVisible()
+    await context.setOffline(false)
+  })
+
+  test('removing the Gemini key switches back to the built-in coach', async ({ page }) => {
+    await page.route('https://generativelanguage.googleapis.com/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ candidates: [{ content: { parts: [{ text: 'OK' }] } }] }) }))
+    const errors = await open(page, history(), { path: '/settings?ai=1' })
+    await page.getByLabel('Gemini API key').fill('AIza-test-key-1234')
+    await page.getByRole('button', { name: 'Connect' }).click()
+    await expect(page.getByText('Gemini (free key)')).toBeVisible()
+    await expect(page.getByText('•••• 1234')).toBeVisible()
+    await page.getByRole('button', { name: 'Remove' }).click()
+    await expect(page.getByText('Built-in coach', { exact: true })).toBeVisible()
+    expect(await page.evaluate(() => localStorage.getItem('gymcals:gemini-key'))).toBeNull()
+    await noErrors(errors)
   })
 })
