@@ -1,0 +1,107 @@
+import { expect, test } from '@playwright/test'
+import { history, noErrors, open, stored } from './helpers'
+
+const TODAY = '2026-10-14'
+const section = (page: import('@playwright/test').Page, name: string) => page.getByRole('region', { name, exact: true })
+
+test.describe('built-in hold timer', () => {
+  test('a hold: 3-2-1, counts up, cues at the target, saves and ticks the set', async ({ page }) => {
+    const errors = await open(page, history(), { path: '/workout/thu' })
+    const lsit = section(page, 'Tuck L-sit')
+    await lsit.getByRole('button', { name: 'Start timer · set 1' }).click()
+    const timer = page.getByRole('dialog', { name: 'Tuck L-sit timer' })
+    await expect(timer.getByText('Get into position')).toBeVisible()
+    await expect(timer.getByText('Target 10–20 sec')).toBeVisible()
+    await page.clock.fastForward(3_100)
+    await expect(timer.getByText('Hold. Breathe steadily.')).toBeVisible()
+    await page.clock.fastForward(12_000)
+    await expect(timer.getByText(/Target reached/)).toBeVisible()
+    await page.clock.fastForward(9_000)
+    await expect(timer.getByText('Top of the range. Stop now.')).toBeVisible()
+    await timer.getByRole('button', { name: 'Stop' }).click()
+    await expect(timer.getByText('Above the range. Make it harder next time.')).toBeVisible()
+    await timer.getByRole('button', { name: /^Save set · 2\d sec$/ }).click()
+    await expect(timer).toHaveCount(0)
+    const set = (await stored(page)).sessions[TODAY].log['tuck-l-sit'][0]
+    expect(set.done).toBe(true)
+    expect(set.reps).toBeGreaterThanOrEqual(20)
+    expect(set.reps).toBeLessThanOrEqual(24)
+    await expect(lsit.getByRole('button', { name: 'Start timer · set 2' })).toBeVisible()
+    await expect(page.getByRole('timer').filter({ hasText: 'REST' })).toBeVisible()
+    await noErrors(errors)
+  })
+
+  test('side plank times each side and logs the shorter one', async ({ page }) => {
+    const errors = await open(page, history(), { path: '/workout/thu' })
+    await section(page, 'Side Plank').getByRole('button', { name: 'Start timer · set 1' }).click()
+    const timer = page.getByRole('dialog', { name: 'Side Plank timer' })
+    await expect(timer.getByText('Set 1 · Left side')).toBeVisible()
+    await timer.getByRole('button', { name: 'Start now' }).click()
+    await page.clock.fastForward(40_000)
+    await timer.getByRole('button', { name: 'Stop · switch sides' }).click()
+    await expect(timer.getByText('Switch sides')).toBeVisible()
+    await expect(timer.getByText('Set 1 · Right side')).toBeVisible()
+    await page.clock.fastForward(5_100)
+    await page.clock.fastForward(33_000)
+    await timer.getByRole('button', { name: 'Stop', exact: true }).click()
+    const split = (await timer.getByText(/Left \d+ s · Right \d+ s/).textContent())!.match(/Left (\d+) s · Right (\d+) s/)!
+    const [left, right] = [Number(split[1]), Number(split[2])]
+    expect(left).toBeGreaterThanOrEqual(40)
+    expect(right).toBeGreaterThanOrEqual(33)
+    expect(right).toBeLessThan(left)
+    await timer.getByRole('button', { name: `Save set · ${right} sec` }).click()
+    expect((await stored(page)).sessions[TODAY].log['side-plank'][0]).toMatchObject({ reps: right, done: true })
+    await noErrors(errors)
+  })
+
+  test('cardio counts minutes', async ({ page }) => {
+    const errors = await open(page, history(), { path: '/workout/thu' })
+    await section(page, 'Incline Walk / Bike').getByRole('button', { name: 'Start timer · set 1' }).click()
+    const timer = page.getByRole('dialog', { name: 'Incline Walk / Bike timer' })
+    await expect(timer.getByText('Target 30–40 min')).toBeVisible()
+    await timer.getByRole('button', { name: 'Start now' }).click()
+    await page.clock.fastForward(31 * 60_000)
+    await expect(timer.getByText(/Target reached/)).toBeVisible()
+    await expect(timer.getByRole('timer')).toHaveText(/^31:0\d$/)
+    await timer.getByRole('button', { name: 'Stop' }).click()
+    await timer.getByRole('button', { name: 'Save set · 31 min' }).click()
+    expect((await stored(page)).sessions[TODAY].log['incline-walk'][0]).toMatchObject({ reps: 31, done: true })
+    await noErrors(errors)
+  })
+
+  test('Close, Redo and the back button never log anything', async ({ page }) => {
+    const errors = await open(page, history(), { path: '/workout/thu' })
+    const btn = section(page, 'Tuck L-sit').getByRole('button', { name: 'Start timer · set 1' })
+    await btn.click()
+    const timer = page.getByRole('dialog', { name: 'Tuck L-sit timer' })
+    await timer.getByRole('button', { name: 'Close' }).click()
+    await expect(timer).toHaveCount(0)
+    await btn.click()
+    await timer.getByRole('button', { name: 'Start now' }).click()
+    await page.clock.fastForward(5_000)
+    await timer.getByRole('button', { name: 'Stop' }).click()
+    await timer.getByRole('button', { name: 'Redo' }).click()
+    await expect(timer.getByText('Get into position')).toBeVisible()
+    await page.goBack()
+    await expect(timer).toHaveCount(0)
+    await expect(page).toHaveURL(/#\/workout\/thu/)
+    expect((await stored(page)).sessions[TODAY]?.log['tuck-l-sit']).toBeUndefined()
+    await noErrors(errors)
+  })
+
+  test('only timed exercises get a timer', async ({ page }) => {
+    await open(page, history(), { path: '/workout/thu' })
+    await expect(section(page, 'Hanging Knee Raise').getByRole('button', { name: /Start timer/ })).toHaveCount(0)
+    await expect(section(page, 'Cable Crunch').getByRole('button', { name: /Start timer/ })).toHaveCount(0)
+  })
+})
+
+test('timer screen is accessible', async ({ page }) => {
+  const { default: AxeBuilder } = await import('@axe-core/playwright')
+  await open(page, history(), { path: '/workout/thu' })
+  await page.getByRole('region', { name: 'Tuck L-sit', exact: true }).getByRole('button', { name: 'Start timer · set 1' }).click()
+  await page.getByRole('button', { name: 'Start now' }).click()
+  await page.clock.fastForward(12_000)
+  const res = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
+  expect(res.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical').map((v) => v.id)).toEqual([])
+})

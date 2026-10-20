@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { Sheet } from '../components/Chrome'
-import { Chevron, IconCheck, IconChevronLeft, IconInfo, IconSpark } from '../components/Icons'
+import { HoldTimer } from '../components/HoldTimer'
+import { Chevron, IconCheck, IconChevronLeft, IconInfo, IconSpark, IconTimer } from '../components/Icons'
 import { ExerciseThumb } from '../components/Media'
 import { RestBar } from '../components/RestBar'
 import { groupType, TypeBadge } from '../components/TypeBadge'
@@ -175,10 +176,20 @@ function ExerciseBlock({ item, index, planned, alternatives, week, date, log, is
   const toggle = (i: number) => {
     const nowDone = !sets[i].done
     patch(i, { done: nowDone })
-    if (!nowDone) return
-    const best = isPersonalBest(state, item.ex, sets[i], date)
+    if (nowDone) afterDone(i, sets[i])
+  }
+  /** Built-in timer finished: log the time and tick the set (same feedback as tapping ✓). */
+  const timerSaved = (i: number, value: number) => {
+    const set = { ...sets[i], reps: value, done: true }
+    save(sets.map((x, j) => (j === i ? set : x)))
+    afterDone(i, set)
+  }
+  const [timing, setTiming] = useState<number | null>(null)
+  const nextSet = sets.findIndex((x) => !x.done)
+  const afterDone = (i: number, set: SetLog) => {
+    const best = isPersonalBest(state, item.ex, set, date)
     if ('vibrate' in navigator) navigator.vibrate(best ? [30, 60, 30, 60, 60] : 12)
-    if (best) showToast(`New personal best · ${ex.name} ${setText(item.ex, sets[i])}`, { tone: 'good', ms: 4000 })
+    if (best) showToast(`New personal best · ${ex.name} ${setText(item.ex, set)}`, { tone: 'good', ms: 4000 })
     const finishesExercise = sets.every((x, j) => j === i || x.done)
     if (!(isLast && finishesExercise) && item.rest[0] > 0) restTimer.start(Math.round((item.rest[0] + item.rest[1]) / 2), ex.name)
     // Glide to the next exercise once this one is complete.
@@ -264,6 +275,27 @@ function ExerciseBlock({ item, index, planned, alternatives, week, date, log, is
           </div>
         )
       })}
+
+      {(ex.kind === 'time' || ex.kind === 'cardio') && nextSet >= 0 && (
+        <div style={{ padding: '8px 16px 2px' }}>
+          <button type="button" className="btn secondary" style={{ minHeight: 46, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }} onClick={() => setTiming(nextSet)}>
+            <IconTimer size={18} /> Start timer · set {nextSet + 1}
+          </button>
+        </div>
+      )}
+      {timing != null && (
+        <HoldTimer
+          ex={ex}
+          item={item}
+          setNo={timing + 1}
+          onClose={() => setTiming(null)}
+          onSave={(v) => {
+            const i = timing
+            setTiming(null)
+            timerSaved(i, v)
+          }}
+        />
+      )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 8px 0' }}>
         <button type="button" className="link-btn" style={{ fontSize: 15, fontWeight: 600 }} onClick={() => save([...sets, { load: sets.at(-1)?.load ?? tip.load, reps: sets.at(-1)?.reps ?? tip.reps, done: false }])}>+ Add set</button>

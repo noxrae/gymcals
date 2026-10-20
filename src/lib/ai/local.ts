@@ -56,6 +56,8 @@ export function localAnswer(question: string, c: CoachCtx): Answer {
     }
   }
 
+  if (has(q, /timer|stopwatch|count(ing)? (the )?(seconds|time)/)) return { text: 'Timed exercises (planks, side planks, dead hangs, L-sits, carries, mountain climbers and cardio) have a **Start timer** button in the workout. It counts 3-2-1, then up, with a beep and buzz when you hit the target and again at the top of the range. Side planks time each side and log the shorter one. Tap Stop, then Save: the set is logged and your rest timer starts.' }
+
   // ---- exercise-specific ----
   // "How do I get my first pull-up?" is a progression question, not a form question.
   const journey = has(q, /first (pull|chin|push|muscle)|get (a|my|to|better at) .*(pull|chin|push).?ups?|can'?t do (a |one |any |even one )?(single )?(pull|chin|push)|(increase|improve|more|build up) .*(pull|chin|push).?ups?/)

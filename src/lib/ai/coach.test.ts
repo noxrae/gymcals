@@ -137,6 +137,7 @@ describe('built-in coach understands everyday questions', () => {
     ['can i do workout twice a day', /Once a day/],
     ['is lateral raise enough for shoulders', /Lateral Raise/],
     ['should I change my program', /12 weeks/],
+    ['how do I use the plank timer', /Start timer/],
   ]
   it.each(cases)('%s', (q, re) => expect(ans(q)).toMatch(re))
 })

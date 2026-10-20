@@ -12,7 +12,7 @@ let alerted = false
 const listeners = new Set<() => void>()
 const emit = () => listeners.forEach((l) => l())
 
-function unlockAudio() {
+export function unlockAudio() {
   try {
     audio ??= new AudioContext()
     if (audio.state === 'suspended') void audio.resume()
@@ -37,8 +37,35 @@ function beep() {
   })
 }
 
+/** Short cues for the hold timer: countdown ticks, "go", target reached, top of range. */
+export function chime(kind: 'tick' | 'go' | 'target' | 'top') {
+  const { sound, vibrate } = getState().settings
+  if (vibrate && 'vibrate' in navigator) navigator.vibrate(kind === 'tick' ? 30 : kind === 'go' ? 120 : kind === 'target' ? [120, 80, 120] : [250, 100, 250, 100, 400])
+  if (!sound || !audio) return
+  const notes = kind === 'tick' ? [660] : kind === 'go' ? [988] : kind === 'target' ? [880, 1175] : [880, 1175, 1568]
+  const t = audio.currentTime
+  notes.forEach((f, i) => {
+    const osc = audio!.createOscillator()
+    const gain = audio!.createGain()
+    osc.frequency.value = f
+    const at = t + i * 0.16
+    gain.gain.setValueAtTime(0.0001, at)
+    gain.gain.exponentialRampToValueAtTime(0.35, at + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.0001, at + (kind === 'tick' ? 0.08 : 0.14))
+    osc.connect(gain).connect(audio!.destination)
+    osc.start(at)
+    osc.stop(at + 0.16)
+  })
+}
+
+/** A notification at `endAt` if the app is in the background then (hold/cardio timer). */
+export const holdAlarm = {
+  set: (endAt: number, title: string, body: string) => void toServiceWorker({ type: 'rest-start', endAt, label: '', channel: 'hold', title, body }),
+  cancel: () => void toServiceWorker({ type: 'rest-cancel', channel: 'hold' }),
+}
+
 /** Hands the alarm to the service worker, which can notify while the app is in the background. */
-async function toServiceWorker(msg: { type: 'rest-start'; endAt: number; label: string } | { type: 'rest-cancel' }) {
+async function toServiceWorker(msg: { type: 'rest-start'; endAt: number; label: string; channel?: string; title?: string; body?: string } | { type: 'rest-cancel'; channel?: string }) {
   try {
     const reg = await navigator.serviceWorker?.ready
     reg?.active?.postMessage({ ...msg, url: location.href })
