@@ -140,3 +140,12 @@ describe('built-in coach understands everyday questions', () => {
   ]
   it.each(cases)('%s', (q, re) => expect(ans(q)).toMatch(re))
 })
+
+describe('RDL pain on the Athletic plan', () => {
+  it('suggests back-friendly swaps for RDLs and knows the new exercises', () => {
+    expect(ans('my upper back hurts during romanian deadlift')).toMatch(/Barbell Hip Thrust or Back Extension \(45°\) or Seated Leg Curl/)
+    expect(ans('how to do hip thrust')).toMatch(/\*\*Barbell Hip Thrust\*\*/)
+    expect(ans('hyperextension form')).toMatch(/Back Extension/)
+    expect(ans('what muscles does the abductor machine work')).toMatch(/Seated Hip Abduction/)
+  })
+})

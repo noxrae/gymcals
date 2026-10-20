@@ -132,10 +132,11 @@ const ATHLETIC: PlanDay[] = [
     ],
   },
   {
-    id: 'tue', name: 'Heavy Leg Day', short: 'Heavy legs', focus: 'Quads · Hamstrings · Glutes · Calves', minutes: 60, hero: 'squat',
+    id: 'tue', name: 'Heavy Leg Day', short: 'Heavy legs', focus: 'Quads · Glutes · Hamstrings · Calves', minutes: 65, hero: 'squat',
+    // No RDLs: they caused upper-back pain. Hip thrusts and back extensions train the same muscles with far less upper-spine load.
     groups: [
-      { title: 'Main lifts', items: [r('squat', 3, 6, 8, [150, 180], { note: 'Or hack squat — whichever you control best' }), r('romanian-deadlift', 3, 8, 10, [120, 180])] },
-      { title: 'Accessories', items: [r('bulgarian-split-squat', 2, 8, 10, [90, 120], { perSide: true }), r('leg-curl', 3, 10, 12, [60, 90], { note: 'Lying leg curl' }), r('calf-raise', 4, 12, 15, [60, 90], { note: 'Standing' })] },
+      { title: 'Main lifts', items: [r('squat', 3, 6, 8, [150, 180], { note: 'Or hack squat — whichever you control best' }), r('hip-thrust', 3, 8, 10, [120, 150], { note: 'Replaces RDL · no upper-spine strain' })] },
+      { title: 'Accessories', items: [r('bulgarian-split-squat', 2, 8, 10, [90, 120], { perSide: true }), r('leg-curl', 3, 10, 12, [60, 90], { note: 'Lying or seated' }), r('back-extension', 2, 10, 12, [60, 90], { note: 'Neutral spine, don’t over-arch' }), r('calf-raise', 4, 12, 15, [60, 90], { note: 'Standing' })] },
     ],
   },
   {
@@ -189,9 +190,11 @@ const ATHLETIC_EXTENDED: PlanDay[] = [
   {
     id: 'tue', name: 'Complete Leg Day', short: 'Legs', focus: 'Quads · Hamstrings · Glutes · Calves', minutes: 80, hero: 'squat',
     optionalCardio: '10–15 min easy cycling or walking',
+    // No RDLs: they caused upper-back pain. Curls cover the hamstrings; glute-drive/hip thrust only once a clinician clears it.
     groups: [
-      { title: 'Main lifts', items: [r('squat', 3, 6, 10, [150, 180], { note: 'Or hack squat. Warm up with lighter sets' }), r('romanian-deadlift', 3, 8, 10, [120, 180])] },
-      { title: 'Accessories', items: [r('bulgarian-split-squat', 2, 8, 12, [90, 120], { perSide: true }), r('leg-curl', 3, 10, 15, [60, 90]), r('leg-extension', 2, 10, 15, [60, 90])] },
+      { title: 'Main lift', items: [r('squat', 3, 6, 10, [150, 180], { note: 'Or hack squat. Warm up with lighter sets' })] },
+      { title: 'Hamstrings · replaces RDL', items: [r('seated-leg-curl', 3, 10, 15, [60, 90], { note: 'Hips and back supported, lower slowly' }), r('leg-curl', 2, 10, 15, [60, 90], { note: 'Lying · only if lying face-down is comfortable' })] },
+      { title: 'Quads & glutes', items: [r('bulgarian-split-squat', 2, 8, 12, [90, 120], { perSide: true }), r('leg-extension', 2, 10, 15, [60, 90]), r('seated-hip-abduction', 2, 12, 20, [60, 90], { note: 'Glute medius' })] },
       { title: 'Calves', items: [r('calf-raise', 3, 10, 15, [60, 90], { note: 'Standing' }), r('seated-calf-raise', 2, 12, 20, [60, 90])] },
     ],
   },
@@ -225,7 +228,7 @@ const ATHLETIC_EXTENDED: PlanDay[] = [
   {
     id: 'sat', name: 'Light Legs + Calisthenics', short: 'Light legs', focus: 'Leg accessories · Grip · Conditioning', minutes: 55, hero: 'farmers-carry',
     groups: [
-      { title: 'Light legs', items: [r('leg-extension', 2, 12, 15, [60, 90], { note: 'Skip if still sore from Tuesday' }), r('seated-leg-curl', 2, 12, 15, [60, 90]), r('calf-raise', 3, 12, 20, [60, 90])] },
+      { title: 'Light legs', items: [r('seated-leg-curl', 2, 12, 15, [60, 90], { note: 'Skip if still sore from Tuesday' }), r('leg-extension', 2, 12, 15, [60, 90]), r('seated-calf-raise', 3, 12, 20, [60, 90])] },
       { title: 'Hang', items: [r('dead-hang', 3, 20, 40, [90, 90])] },
       { title: 'Grip', items: [r('farmers-carry', 3, 30, 45, [90, 120])] },
       { title: 'Cardio & mobility', items: [r('incline-walk', 1, 15, 20, [0, 0], { note: 'Brisk walk, cycling or sport, then 5–10 min mobility' })] },

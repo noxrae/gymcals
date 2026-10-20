@@ -21,7 +21,8 @@ const SYNONYMS: Record<string, string[]> = {
   'hanging-knee-raise': ['knee raise'], 'hanging-leg-raise': ['leg raise'], 'tuck-l-sit': ['l-sit', 'l sit', 'lsit'],
   'farmers-carry': ['farmer'], 'dumbbell-shoulder-press': ['shoulder press', 'overhead press'], 'face-pull': ['face pull'],
   'one-arm-dumbbell-row': ['dumbbell row', 'db row'], 'seated-cable-row': ['cable row'], 'mountain-climber': ['mountain climber'],
-  'incline-walk': ['incline walk', 'treadmill'], 'dead-hang': ['dead hang', 'hang'], 'squat': ['squat'],
+  'incline-walk': ['incline walk', 'treadmill'], 'hip-thrust': ['hip thrust', 'glute bridge', 'glute drive'], 'back-extension': ['hyperextension', 'back extension'],
+  'seated-hip-abduction': ['abduction', 'abductor'], 'dead-hang': ['dead hang', 'hang'], 'squat': ['squat'],
 }
 
 /** Finds the exercise a question is about, preferring the longest matching name. */
