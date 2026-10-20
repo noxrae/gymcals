@@ -43,8 +43,9 @@ export function CoachBriefing({ state }: { state: State }) {
   if (items.length) {
     // Highlight the lift the user has been progressing, else the day's first strength move.
     const main = items.find((i) => history(state, i.ex).length) ?? items.find((i) => EXERCISES[i.ex].kind !== 'cardio')
-    lines.push(`${c.day.short} day, ${phaseOf(c.week, c.program).name.toLowerCase()} phase${isDeload(c.week, c.program) ? ', a lighter deload week' : ''}.`)
-    if (main) lines.push(`${EXERCISES[main.ex].name}: ${suggest(state, main, c.week).text}`)
+    const done = !!state.sessions[c.date]?.finishedAt
+    lines.push(done ? `${c.day.short} done today. Nice work: now food, water and sleep.` : `${c.day.short} day, ${phaseOf(c.week, c.program).name.toLowerCase()} phase${isDeload(c.week, c.program) ? ', a lighter deload week' : ''}.`)
+    if (main) lines.push(`${done ? 'Next time, ' : ''}${EXERCISES[main.ex].name}: ${suggest(state, main, c.week).text}`)
   } else lines.push('Rest day. A walk, good food and early sleep are today’s training.')
   const left = s.proteinTarget - s.protein
   if (left > 0) lines.push(`${left} g protein to go today${s.cal ? ` · ${s.cal.target.toLocaleString()} kcal target` : ''}.`)

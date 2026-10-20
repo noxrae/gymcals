@@ -172,3 +172,12 @@ test.describe('AI coach · on-device and offline', () => {
     await noErrors(errors)
   })
 })
+
+test('after finishing today, the briefing says so and frames the tip as next time', async ({ page }) => {
+  const seed = history()
+  seed.sessions!['2026-10-14'] = { date: '2026-10-14', dayId: 'wed', startedAt: 0, finishedAt: 3_600_000, log: { 'assisted-pull-up': [8, 8, 8, 8].map((r) => ({ load: 27.5, reps: r, done: true })) } }
+  const errors = await open(page, seed)
+  const briefing = page.getByRole('link', { name: /^Coach Pull done today/ })
+  await expect(briefing).toContainText('Next time, Assisted Pull-up')
+  await noErrors(errors)
+})
