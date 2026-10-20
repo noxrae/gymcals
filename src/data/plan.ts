@@ -46,7 +46,7 @@ export const DAYS: PlanDay[] = [
   {
     id: 'tue', name: 'Lower A + Cardio', short: 'Lower A', focus: 'Quads · Hamstrings · Glutes · Calves', minutes: 70, hero: 'squat',
     groups: [
-      { title: 'Main lifts', items: [r('squat', 3, 6, 10, [120, 180], { note: 'Or hack squat — whichever you control best' }), r('romanian-deadlift', 3, 8, 10, [120, 180])] },
+      { title: 'Main lifts', items: [r('squat', 3, 6, 10, [120, 180], { note: 'Or hack squat — whichever you control best' }), r('hip-thrust', 3, 8, 10, [120, 150], { added: true, note: 'Replaces RDL (upper-back pain)' })] },
       { title: 'Accessories', items: [r('leg-press', 2, 10, 12, [90, 150]), r('leg-curl', 3, 10, 15, [60, 90]), r('calf-raise', 3, 12, 15, [60, 90])] },
       { title: 'Core', items: [r('plank', 2, 30, 45, [45, 60], { added: true })] },
       { title: 'Cardio', items: [r('incline-walk', 1, 20, 25, [0, 0])] },
@@ -86,7 +86,7 @@ export const DAYS: PlanDay[] = [
     id: 'sat', name: 'Lower B + Athletic', short: 'Lower B', focus: 'Legs · Balance · Conditioning', minutes: 70, hero: 'bulgarian-split-squat',
     optionalCardio: '10–15 min easy, if legs feel recovered',
     groups: [
-      { title: 'Main lifts', items: [r('bulgarian-split-squat', 3, 8, 10, [120, 120], { perSide: true }), r('romanian-deadlift', 3, 8, 10, [120, 180])] },
+      { title: 'Main lifts', items: [r('bulgarian-split-squat', 3, 8, 10, [120, 120], { perSide: true }), r('back-extension', 3, 10, 12, [90, 120], { added: true, note: 'Replaces RDL · neutral spine' })] },
       { title: 'Accessories', items: [r('leg-extension', 2, 12, 15, [60, 90]), r('leg-curl', 2, 12, 15, [60, 90]), r('calf-raise', 3, 12, 15, [60, 90])] },
       { title: 'Shoulders · V-taper', items: [r('lateral-raise', 3, 12, 15, [60, 90], { added: true, note: 'Extra width work for the V-taper' })] },
       { title: 'Loaded carry', items: [r('farmers-carry', 3, 30, 45, [90, 120])] },
@@ -171,6 +171,7 @@ const ATHLETIC: PlanDay[] = [
       { title: 'Light legs', items: [r('leg-extension', 3, 12, 15, [60, 90], { note: 'A pump, not heavy fatigue' }), r('seated-leg-curl', 3, 12, 15, [60, 90])] },
       { title: 'Grip', items: [r('farmers-carry', 3, 30, 45, [90, 120], { note: 'About 40–50 m' })] },
       { title: 'Hang', items: [r('dead-hang', 3, 20, 60, [90, 90], { note: 'Max time, stop before your grip fails' })] },
+      { title: 'Core', items: [r('cable-crunch', 3, 12, 15, [60, 90], { added: true, note: 'Second ab day for the six-pack' })] },
       { title: 'Cardio & mobility', items: [r('incline-walk', 1, 15, 20, [0, 0], { note: 'Light, then a few minutes of mobility' })] },
     ],
   },
@@ -183,7 +184,7 @@ const ATHLETIC_EXTENDED: PlanDay[] = [
     groups: [
       { title: 'Main lifts', items: [r('bench-press', 3, 6, 10, [120, 180], { note: 'Shoulder blades stable, controlled descent' }), r('incline-dumbbell-press', 3, 8, 12, [90, 150], { note: 'Modest incline' })] },
       { title: 'Back width', items: [r('lat-pulldown', 3, 8, 12, [90, 150]), r('seated-cable-row', 3, 8, 12, [90, 150], { note: 'No momentum' })] },
-      { title: 'Shoulders & arms', items: [r('lateral-raise', 3, 12, 20, [60, 90]), r('triceps-pushdown', 2, 10, 15, [60, 90])] },
+      { title: 'Shoulders & arms', items: [r('lateral-raise', 4, 12, 20, [60, 90], { added: true, note: '+1 set for shoulder width' }), r('triceps-pushdown', 2, 10, 15, [60, 90])] },
       { title: 'Push foundation', items: [r('push-up', 2, 6, 15, [90, 120], { note: 'Stop before technique breaks down' }), r('scapular-push-up', 2, 10, 15, [60, 60])] },
     ],
   },
@@ -220,7 +221,7 @@ const ATHLETIC_EXTENDED: PlanDay[] = [
     id: 'fri', name: 'Upper B · Shoulders & Arms', short: 'Upper B', focus: '3D delts · Upper chest · Biceps · Triceps', minutes: 85, hero: 'incline-bench-press',
     groups: [
       { title: 'Main lifts', items: [r('incline-bench-press', 3, 8, 12, [120, 180]), r('dumbbell-shoulder-press', 3, 8, 12, [90, 150])] },
-      { title: 'Shoulders & back', items: [r('cable-lateral-raise', 3, 12, 20, [60, 90]), r('reverse-pec-deck', 2, 12, 20, [60, 90]), r('seated-cable-row', 2, 10, 12, [60, 90])] },
+      { title: 'Shoulders & back', items: [r('cable-lateral-raise', 4, 12, 20, [60, 90], { added: true, note: '+1 set for 3D shoulders' }), r('reverse-pec-deck', 2, 12, 20, [60, 90]), r('seated-cable-row', 2, 10, 12, [60, 90])] },
       { title: 'Arms', items: [r('preacher-curl', 3, 8, 12, [60, 90]), r('triceps-extension', 3, 10, 15, [60, 90], { note: 'Overhead cable' }), r('triceps-pushdown', 2, 10, 15, [60, 90])] },
       { title: 'Optional skill', items: [r('pike-push-up', 2, 5, 10, [90, 120], { note: 'Optional — only if shoulders and wrists feel good' })] },
     ],
@@ -231,6 +232,7 @@ const ATHLETIC_EXTENDED: PlanDay[] = [
       { title: 'Light legs', items: [r('seated-leg-curl', 2, 12, 15, [60, 90], { note: 'Skip if still sore from Tuesday' }), r('leg-extension', 2, 12, 15, [60, 90]), r('seated-calf-raise', 3, 12, 20, [60, 90])] },
       { title: 'Hang', items: [r('dead-hang', 3, 20, 40, [90, 90])] },
       { title: 'Grip', items: [r('farmers-carry', 3, 30, 45, [90, 120])] },
+      { title: 'Core', items: [r('cable-crunch', 3, 12, 15, [60, 90], { added: true, note: 'Second ab day for the six-pack' })] },
       { title: 'Cardio & mobility', items: [r('incline-walk', 1, 15, 20, [0, 0], { note: 'Brisk walk, cycling or sport, then 5–10 min mobility' })] },
     ],
   },

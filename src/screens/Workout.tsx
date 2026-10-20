@@ -50,6 +50,13 @@ export default function WorkoutScreen() {
   const swaps = session.swaps ?? {}
   const items = allItems(day)
   const inDay = new Set(items.map((it) => swaps[it.ex] ?? it.ex))
+  // Logged exercises the plan no longer has (e.g. the plan changed after this workout): never hide them.
+  const extra: PlanItem[] = Object.entries(session.log)
+    .filter(([ex, sets]) => !inDay.has(ex) && EXERCISES[ex] && sets.some((x) => x.done))
+    .map(([ex, sets]) => {
+      const reps = sets.map((x) => x.reps ?? 0)
+      return { ex, sets: sets.length, min: Math.min(...reps), max: Math.max(...reps), rest: [0, 0] as [number, number] }
+    })
   const finished = !!session.finishedAt
   const elapsed = ((session.finishedAt ?? now) - session.startedAt) / 1000
   const total = items.reduce((n, it) => n + setsFor(it, week, program), 0)
@@ -109,6 +116,14 @@ export default function WorkoutScreen() {
             })}
           </div>
         ))}
+        {extra.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <h2 className="sec" style={{ margin: '10px 0 0', padding: '0 16px' }}>Also logged</h2>
+            {extra.map((it, j) => (
+              <ExerciseBlock key={it.ex} index={items.length + j} planned={it.ex} item={it} week={week} date={date} log={session.log[it.ex]} isLast={false} alternatives={[]} />
+            ))}
+          </div>
+        )}
       </div>
 
       {day.optionalCardio && <p className="sec-foot" style={{ margin: '20px 16px 0' }}>Optional cardio: {day.optionalCardio}.</p>}

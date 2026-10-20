@@ -13,7 +13,7 @@ import { useStore, type State } from '../lib/store'
 import { useToday } from '../lib/useToday'
 
 type Tab = 'weight' | 'body' | 'strength' | 'tests' | 'photos'
-const LIFTS = ['bench-press', 'incline-bench-press', 'squat', 'romanian-deadlift', 'lat-pulldown', 'dumbbell-shoulder-press', 'assisted-pull-up']
+const LIFTS = ['bench-press', 'incline-bench-press', 'squat', 'hip-thrust', 'romanian-deadlift', 'lat-pulldown', 'dumbbell-shoulder-press', 'assisted-pull-up']
 
 export default function ProgressScreen() {
   const [params] = useSearchParams()

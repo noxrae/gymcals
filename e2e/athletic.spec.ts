@@ -101,3 +101,13 @@ for (const scheme of ['light', 'dark'] as const) {
     expect(problems, problems.join('\n')).toEqual([])
   })
 }
+
+test('a past workout still shows exercises the plan has since dropped (RDL → hip thrust)', async ({ page }) => {
+  const seed = history()
+  seed.sessions!['2026-10-13'] = { date: '2026-10-13', dayId: 'tue', startedAt: 0, finishedAt: 3_600_000, log: { squat: [{ load: 60, reps: 8, done: true }], 'romanian-deadlift': [10, 10, 9].map((r) => ({ load: 40, reps: r, done: true })) } }
+  const errors = await open(page, seed, { at: new Date('2026-10-13T18:00:00'), path: '/workout/tue' })
+  await expect(page.getByRole('region', { name: 'Barbell Hip Thrust', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Also logged' })).toBeVisible()
+  await expect(page.getByText('40×10, 40×10, 40×9')).toBeVisible()
+  await noErrors(errors)
+})

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { EXERCISES, typeOf } from '../data/exercises'
 import { allItems, ctxForSession, dayFor, daysFor, planKey, PROGRAMS, templateOf, type PlanDay } from '../data/plan'
-import { scheduleText, weeklySets } from '../data/volume'
+import { daysTraining, scheduleText, weeklySets } from '../data/volume'
 import videos from '../data/videos.json' with { type: 'json' }
 
 const A = { template: 'athletic' as const }
@@ -15,20 +15,26 @@ describe('Athletic plan (as written by the user)', () => {
     expect(line(dayFor('wed', false, A))).toEqual(['assisted-pull-up 4×5–8', 'chest-supported-row 3×8–12', 'straight-arm-pulldown 3×12–15', 'reverse-pec-deck 3×12–15', 'incline-dumbbell-curl 3×8–12', 'hammer-curl 3×10–12'])
     expect(line(dayFor('thu', false, A))).toEqual(['tuck-l-sit 4×10–15', 'hanging-knee-raise 3×10–12', 'dead-bug 2×10–10', 'cable-crunch 3×12–15', 'incline-walk 1×25–30'])
     expect(line(dayFor('fri', false, A))).toEqual(['incline-bench-press 3×8–10', 'dumbbell-shoulder-press 3×8–10', 'cable-lateral-raise 4×12–15', 'preacher-curl 3×8–12', 'triceps-extension 3×10–12', 'push-up 2×8–15'])
-    expect(line(dayFor('sat', false, A))).toEqual(['leg-extension 3×12–15', 'seated-leg-curl 3×12–15', 'farmers-carry 3×30–45', 'dead-hang 3×20–60', 'incline-walk 1×15–20'])
+    expect(line(dayFor('sat', false, A))).toEqual(['leg-extension 3×12–15', 'seated-leg-curl 3×12–15', 'farmers-carry 3×30–45', 'dead-hang 3×20–60', 'cable-crunch 3×12–15', 'incline-walk 1×15–20'])
     expect(dayFor('sun', false, A).groups).toHaveLength(0)
   })
 
   it('has the extended week exactly', () => {
     expect(line(dayFor('mon', false, X))).toHaveLength(8)
     expect(line(dayFor('tue', false, X))).toEqual(['squat 3×6–10', 'seated-leg-curl 3×10–15', 'leg-curl 2×10–15', 'bulgarian-split-squat 2×8–12', 'leg-extension 2×10–15', 'seated-hip-abduction 2×12–20', 'calf-raise 3×10–15', 'seated-calf-raise 2×12–20'])
-    expect(line(dayFor('sat', false, X))).toEqual(['seated-leg-curl 2×12–15', 'leg-extension 2×12–15', 'seated-calf-raise 3×12–20', 'dead-hang 3×20–40', 'farmers-carry 3×30–45', 'incline-walk 1×15–20'])
+    expect(line(dayFor('sat', false, X))).toEqual(['seated-leg-curl 2×12–15', 'leg-extension 2×12–15', 'seated-calf-raise 3×12–20', 'dead-hang 3×20–40', 'farmers-carry 3×30–45', 'cable-crunch 3×12–15', 'incline-walk 1×15–20'])
+  })
+
+  it('fixes from review: abs twice a week, Extended keeps up on side delts', () => {
+    for (const v of [A, X]) expect(daysTraining(daysFor(false, v), 'abs')).toBe(2)
+    expect(weeklySets(daysFor(false, X), 'side-delts')).toBeGreaterThanOrEqual(weeklySets(daysFor(false, A), 'side-delts'))
     expect(line(dayFor('wed', false, X))).toEqual(['assisted-pull-up 3×5–8', 'lat-pulldown 2×8–12', 'chest-supported-row 3×8–12', 'straight-arm-pulldown 2×12–15', 'reverse-pec-deck 3×12–20', 'dumbbell-curl 3×8–12', 'hammer-curl 2×10–15', 'scapular-pull-up 2×5–8'])
     expect(line(dayFor('thu', false, X))).toEqual(['hanging-knee-raise 3×8–12', 'dead-bug 2×10–10', 'side-plank 2×30–45', 'cable-crunch 3×10–15', 'tuck-l-sit 3×10–20', 'incline-walk 1×25–35'])
     expect(line(dayFor('fri', false, X))).toHaveLength(9)
-    // The Athletic plan has no RDLs at all; the original plan keeps them.
-    for (const v of [A, X]) expect(daysFor(false, v).flatMap(allItems).some((i) => i.ex === 'romanian-deadlift')).toBe(false)
-    expect(daysFor(false).flatMap(allItems).some((i) => i.ex === 'romanian-deadlift')).toBe(true)
+    // No plan has RDLs any more (they caused upper-back pain); they stay available as a swap.
+    for (const v of [A, X, {}]) for (const five of [false, true]) expect(daysFor(five, v).flatMap(allItems).some((i) => i.ex === 'romanian-deadlift')).toBe(false)
+    expect(line(dayFor('tue', false))).toContain('hip-thrust 3×8–10')
+    expect(line(dayFor('sat', false))).toContain('back-extension 3×10–12')
     expect(dayFor('tue', false, X).optionalCardio).toMatch(/10–15 min/)
   })
 

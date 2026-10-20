@@ -29,7 +29,9 @@ for (const width of [320, 360, 414, 768, 1280]) {
     const issues: string[] = []
     for (const r of ROUTES) {
       await page.goto(`/#${r}`)
-      await page.waitForTimeout(400)
+      await page.waitForTimeout(150)
+      // Measure only after the screen's enter animation has settled (it slides in, which made this flaky).
+      await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => null))))
       const res = await page.evaluate(() => {
         const vw = document.documentElement.clientWidth
         const over = document.documentElement.scrollWidth - vw
