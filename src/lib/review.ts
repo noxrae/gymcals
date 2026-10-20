@@ -1,5 +1,5 @@
 import { EXERCISES } from '../data/exercises'
-import { daysFor, programOf, weekFocus } from '../data/plan'
+import { daysFor, programOf, templateOf, weekFocus } from '../data/plan'
 import { avgWeight } from './coach'
 import { addDays } from './dates'
 import type { SetLog, State } from './store'
@@ -48,7 +48,7 @@ export function weekReview(state: State, monday: string, week: number): WeekRevi
 
   return {
     sessions: sessions.length,
-    planned: daysFor(state.settings.fiveDay).filter((d) => d.groups.length).length,
+    planned: daysFor(state.settings.fiveDay, { template: templateOf(state.settings.plan), extended: !!state.settings.extended }).filter((d) => d.groups.length).length,
     sets: Object.values(thisWeek).reduce((n, s) => n + s.length, 0),
     records,
     weightChange: now != null && prev != null ? now - prev : null,

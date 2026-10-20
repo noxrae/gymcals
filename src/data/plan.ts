@@ -116,7 +116,140 @@ const FIVE_DAYS: PlanDay[] = DAYS.map((d) => {
   return { ...d, optionalCardio: undefined, groups: extra ? [...d.groups, extra] : d.groups }
 })
 
-const daysBase = (fiveDay: boolean) => (fiveDay ? FIVE_DAYS : DAYS)
+// ---------------- Athletic plan (user's recomposition & V-taper plan) ----------------
+// Upper-body emphasis with one heavy and one light leg day. "Extended" is the fuller
+// version of the same week: more exercises per session and a few wider rep ranges.
+
+const SUN: PlanDay = DAYS[6]
+
+const ATHLETIC: PlanDay[] = [
+  {
+    id: 'mon', name: 'Upper A · Chest & Back Width', short: 'Upper A', focus: 'Upper chest · Lats · Side delts · Triceps', minutes: 65, hero: 'bench-press',
+    groups: [
+      { title: 'Main lifts', items: [r('bench-press', 3, 6, 8, [120, 180], { note: 'Overall chest mass' }), r('incline-dumbbell-press', 3, 8, 10, [90, 150], { note: 'Upper chest shelf' })] },
+      { title: 'Back width', items: [r('lat-pulldown', 3, 8, 12, [90, 150], { note: 'Wide grip' }), r('seated-cable-row', 3, 8, 12, [90, 150])] },
+      { title: 'Shoulders & arms', items: [r('lateral-raise', 4, 12, 15, [60, 90], { note: 'Shoulder width' }), r('triceps-pushdown', 3, 10, 12, [60, 90])] },
+    ],
+  },
+  {
+    id: 'tue', name: 'Heavy Leg Day', short: 'Heavy legs', focus: 'Quads · Hamstrings · Glutes · Calves', minutes: 60, hero: 'squat',
+    groups: [
+      { title: 'Main lifts', items: [r('squat', 3, 6, 8, [150, 180], { note: 'Or hack squat — whichever you control best' }), r('romanian-deadlift', 3, 8, 10, [120, 180])] },
+      { title: 'Accessories', items: [r('bulgarian-split-squat', 2, 8, 10, [90, 120], { perSide: true }), r('leg-curl', 3, 10, 12, [60, 90], { note: 'Lying leg curl' }), r('calf-raise', 4, 12, 15, [60, 90], { note: 'Standing' })] },
+    ],
+  },
+  {
+    id: 'wed', name: 'Back, Biceps + Pull-ups', short: 'Pull', focus: 'Back width · Rear delts · Biceps · Pull-up skill', minutes: 65, hero: 'assisted-pull-up',
+    groups: [
+      { title: 'Pull-up skill · do these fresh', items: [r('assisted-pull-up', 4, 5, 8, [120, 180], { note: 'Strict reps, reduce assistance over time' })] },
+      { title: 'Back', items: [r('chest-supported-row', 3, 8, 12, [90, 150]), r('straight-arm-pulldown', 3, 12, 15, [60, 90]), r('reverse-pec-deck', 3, 12, 15, [60, 90])] },
+      { title: 'Arms', items: [r('incline-dumbbell-curl', 3, 8, 12, [60, 90]), r('hammer-curl', 3, 10, 12, [60, 90])] },
+    ],
+  },
+  {
+    id: 'thu', name: 'Abs, Core, L-Sit + Cardio', short: 'Core', focus: 'Abs · Core compression · Fat loss', minutes: 55, hero: 'hanging-knee-raise',
+    groups: [
+      { title: 'Skill first · while fresh', items: [r('tuck-l-sit', 4, 10, 15, [90, 120])] },
+      { title: 'Core · bodyweight', items: [r('hanging-knee-raise', 3, 10, 12, [60, 90], { note: 'Or leg raises when knees get easy' }), r('dead-bug', 2, 10, 10, [45, 60], { perSide: true, note: 'About 45 seconds per set' })] },
+      { title: 'Core · cable', items: [r('cable-crunch', 3, 12, 15, [60, 90])] },
+      { title: 'Cardio', items: [r('incline-walk', 1, 25, 30, [0, 0], { note: 'Zone 2: brisk walk or easy cycle' })] },
+    ],
+  },
+  {
+    id: 'fri', name: 'Upper B · 3D Shoulders & Arms', short: 'Upper B', focus: 'Side delts · Upper chest · Biceps · Triceps', minutes: 65, hero: 'incline-bench-press',
+    groups: [
+      { title: 'Main lifts', items: [r('incline-bench-press', 3, 8, 10, [120, 180]), r('dumbbell-shoulder-press', 3, 8, 10, [90, 150])] },
+      { title: 'Shoulders', items: [r('cable-lateral-raise', 4, 12, 15, [60, 90], { note: '3D side-delt caps' })] },
+      { title: 'Arms', items: [r('preacher-curl', 3, 8, 12, [60, 90], { note: 'EZ-bar' }), r('triceps-extension', 3, 10, 12, [60, 90], { note: 'Overhead cable' })] },
+      { title: 'Push-ups', items: [r('push-up', 2, 8, 15, [90, 90], { note: 'Near failure, clean reps' })] },
+    ],
+  },
+  {
+    id: 'sat', name: 'Light Legs, Grip + Conditioning', short: 'Light legs', focus: 'Legs · Grip · Conditioning', minutes: 45, hero: 'farmers-carry',
+    groups: [
+      { title: 'Light legs', items: [r('leg-extension', 3, 12, 15, [60, 90], { note: 'A pump, not heavy fatigue' }), r('seated-leg-curl', 3, 12, 15, [60, 90])] },
+      { title: 'Grip', items: [r('farmers-carry', 3, 30, 45, [90, 120], { note: 'About 40–50 m' })] },
+      { title: 'Hang', items: [r('dead-hang', 3, 20, 60, [90, 90], { note: 'Max time, stop before your grip fails' })] },
+      { title: 'Cardio & mobility', items: [r('incline-walk', 1, 15, 20, [0, 0], { note: 'Light, then a few minutes of mobility' })] },
+    ],
+  },
+  SUN,
+]
+
+const ATHLETIC_EXTENDED: PlanDay[] = [
+  {
+    id: 'mon', name: 'Upper A · Chest, Back & Triceps', short: 'Upper A', focus: 'Chest · Lats · Side delts · Triceps', minutes: 80, hero: 'bench-press',
+    groups: [
+      { title: 'Main lifts', items: [r('bench-press', 3, 6, 10, [120, 180], { note: 'Shoulder blades stable, controlled descent' }), r('incline-dumbbell-press', 3, 8, 12, [90, 150], { note: 'Modest incline' })] },
+      { title: 'Back width', items: [r('lat-pulldown', 3, 8, 12, [90, 150]), r('seated-cable-row', 3, 8, 12, [90, 150], { note: 'No momentum' })] },
+      { title: 'Shoulders & arms', items: [r('lateral-raise', 3, 12, 20, [60, 90]), r('triceps-pushdown', 2, 10, 15, [60, 90])] },
+      { title: 'Push foundation', items: [r('push-up', 2, 6, 15, [90, 120], { note: 'Stop before technique breaks down' }), r('scapular-push-up', 2, 10, 15, [60, 60])] },
+    ],
+  },
+  {
+    id: 'tue', name: 'Complete Leg Day', short: 'Legs', focus: 'Quads · Hamstrings · Glutes · Calves', minutes: 80, hero: 'squat',
+    optionalCardio: '10–15 min easy cycling or walking',
+    groups: [
+      { title: 'Main lifts', items: [r('squat', 3, 6, 10, [150, 180], { note: 'Or hack squat. Warm up with lighter sets' }), r('romanian-deadlift', 3, 8, 10, [120, 180])] },
+      { title: 'Accessories', items: [r('bulgarian-split-squat', 2, 8, 12, [90, 120], { perSide: true }), r('leg-curl', 3, 10, 15, [60, 90]), r('leg-extension', 2, 10, 15, [60, 90])] },
+      { title: 'Calves', items: [r('calf-raise', 3, 10, 15, [60, 90], { note: 'Standing' }), r('seated-calf-raise', 2, 12, 20, [60, 90])] },
+    ],
+  },
+  {
+    id: 'wed', name: 'Back Width, Biceps + Pull-ups', short: 'Pull', focus: 'Lats · Back thickness · Rear delts · Biceps', minutes: 80, hero: 'assisted-pull-up',
+    groups: [
+      { title: 'Pull-up skill · do these fresh', items: [r('assisted-pull-up', 3, 5, 8, [120, 180], { note: 'No swinging, lower under control' })] },
+      { title: 'Back', items: [r('lat-pulldown', 2, 8, 12, [90, 150]), r('chest-supported-row', 3, 8, 12, [90, 150]), r('straight-arm-pulldown', 2, 12, 15, [60, 90]), r('reverse-pec-deck', 3, 12, 20, [60, 90])] },
+      { title: 'Arms', items: [r('dumbbell-curl', 3, 8, 12, [60, 90]), r('hammer-curl', 2, 10, 15, [60, 90])] },
+      { title: 'Scapular control', items: [r('scapular-pull-up', 2, 5, 8, [60, 90], { note: 'Small, controlled movement' })] },
+    ],
+  },
+  {
+    id: 'thu', name: 'Abs, Core + Cardio', short: 'Core', focus: 'Abs · Core stability · Endurance', minutes: 65, hero: 'hanging-knee-raise',
+    groups: [
+      { title: 'Core · bodyweight', items: [r('hanging-knee-raise', 3, 8, 12, [60, 90]), r('dead-bug', 2, 10, 10, [45, 60], { perSide: true }), r('side-plank', 2, 30, 45, [45, 60], { perSide: true })] },
+      { title: 'Core · cable', items: [r('cable-crunch', 3, 10, 15, [60, 90])] },
+      { title: 'L-sit practice', items: [r('tuck-l-sit', 3, 10, 20, [90, 120], { note: 'Shoulders down, only as long as you control it' })] },
+      { title: 'Cardio', items: [r('incline-walk', 1, 25, 35, [0, 0], { note: 'Moderate: you can still talk in short sentences' })] },
+    ],
+  },
+  {
+    id: 'fri', name: 'Upper B · Shoulders & Arms', short: 'Upper B', focus: '3D delts · Upper chest · Biceps · Triceps', minutes: 85, hero: 'incline-bench-press',
+    groups: [
+      { title: 'Main lifts', items: [r('incline-bench-press', 3, 8, 12, [120, 180]), r('dumbbell-shoulder-press', 3, 8, 12, [90, 150])] },
+      { title: 'Shoulders & back', items: [r('cable-lateral-raise', 3, 12, 20, [60, 90]), r('reverse-pec-deck', 2, 12, 20, [60, 90]), r('seated-cable-row', 2, 10, 12, [60, 90])] },
+      { title: 'Arms', items: [r('preacher-curl', 3, 8, 12, [60, 90]), r('triceps-extension', 3, 10, 15, [60, 90], { note: 'Overhead cable' }), r('triceps-pushdown', 2, 10, 15, [60, 90])] },
+      { title: 'Optional skill', items: [r('pike-push-up', 2, 5, 10, [90, 120], { note: 'Optional — only if shoulders and wrists feel good' })] },
+    ],
+  },
+  {
+    id: 'sat', name: 'Light Legs + Calisthenics', short: 'Light legs', focus: 'Leg accessories · Grip · Conditioning', minutes: 55, hero: 'farmers-carry',
+    groups: [
+      { title: 'Light legs', items: [r('leg-extension', 2, 12, 15, [60, 90], { note: 'Skip if still sore from Tuesday' }), r('seated-leg-curl', 2, 12, 15, [60, 90]), r('calf-raise', 3, 12, 20, [60, 90])] },
+      { title: 'Hang', items: [r('dead-hang', 3, 20, 40, [90, 90])] },
+      { title: 'Grip', items: [r('farmers-carry', 3, 30, 45, [90, 120])] },
+      { title: 'Cardio & mobility', items: [r('incline-walk', 1, 15, 20, [0, 0], { note: 'Brisk walk, cycling or sport, then 5–10 min mobility' })] },
+    ],
+  },
+  SUN,
+]
+
+// 5-day mode for the Athletic plan: Saturday (the light day) becomes recovery.
+const fiveOf = (days: PlanDay[]) => days.map((d) => (d.id === 'sat' ? { ...d, name: 'Recovery Day', short: 'Recovery', focus: 'Easy walk · Mobility · Sleep', minutes: 0, hero: '', groups: [], optionalCardio: undefined } : { ...d, optionalCardio: undefined }))
+const ATHLETIC_5 = fiveOf(ATHLETIC)
+const ATHLETIC_EXTENDED_5 = fiveOf(ATHLETIC_EXTENDED)
+
+export type TemplateId = 'original' | 'athletic'
+export const TEMPLATES: Record<TemplateId, { name: string; summary: string }> = {
+  original: { name: 'Original', summary: 'Your PDF plan: upper/lower split with calisthenics every training day and two full leg days.' },
+  athletic: { name: 'Athletic', summary: 'Upper-body and V-taper focus: one heavy and one light leg day, a core day, and 3D shoulders and arms.' },
+}
+export const templateOf = (id?: string): TemplateId => (id === 'athletic' ? 'athletic' : 'original')
+/** Short id stored on each workout so past sessions keep the exercises they were done with. */
+export const planKey = (template: TemplateId, extended: boolean) => (template === 'athletic' ? (extended ? 'athletic-extended' : 'athletic') : 'original')
+
+const daysBase = (fiveDay: boolean, template: TemplateId = 'original', extended = false) =>
+  template === 'athletic' ? (extended ? (fiveDay ? ATHLETIC_EXTENDED_5 : ATHLETIC_EXTENDED) : fiveDay ? ATHLETIC_5 : ATHLETIC) : fiveDay ? FIVE_DAYS : DAYS
 
 export const JS_DAY: DayId[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 
@@ -140,18 +273,18 @@ const BLOCK_1: Phase[] = [
 export const PROGRAMS: Record<ProgramId, Program> = {
   12: {
     id: 12, weeks: 12, name: '12 weeks', short: '12 wk',
-    summary: 'Your PDF plan: foundation, progression and performance, with a lighter week 7.',
+    summary: 'Three 4-week phases: foundation, progression and performance, with a lighter week 7.',
     phases: BLOCK_1, deloads: [7], maintenance: [],
   },
   16: {
     id: 16, weeks: 16, name: '4 months', short: '4 mo',
-    summary: 'The 12-week plan plus a 4-week peak: heavier main lifts (5–8 reps), full pull-ups and harder calisthenics.',
+    summary: '12 weeks plus a 4-week peak: heavier main lifts (5–8 reps), full pull-ups and harder calisthenics.',
     phases: [...BLOCK_1, { id: 'peak', name: 'Peak', weeks: [13, 16], text: 'Recover in week 13, then heavier main lifts (5–8 reps), full pull-ups, decline and diamond push-ups, advanced L-sit.' }],
     deloads: [7, 13], maintenance: [13],
   },
   24: {
     id: 24, weeks: 24, name: '6 months', short: '6 mo',
-    summary: 'Three blocks: the 12-week plan, a 6-week hypertrophy block for size (extra shoulder and lat work), then 6 weeks of strength and definition.',
+    summary: 'Three blocks: 12 weeks, a 6-week hypertrophy block for size (extra shoulder and lat work), then 6 weeks of strength and definition.',
     phases: [
       ...BLOCK_1,
       { id: 'hypertrophy', name: 'Hypertrophy', weeks: [13, 18], text: 'More muscle: main lifts 8–12 reps, extra side-delt and lat sets for the V-taper, harder calisthenics.' },
@@ -236,7 +369,7 @@ function applyPhase(day: PlanDay, phase: PhaseId): PlanDay {
         if (phase === 'hypertrophy') next = { ...next, min: 8, max: 12 }
         else next = { ...next, min: 5, max: 8, rest: [150, 210] }
       }
-      if (phase === 'hypertrophy' && (next.ex === 'lateral-raise' || next.ex === 'lat-pulldown')) next = { ...next, sets: next.sets + 1 }
+      if (phase === 'hypertrophy' && (next.ex === 'lateral-raise' || next.ex === 'cable-lateral-raise' || next.ex === 'lat-pulldown')) next = { ...next, sets: next.sets + 1 }
       used.add(next.ex)
       return next
     }),
@@ -245,13 +378,19 @@ function applyPhase(day: PlanDay, phase: PhaseId): PlanDay {
 }
 
 /** Everything the plan depends on: 5-day mode, the current week and the chosen program. */
-export interface PlanCtx { fiveDay: boolean; week: number; program: Program }
+export interface PlanCtx { fiveDay: boolean; week: number; program: Program; template?: TemplateId; extended?: boolean }
 export const DEFAULT_CTX: PlanCtx = { fiveDay: false, week: 1, program: PROGRAMS[12] }
+
+/** The plan context a past workout was done with (sessions remember their plan). */
+export function ctxForSession<T extends Partial<PlanCtx>>(ctx: T, plan?: string): T {
+  if (!plan) return { ...ctx, template: 'original', extended: false }
+  return { ...ctx, template: templateOf(plan.split('-')[0]), extended: plan.endsWith('-extended') }
+}
 
 export const daysFor = (fiveDay: boolean, ctx: Partial<PlanCtx> = {}) => {
   const program = ctx.program ?? PROGRAMS[12]
   const phase = phaseOf(ctx.week ?? 1, program).id
-  return daysBase(fiveDay).map((d) => applyPhase(d, phase))
+  return daysBase(fiveDay, ctx.template, ctx.extended).map((d) => applyPhase(d, phase))
 }
 export const dayFor = (id: DayId, fiveDay: boolean, ctx: Partial<PlanCtx> = {}) => daysFor(fiveDay, ctx).find((d) => d.id === id)!
 

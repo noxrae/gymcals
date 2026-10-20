@@ -6,6 +6,7 @@ import { dayFor, isDeload, nextDeload, phaseOf, PROGRAMS } from '../../data/plan
 import { absZone, V_TARGET } from '../body'
 import { fmtNum, history } from '../coach'
 import { addDays, dayIdOf } from '../dates'
+import { daysTraining, weeklySets } from '../../data/volume'
 import { coachCtx, personalBests, stats, todaysPlanLines, type CoachCtx } from './context'
 
 export interface Answer { text: string; links?: { label: string; to: string }[] }
@@ -92,7 +93,7 @@ export function localAnswer(question: string, c: CoachCtx): Answer {
     return { text: `Week ${c.week} · ${phaseOf(c.week, c.program).name}${isDeload(c.week, c.program) ? ' · deload' : ''}. **${c.day.name}**:\n${lines.join('\n')}`, links: c.day.groups.length ? [{ label: 'Open today’s workout', to: `/day/${c.day.id}` }] : undefined }
   }
   if (has(q, /month|program|which plan|longer|16 week|24 week|switch plan|after (12|twelve|the) weeks|after week 12|what (happens|next) after/)) {
-    return { text: `You're on the **${c.program.name}** program (week ${c.week} of ${c.program.weeks}).\n• 12 weeks: your PDF plan.\n• 4 months: + a peak block with heavier lifts and full pull-ups.\n• 6 months: + a hypertrophy block for size, then strength & definition.\nLonger plans add planned lighter weeks and maintenance-calorie weeks. ${PROGRAMS[24].weeks > c.week ? 'Switching keeps all your history.' : ''}`, links: [{ label: 'Change program', to: '/plan' }] }
+    return { text: `You're on the **${c.planName}** plan, **${c.program.name}** (week ${c.week} of ${c.program.weeks}). Plans (in Plan): Original, your PDF plan, or Athletic, with an Extended version.\n• 12 weeks: three 4-week phases.\n• 4 months: + a peak block with heavier lifts and full pull-ups.\n• 6 months: + a hypertrophy block for size, then strength & definition.\nLonger plans add planned lighter weeks and maintenance-calorie weeks. ${PROGRAMS[24].weeks > c.week ? 'Switching keeps all your history.' : ''}`, links: [{ label: 'Change program', to: '/plan' }] }
   }
   if (has(q, /deload|lighter week|rest week/)) {
     const nd = nextDeload(c.week, c.program)
@@ -112,14 +113,15 @@ export function localAnswer(question: string, c: CoachCtx): Answer {
 
   // ---- body goals ----
   if (has(q, /ab (exercise|workout|training)|abs? (exercises?|workout|every ?day|daily)|train (my )?abs|core (exercise|workout)|best ab/)) {
-    return { text: 'Your plan already trains abs 2–3× a week: hanging knee and leg raises, cable crunches, planks and carries, plus L-sit work. That’s enough; abs recover like any muscle, so daily training doesn’t help more. Add reps or harder versions over time, and let the calorie deficit reveal them.', links: [{ label: 'Skills day', to: '/day/thu' }] }
+    const n = daysTraining(c.days, 'abs')
+    return { text: `Your plan already trains abs directly ${n === 1 ? 'once' : `${n}×`} a week (${weeklySets(c.days, 'abs')} hard sets: hanging raises, cable crunches, dead bugs, L-sit work). That’s enough; abs recover like any muscle, so daily training doesn’t help more. Add reps or harder versions over time, and let the calorie deficit reveal them.`, links: [{ label: 'Core day', to: '/day/thu' }] }
   }
   if (has(q, /six.?pack|6.?pack| abs |abs\?|visible abs|ab definition/)) {
     const zone = absZone(c.state.settings.profile?.sex)
     if (s.bf) {
       const pts = Math.max(0, s.bf - zone.to)
       const weeks = pts / 0.45
-      return { text: `Abs usually show around **${zone.from}–${zone.to}% body fat**. Your estimate is **${r1(s.bf)}%**${pts > 0 ? `, so about ${r1(pts)} points to go. At a steady 0.25–0.5 kg a week that's roughly **${Math.round(weeks * 0.8)}–${Math.round(weeks * 1.3)} weeks**.` : ', so you’re there: keep the deficit small and keep training abs.'}\nCrunches build the muscle; the deficit reveals it. Train abs 2–3× a week (it's in your plan).`, links: [{ label: 'Body tab', to: '/progress?tab=body' }] }
+      return { text: `Abs usually show around **${zone.from}–${zone.to}% body fat**. Your estimate is **${r1(s.bf)}%**${pts > 0 ? `, so about ${r1(pts)} points to go. At a steady 0.25–0.5 kg a week that's roughly **${Math.round(weeks * 0.8)}–${Math.round(weeks * 1.3)} weeks**.` : ', so you’re there: keep the deficit small and keep training abs.'}\nCrunches build the muscle; the deficit reveals it. Your plan trains abs directly ${daysTraining(c.days, 'abs')}× a week.`, links: [{ label: 'Body tab', to: '/progress?tab=body' }] }
     }
     return { text: `Abs show when body fat is low, usually around ${zone.from}–${zone.to}% for ${c.state.settings.profile?.sex === 'female' ? 'women' : 'men'}. Ab training builds them; a calorie deficit reveals them. Add your waist, neck and height and I'll estimate how far you are.`, links: [{ label: 'Add measurements', to: '/log' }] }
   }
@@ -128,7 +130,7 @@ export function localAnswer(question: string, c: CoachCtx): Answer {
     return { text: `Belly fat and love handles can't be spot-reduced. Ab and side exercises don't burn the fat on top of them. Fat comes off the whole body with a **steady calorie deficit** (${s.cal ? `your target is ${s.cal.target.toLocaleString()} kcal` : 'set your target in Settings'}), daily steps and cardio, while lifting keeps your muscle.\n${trend}${s.waistNow && s.waistStart ? `\nWaist: ${s.waistNow} cm (${signed(s.waistNow - s.waistStart)} cm since start). That's the best sign it's working.` : ''}`, links: s.cal ? [{ label: 'Check-in', to: '/log' }] : [{ label: 'Set calorie target', to: '/settings?profile=1' }] }
   }
   if (has(q, /v.?taper|v.?shape|wider|width|broad|shoulder size|bigger shoulder/)) {
-    return { text: `A V-taper comes from **wider side delts and lats** plus a **smaller waist**. Your plan gives side delts 14 sets a week and lats ~28. ${s.ratio ? `Your shoulder-to-waist ratio is **${s.ratio.toFixed(2)}** (goal ${V_TARGET}).` : 'Measure shoulders and waist monthly to track your ratio.'} Progress lateral raises with strict form, and chase pull-up strength.`, links: [{ label: s.ratio ? 'Body tab' : 'Add measurements', to: s.ratio ? '/progress?tab=body' : '/log' }] }
+    return { text: `A V-taper comes from **wider side delts and lats** plus a **smaller waist**. Your plan gives side delts ${weeklySets(c.days, 'side-delts')} hard sets a week and lats ${weeklySets(c.days, 'lats')}. ${s.ratio ? `Your shoulder-to-waist ratio is **${s.ratio.toFixed(2)}** (goal ${V_TARGET}).` : 'Measure shoulders and waist monthly to track your ratio.'} Progress lateral raises with strict form, and chase pull-up strength.`, links: [{ label: s.ratio ? 'Body tab' : 'Add measurements', to: s.ratio ? '/progress?tab=body' : '/log' }] }
   }
 
   // ---- muscle growth ----

@@ -1,6 +1,6 @@
 # GymCals
 
-A personal app for a 12-week gym + calisthenics plan. It's an installable web app (PWA) that works offline, keeps all data on the device, and uses only free resources.
+A personal app for a gym + calisthenics plan (12 weeks, 4 months or 6 months). It's an installable web app (PWA) that works offline, keeps all data on the device, and uses only free resources.
 
 ## Features
 
@@ -12,7 +12,8 @@ A personal app for a 12-week gym + calisthenics plan. It's an installable web ap
   - warm-up checklist, and warm-up sets with plate loading for barbell lifts
   - swap an exercise when equipment is busy
 - **Exercise pages**: an embedded YouTube form video, start and finish photos, numbered steps, a common mistake, an anatomical muscle map with tap-to-focus, and your history chart.
-- **Plan**: the 12-week phases with a week 7 deload, this week's schedule, and a 5-day mode.
+- **Plan**: two weekly plans (Original, and Athletic with an Extended version), three lengths (12 weeks, 4 months, 6 months) with phases and deloads, this week's schedule, and a 5-day mode.
+- **Coach**: a free built-in coach that answers from your plan and numbers, offline; optional free Gemini key or Chrome's on-device AI.
 - **Progress**: weight against the target pace, waist, best lifts, skill tests and private progress photos with side-by-side compare.
 - **Skills**: push, pull and core levels, a first-pull-up milestone, and test logging.
 - **Check-in**: weight, waist, protein quick-add (Indian foods), sleep, steps and recovery. It saves automatically.
@@ -35,7 +36,7 @@ Installing as an app and offline mode need HTTPS. A free host such as GitHub Pag
 ## Testing
 
 ```bash
-npm test           # 31 unit tests: coach logic, dates, warm-up maths, weekly review, plan data integrity
+npm test           # 92 unit tests: coach logic and AI fallbacks, plans and programs, dates, warm-up maths, weekly review
 npm run e2e        # 42 end-to-end tests in Microsoft Edge at phone size (builds and serves the app)
 ```
 

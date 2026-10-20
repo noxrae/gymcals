@@ -1,9 +1,10 @@
 import { EXERCISES, typeOf } from '../../data/exercises'
-import { allItems, dayFor, isDeload, isMaintenance, nextDeload, phaseOf, programOf, setsFor, type PlanDay, type Program } from '../../data/plan'
+import { allItems, ctxForSession, dayFor, daysFor, TEMPLATES, templateOf, isDeload, isMaintenance, nextDeload, phaseOf, programOf, setsFor, type PlanDay, type Program } from '../../data/plan'
 import { navyBodyFat, profileComplete, vTaper } from '../body'
 import { avgWeight, calorieTarget, fmtNum, history, insights, rangeText, suggest, weightSeries } from '../coach'
 import { addDays, dayIdOf, today, weekOf } from '../dates'
 import type { State } from '../store'
+import { scheduleText } from '../../data/volume'
 
 /** Everything the coach knows about "now". Built fresh for every question. */
 export interface CoachCtx {
@@ -12,14 +13,21 @@ export interface CoachCtx {
   week: number
   program: Program
   day: PlanDay
+  /** the whole current week of the chosen plan */
+  days: PlanDay[]
+  planName: string
 }
 
 export function coachCtx(state: State, date = today()): CoachCtx {
   const program = programOf(state.settings.program)
   const week = Math.min(program.weeks, Math.max(1, weekOf(date, state.settings.startDate)))
   // Follow the workout actually started today (e.g. a moved session), like the Today card does.
-  const day = dayFor(state.sessions[date]?.dayId ?? dayIdOf(date), state.settings.fiveDay, { week, program })
-  return { state, date, week, program, day }
+  const session = state.sessions[date]
+  const base = { week, program, template: templateOf(state.settings.plan), extended: !!state.settings.extended }
+  const day = session ? dayFor(session.dayId, state.settings.fiveDay, ctxForSession(base, session.plan)) : dayFor(dayIdOf(date), state.settings.fiveDay, base)
+  const days = daysFor(state.settings.fiveDay, base)
+  const planName = `${TEMPLATES[base.template].name}${base.template === 'athletic' && base.extended ? ' (Extended)' : ''}`
+  return { state, date, week, program, day, days, planName }
 }
 
 const latest = (state: State, key: 'waist' | 'shoulders' | 'neck' | 'hip' | 'weight') =>
@@ -86,7 +94,7 @@ export function contextForModel(c: CoachCtx) {
   const ph = phaseOf(c.week, c.program)
   const lines = [
     `Program: ${c.program.name} (${c.program.weeks} weeks), currently week ${c.week}, phase "${ph.name}"${isDeload(c.week, c.program) ? ', deload week' : ''}${isMaintenance(c.week, c.program) ? ', maintenance-calorie week' : ''}. Next deload: ${nextDeload(c.week, c.program) ?? 'none'}.`,
-    `Schedule: 6 days (Mon Upper A + push calisthenics, Tue Lower A + cardio, Wed Pull + pull-up skill, Thu calisthenics skills + core + cardio, Fri Upper B + calisthenics, Sat Lower B + athletic, Sun rest)${c.state.settings.fiveDay ? ' in 5-day mode (Thursday is recovery)' : ''}.`,
+    `Plan: ${c.planName}. Weekly schedule: ${scheduleText(c.days)}${c.state.settings.fiveDay ? ' (5-day mode)' : ''}.`,
     `Today (${c.day.name}):`, ...todaysPlanLines(c),
     p && profileComplete(p) ? `Profile: ${p.sex}, ${p.age} y, ${p.heightCm} cm, activity ${p.activity}.` : 'Profile: not filled in.',
     s.avgNow != null ? `Weight: 7-day average ${fmtNum(Math.round(s.avgNow * 10) / 10)} kg${s.totalChange != null ? `, ${fmtNum(Math.round(s.totalChange * 10) / 10)} kg since start` : ''}${s.weekChange != null ? `, ${fmtNum(Math.round(s.weekChange * 10) / 10)} kg this week` : ''}.` : 'Weight: no weigh-ins yet.',

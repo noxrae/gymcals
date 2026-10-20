@@ -4,7 +4,7 @@ import { Chevron, IconInfo } from '../components/Icons'
 import { ExerciseThumb } from '../components/Media'
 import { dayMix, groupType, TypeBadge } from '../components/TypeBadge'
 import { EXERCISES, photoUrl } from '../data/exercises'
-import { allItems, dayFor, setsFor, type DayId } from '../data/plan'
+import { allItems, ctxForSession, dayFor, setsFor, type DayId } from '../data/plan'
 import { rangeText } from '../lib/coach'
 import { actions, useStore } from '../lib/store'
 import { useToday } from '../lib/useToday'
@@ -12,8 +12,8 @@ import { useToday } from '../lib/useToday'
 export default function DayScreen() {
   const { dayId } = useParams<{ dayId: DayId }>()
   const { date, week, dayId: todayId, fiveDay, ctx, program, deload, phase } = useToday()
-  const day = dayId ? dayFor(dayId, fiveDay, ctx) : undefined
   const session = useStore((s) => s.sessions[date])
+  const day = dayId ? dayFor(dayId, fiveDay, session && session.dayId === dayId ? ctxForSession(ctx, session.plan) : ctx) : undefined
   const navigate = useNavigate()
   if (!day) return <Navigate to="/" replace />
 
@@ -25,7 +25,7 @@ export default function DayScreen() {
 
   const start = () => {
     if (session && session.dayId !== day.id && Object.keys(session.log).length) {
-      const other = dayFor(session.dayId, fiveDay, ctx).short
+      const other = dayFor(session.dayId, fiveDay, ctxForSession(ctx, session.plan)).short
       if (!window.confirm(`You already logged ${other} today. Replace it with ${day.short}?`)) return
       actions.discardSession(date)
     }
@@ -38,7 +38,7 @@ export default function DayScreen() {
       <div className="screen no-tabs">
         <FloatingBack />
         <div style={{ paddingTop: 60, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <span className="kicker" style={{ color: 'var(--accent-ink)' }}>{day.id === 'thu' ? 'Thursday · 5-day mode' : 'Sunday'}</span>
+          <span className="kicker" style={{ color: 'var(--accent-ink)' }}>{day.id === 'sun' ? 'Sunday' : `${{ mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday' }[day.id]} · 5-day mode`}</span>
           <h1 className="disp" style={{ fontSize: 64 }}>{day.name}</h1>
           <p className="muted" style={{ lineHeight: 1.5 }}>No structured gym session and no hard calisthenics. Normal walking is fine. Prioritise sleep, food and water.</p>
         </div>

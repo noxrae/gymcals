@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { photoUrl } from '../data/exercises'
-import { dayFor, daysFor } from '../data/plan'
+import { ctxForSession, dayFor, daysFor } from '../data/plan'
 import { avgWeight, calorieTarget, fmtNum, insights } from '../lib/coach'
 import { addDays, daysBetween, fmtLong, mondayOf } from '../lib/dates'
 import { useStore } from '../lib/store'
@@ -24,7 +24,7 @@ export default function TodayScreen() {
   const [allTips, setAllTips] = useState(false)
   const monday = mondayOf(date)
   // If a different day's workout was done today (e.g. a missed session), show that one.
-  const shown = session ? dayFor(session.dayId, fiveDay, ctx) : day
+  const shown = session ? dayFor(session.dayId, fiveDay, ctxForSession(ctx, session.plan)) : day
 
   return (
     <div className="screen">

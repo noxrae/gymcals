@@ -53,6 +53,13 @@ const PHOTOS = {
   'decline-push-up': ['Decline_Push-Up', [0, 1]],
   'hanging-leg-raise': ['Hanging_Leg_Raise', [0, 1]],
   'diamond-push-up': ['Push-Ups_-_Close_Triceps_Position', [0, 1]],
+  'straight-arm-pulldown': ['Straight-Arm_Pulldown', [0, 1]],
+  'reverse-pec-deck': ['Reverse_Machine_Flyes', [0, 1]],
+  'incline-dumbbell-curl': ['Incline_Dumbbell_Curl', [0, 1]],
+  'cable-lateral-raise': ['Cable_Seated_Lateral_Raise', [0, 1]],
+  'preacher-curl': ['Preacher_Curl', [0, 1]],
+  'seated-calf-raise': ['Seated_Calf_Raise', [0, 1]],
+  'seated-leg-curl': ['Seated_Leg_Curl', [0, 1]],
 }
 
 // Exercises with no free-exercise-db photo use their form video's thumbnail instead.

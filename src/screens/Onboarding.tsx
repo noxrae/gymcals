@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { BottomBar } from '../components/Chrome'
 import { photoUrl } from '../data/exercises'
-import { PROGRAMS, type ProgramId } from '../data/plan'
+import { PROGRAMS, TEMPLATES, type ProgramId, type TemplateId } from '../data/plan'
+import { Toggle } from '../components/Toggle'
 import { addDays, fmtLong, mondayOf, today } from '../lib/dates'
 import { actions, type Baseline } from '../lib/store'
 
@@ -18,6 +19,8 @@ export default function Onboarding() {
   const nextMonday = addDays(thisMonday, 7)
   const [start, setStart] = useState(thisMonday)
   const [program, setProgram] = useState<ProgramId>(12)
+  const [plan, setPlan] = useState<TemplateId>('original')
+  const [extended, setExtended] = useState(false)
   const [b, setB] = useState({ weight: '76.7', waist: '', pushups: '', deadHang: '', pullAssist: '' })
 
   const finish = () => {
@@ -29,7 +32,7 @@ export default function Onboarding() {
       deadHang: num(b.deadHang),
       pullAssist: num(b.pullAssist),
     }
-    actions.finishSetup(start, baseline, program)
+    actions.finishSetup(start, baseline, program, plan, plan === 'athletic' && extended)
   }
 
   if (step === 'welcome') {
@@ -78,6 +81,20 @@ export default function Onboarding() {
               <span className="grow"><span>Pick a date</span></span>
               <input type="date" value={start} onChange={(e) => e.target.value && setStart(e.target.value)} className="field" style={{ width: 150 }} />
             </label>
+          </div>
+          <div>
+            <h2 className="sec">Which plan?</h2>
+            <div className="seg" role="group" aria-label="Weekly plan">
+              {(['original', 'athletic'] as TemplateId[]).map((t) => (
+                <button key={t} type="button" aria-pressed={plan === t} onClick={() => setPlan(t)}>{TEMPLATES[t].name}</button>
+              ))}
+            </div>
+            {plan === 'athletic' && (
+              <div className="group" style={{ marginTop: 12 }}>
+                <Toggle label="Extended" sub="Heavier version: more exercises and sets each day" on={extended} onChange={setExtended} />
+              </div>
+            )}
+            <p className="sec-foot">{TEMPLATES[plan].summary}</p>
           </div>
           <div>
             <h2 className="sec">How long?</h2>

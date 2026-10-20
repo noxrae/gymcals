@@ -26,6 +26,8 @@
   --label: #000000;
   --label-2: #6c6c70;
   --label-3: #8e8e93;
+  /* inactive tab labels sit on a see-through bar, so they need a little extra contrast */
+  --tab-ink: #56565b;
   --sep: #e5e5ea;
   --chevron: #c4c4c7;
 
@@ -67,6 +69,7 @@
     --fill: #2c2c2e;
     --label: #ffffff;
     --label-2: #aeaeb2;
+    --tab-ink: #aeaeb2;
     --label-3: #8e8e93;
     --sep: #38383a;
     --chevron: #5a5a5e;
@@ -236,7 +239,7 @@ a.row:active, button.row:active { transform: none; background: var(--surface-2);
   background: var(--bar); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-top: 1px solid var(--sep);
 }
-.tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 64px; min-height: 48px; font-size: 10px; font-weight: 600; color: var(--label-2); }
+.tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 64px; min-height: 48px; font-size: 10px; font-weight: 600; color: var(--tab-ink); }
 .tab.active { color: var(--label); }
 
 .bottom-bar {

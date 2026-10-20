@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { Chevron } from './Icons'
+import type { PlanDay } from '../data/plan'
+import { daysTraining, weeklySets } from '../data/volume'
 
 // The evidence behind the plan, in plain words, with honest expectations for the goals.
-const POINTS = [
+const points = (days: PlanDay[]) => [
   {
     title: 'Progressive overload',
     text: 'You add a rep or a little weight only when every set hits the top of the range (double progression). This steady, measurable increase is the core driver of strength and muscle in every major review (ACSM 2026).',
   },
   {
     title: 'Enough volume, twice a week',
-    text: 'Most muscles get 12–20 hard sets a week, split over at least two sessions. Research shows growth rises with weekly sets up to roughly this range, with diminishing returns beyond it (Schoenfeld et al., 2017).',
+    text: `Growth rises with weekly hard sets up to roughly 10–20 per muscle, split over at least two sessions, with diminishing returns beyond that (Schoenfeld et al., 2017). This plan, per week: chest ${weeklySets(days, 'chest')}, lats ${weeklySets(days, 'lats')}, side delts ${weeklySets(days, 'side-delts')}, biceps ${weeklySets(days, 'biceps')}, quads ${weeklySets(days, 'quads')}, hamstrings ${weeklySets(days, 'hamstrings')}, abs ${weeklySets(days, 'abs')} (main-target sets only; compound lifts add more).`,
   },
   {
     title: 'Gym + calisthenics together',
@@ -21,11 +23,11 @@ const POINTS = [
   },
   {
     title: 'The V-taper',
-    text: 'Width comes from side delts (14 sets a week) and lats (pull-ups, pulldowns, rows), while the waist gets smaller from fat loss. Track it with the shoulder-to-waist ratio in Progress → Body.',
+    text: `Width comes from side delts (${weeklySets(days, 'side-delts')} hard sets a week) and lats (pull-ups, pulldowns, rows), while the waist gets smaller from fat loss. Track it with the shoulder-to-waist ratio in Progress → Body.`,
   },
   {
     title: 'A visible six-pack',
-    text: 'Abs are trained 2–3 times a week, but they only show when body fat is low, usually around 10–12% for men. Depending on where you start, that can take longer than 12 weeks. The body-fat estimate shows how close you are.',
+    text: `Abs are trained directly ${daysTraining(days, 'abs') === 1 ? 'once' : `${daysTraining(days, 'abs')} times`} a week (${weeklySets(days, 'abs')} hard sets), but they only show when body fat is low, usually around 10–12% for men. Depending on where you start, that can take longer than 12 weeks. The body-fat estimate shows how close you are.`,
   },
   {
     title: 'Protein, sleep and recovery',
@@ -37,8 +39,9 @@ const POINTS = [
   },
 ]
 
-export function WhyPlan() {
+export function WhyPlan({ days }: { days: PlanDay[] }) {
   const [open, setOpen] = useState<number | null>(null)
+  const POINTS = points(days)
   return (
     <div>
       <h2 className="sec">Why this plan works</h2>

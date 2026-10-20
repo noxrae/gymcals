@@ -5,7 +5,8 @@ import { ExerciseThumb } from '../components/Media'
 import { mixText } from '../components/TypeBadge'
 import { WhyPlan } from '../components/WhyPlan'
 import { EXERCISES } from '../data/exercises'
-import { daysFor, isDeload, isMaintenance, PROGRAMS, weekFocus, type ProgramId } from '../data/plan'
+import { daysFor, isDeload, isMaintenance, PROGRAMS, TEMPLATES, weekFocus, type ProgramId, type TemplateId } from '../data/plan'
+import { Toggle } from '../components/Toggle'
 import { addDays, mondayOf } from '../lib/dates'
 import { actions, useStore } from '../lib/store'
 import { showToast } from '../lib/toast'
@@ -14,7 +15,7 @@ import { useToday } from '../lib/useToday'
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 export default function PlanScreen() {
-  const { date, week, rawWeek, dayId, fiveDay, ctx, program, phase, deload, maintenanceWeek } = useToday()
+  const { date, week, rawWeek, dayId, fiveDay, ctx, program, template, extended, phase, deload, maintenanceWeek } = useToday()
   const sessions = useStore((s) => s.sessions)
   const [view, setView] = useState<'week' | 'all'>('week')
   const monday = mondayOf(date)
@@ -26,11 +27,35 @@ export default function PlanScreen() {
     showToast(rawWeek > next.weeks ? `Switched to ${next.name}. You’re past week ${next.weeks}, so this plan is complete.` : `Switched to ${next.name}. You’re in week ${Math.max(1, rawWeek)} of ${next.weeks}.`)
   }
 
+  const planName = (t: TemplateId, x: boolean) => `${TEMPLATES[t].name}${t === 'athletic' && x ? ' · Extended' : ''}`
+  const switchPlan = (t: TemplateId, x: boolean) => {
+    if (t === template && x === extended) return
+    const before = { t: template, x: extended }
+    actions.setPlan(t, x, date)
+    showToast(`Switched to the ${planName(t, x)} plan. Your history stays.`, { action: { label: 'Undo', run: () => actions.setPlan(before.t, before.x, date) } })
+  }
+
   return (
     <div className="screen">
       <h1 className="large-title" style={{ padding: '8px 4px 0' }}>Plan</h1>
 
       <div>
+        <h2 className="sec">Weekly plan</h2>
+        <div className="seg" role="group" aria-label="Weekly plan">
+          {(['original', 'athletic'] as TemplateId[]).map((t) => (
+            <button key={t} type="button" aria-pressed={template === t} onClick={() => switchPlan(t, t === 'athletic' ? extended : false)}>{TEMPLATES[t].name}</button>
+          ))}
+        </div>
+        {template === 'athletic' && (
+          <div className="group" style={{ marginTop: 12 }}>
+            <Toggle label="Extended" sub="Heavier version: more exercises and sets each day" on={extended} onChange={(v) => switchPlan('athletic', v)} />
+          </div>
+        )}
+        <p className="sec-foot" style={{ marginLeft: 4 }}>{TEMPLATES[template].summary}</p>
+      </div>
+
+      <div>
+        <h2 className="sec">Length</h2>
         <div className="seg" role="group" aria-label="Program length">
           {([12, 16, 24] as ProgramId[]).map((id) => (
             <button key={id} type="button" aria-pressed={program.id === id} onClick={() => choose(id)}>{PROGRAMS[id].name}</button>
@@ -106,7 +131,7 @@ export default function PlanScreen() {
         )}
       </div>
 
-      <WhyPlan />
+      <WhyPlan days={daysFor(fiveDay, ctx)} />
     </div>
   )
 }

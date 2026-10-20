@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Toggle } from '../components/Toggle'
 import { useSearchParams } from 'react-router-dom'
 import { AiSettings } from '../components/AiSettings'
 import { BodyProfile } from '../components/BodyProfile'
@@ -68,7 +69,9 @@ export default function SettingsScreen() {
           </div>
           <p className="sec-foot">
             {s.startDate ? `Week 1 began ${fmtLong(s.startDate)}. ` : ''}
-            5-day mode makes Thursday a recovery day, spreads its skill and core work over Mon/Wed/Fri/Sat and drops optional cardio. Use it for weeks when six days feels like too much.
+            {s.plan === 'athletic'
+              ? '5-day mode makes Saturday (the light leg day) a recovery day and drops optional cardio. Use it for weeks when six days feels like too much.'
+              : '5-day mode makes Thursday a recovery day, spreads its skill and core work over Mon/Wed/Fri/Sat and drops optional cardio. Use it for weeks when six days feels like too much.'}
           </p>
         </div>
 
@@ -160,17 +163,6 @@ export default function SettingsScreen() {
         </div>
       </div>
     </div>
-  )
-}
-
-function Toggle({ label, on, onChange }: { label: string; on: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button type="button" className="row" role="switch" aria-checked={on} onClick={() => onChange(!on)}>
-      <span style={{ flex: 1 }}>{label}</span>
-      <span aria-hidden style={{ width: 51, height: 31, borderRadius: 16, background: on ? 'var(--good-fill)' : 'var(--fill)', position: 'relative', transition: 'background-color .25s ease' }}>
-        <span style={{ position: 'absolute', top: 2, left: on ? 22 : 2, width: 27, height: 27, borderRadius: 14, background: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,.2)', transition: 'left .25s var(--ease)' }} />
-      </span>
-    </button>
   )
 }
 

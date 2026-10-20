@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import type { DayId } from '../data/plan'
+import { planKey, templateOf, type DayId, type TemplateId } from '../data/plan'
 import type { Profile } from './body'
 
 // All data lives on the device (localStorage). Export/import gives a JSON backup.
@@ -20,6 +20,8 @@ export interface Session {
   log: Record<string, SetLog[]>
   /** planned exercise -> exercise actually done (busy equipment) */
   swaps?: Record<string, string>
+  /** which plan this workout followed ('original', 'athletic', 'athletic-extended') */
+  plan?: string
 }
 
 export interface Checkin {
@@ -65,6 +67,10 @@ export interface Settings {
   calorieAdjust?: number
   /** program length in weeks: 12, 16 (4 months) or 24 (6 months) */
   program?: number
+  /** which weekly plan: the original PDF plan or the Athletic plan */
+  plan?: TemplateId
+  /** Athletic plan: the extended (heavier, fuller) version */
+  extended?: boolean
 }
 
 export interface State {
@@ -143,10 +149,10 @@ export function useStore<T>(select: (s: State) => T): T {
 // ---------- actions ----------
 
 export const actions = {
-  finishSetup(startDate: string, baseline: Baseline, program = 12) {
+  finishSetup(startDate: string, baseline: Baseline, program = 12, plan: TemplateId = 'original', extended = false) {
     update((s) => ({
       ...s,
-      settings: { ...s.settings, startDate, program },
+      settings: { ...s.settings, startDate, program, plan, extended },
       baseline,
       checkins: {
         ...s.checkins,
@@ -174,7 +180,18 @@ export const actions = {
       if (existing && existing.dayId === dayId) return s
       // Carry over equipment swaps from the last time this day was trained.
       const prev = Object.values(s.sessions).filter((x) => x.dayId === dayId && x.date < date).sort((a, b) => b.date.localeCompare(a.date))[0]
-      return { ...s, sessions: { ...s.sessions, [date]: { date, dayId, startedAt: Date.now(), log: {}, swaps: prev?.swaps } } }
+      const plan = planKey(templateOf(s.settings.plan), !!s.settings.extended)
+      return { ...s, sessions: { ...s.sessions, [date]: { date, dayId, startedAt: Date.now(), log: {}, swaps: prev?.swaps, plan } } }
+    })
+  },
+
+  /** Switch the weekly plan. Today's workout follows along if nothing has been logged in it yet. */
+  setPlan(template: TemplateId, extended: boolean, date: string) {
+    update((s) => {
+      const settings = { ...s.settings, plan: template, extended }
+      const today = s.sessions[date]
+      const untouched = today && !today.finishedAt && !Object.values(today.log).some((sets) => sets.some((x) => x.done))
+      return { ...s, settings, sessions: untouched ? { ...s.sessions, [date]: { ...today, plan: planKey(template, extended) } } : s.sessions }
     })
   },
 

@@ -7,7 +7,7 @@ import { RestBar } from '../components/RestBar'
 import { groupType, TypeBadge } from '../components/TypeBadge'
 import { ALTERNATIVES, BARBELL, EXERCISES, type Exercise } from '../data/exercises'
 import { MUSCLES } from '../data/muscles'
-import { allItems, dayFor, programOf, setsFor, type DayId, type PlanItem } from '../data/plan'
+import { allItems, ctxForSession, dayFor, programOf, setsFor, type DayId, type PlanItem } from '../data/plan'
 import { fmtNum, isPersonalBest, lastSets, rangeText, restText, setText, suggest } from '../lib/coach'
 import { fmtClock } from '../lib/dates'
 import { actions, useStore, type SetLog } from '../lib/store'
@@ -20,8 +20,9 @@ import { plateText, warmupSets } from '../lib/warmup'
 export default function WorkoutScreen() {
   const { dayId } = useParams<{ dayId: DayId }>()
   const { date, week, fiveDay, ctx, program } = useToday()
-  const day = dayId ? dayFor(dayId, fiveDay, ctx) : undefined
   const session = useStore((s) => s.sessions[date])
+  // A workout already started keeps the plan it was started with.
+  const day = dayId ? dayFor(dayId, fiveDay, session && session.dayId === dayId ? ctxForSession(ctx, session.plan) : ctx) : undefined
   const keepAwake = useStore((s) => s.settings.keepAwake)
   const state = useStore((s) => s)
   const navigate = useNavigate()
