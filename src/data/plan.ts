@@ -141,7 +141,7 @@ const ATHLETIC: PlanDay[] = [
     optionalCardio: '10–15 min easy cycling or walking to flush out soreness',
     warmup: ['5 min light cardio on a bike or incline treadmill', '1–2 sets of 12–15 bodyweight squats', 'Dynamic leg swings, front-to-back and side-to-side', 'Light practice sets on squats before your heavy sets'],
     groups: [
-      { title: 'Main lifts', items: [r('squat', 3, 6, 8, [120, 180], { note: 'Or hack squat · chest proud, core braced' }), r('hip-thrust', 3, 8, 10, [120, 180], { note: 'RDL replacement #1 · chin tucked' }), r('back-extension', 3, 10, 12, [90, 90], { note: 'RDL replacement #2 · neutral spine' })] },
+      { title: 'Main lifts', items: [r('squat', 3, 6, 8, [120, 180], { note: 'Or hack squat · chest proud, core braced' }), r('hip-thrust', 3, 8, 10, [120, 180], { note: 'RDL replacement #1 · chin tucked' }), r('back-extension', 3, 10, 12, [90, 90], { note: 'RDL replacement #2 · neutral spine', alt: ['cable-pull-through', 'reverse-hyper'] })] },
       { title: 'Accessories', items: [r('bulgarian-split-squat', 2, 8, 10, [90, 90], { perSide: true, note: 'Upright torso' }), r('leg-curl', 3, 10, 12, [60, 90], { note: 'Lying or seated · pause at the top' }), r('calf-raise', 4, 12, 15, [60, 60], { note: 'Standing · full range' })] },
     ],
   },

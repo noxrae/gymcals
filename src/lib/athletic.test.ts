@@ -40,6 +40,9 @@ describe('Athletic plan (as written by the user)', () => {
     expect(allItems(dayFor('tue', false, A)).find((i) => i.ex === 'squat')!.rest).toEqual([120, 180])
     expect(allItems(dayFor('tue', false, A)).find((i) => i.ex === 'back-extension')!.rest).toEqual([90, 90])
   })
+  it('Athletic Tuesday hip extension has the same one-tap alternatives', () => {
+    expect(allItems(dayFor('tue', false, A)).find((i) => i.ex === 'back-extension')!.alt).toEqual(['cable-pull-through', 'reverse-hyper'])
+  })
   it('no plan has RDLs any more; they stay available as a swap', () => {
     for (const v of [A, X, {}]) for (const five of [false, true]) expect(daysFor(five, v).flatMap(allItems).some((i) => i.ex === 'romanian-deadlift')).toBe(false)
     expect(line(dayFor('tue', false))).toContain('hip-thrust 3×8–10')

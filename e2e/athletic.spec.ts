@@ -124,3 +124,12 @@ test('Athletic Tuesday shows its own warm-up; Extended Saturday has a mobility t
   await expect(page.getByText('Mobility Routine', { exact: true })).toBeVisible()
   await noErrors(errors)
 })
+
+test('Athletic Tuesday: switch 45° hip extension to cable pull-through by name', async ({ page }) => {
+  const errors = await open(page, { ...history(), settings: { plan: 'athletic' } }, { at: new Date('2026-10-13T08:00:00'), path: '/workout/tue' })
+  const pick = page.getByRole('group', { name: 'Choose 45° Hip Extension or an alternative' })
+  await pick.getByRole('button', { name: 'Reverse Hyperextension' }).click()
+  await expect(page.getByRole('region', { name: 'Reverse Hyperextension', exact: true })).toBeVisible()
+  expect((await stored(page)).sessions['2026-10-13'].swaps).toEqual({ 'back-extension': 'reverse-hyper' })
+  await noErrors(errors)
+})
