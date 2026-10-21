@@ -9,7 +9,7 @@ import { LineChart } from '../components/LineChart'
 import { VideoCredit, VideoPlayer } from '../components/Media'
 import { EXERCISES } from '../data/exercises'
 import { MUSCLES, type MuscleId } from '../data/muscles'
-import { allItems, dayFor, programOf, setsFor, type DayId } from '../data/plan'
+import { allItems, dayFor, setsFor, type DayId } from '../data/plan'
 import { fmtNum, history, rangeText, restText, suggest, unitOf } from '../lib/coach'
 import { fmtShort, weekOf } from '../lib/dates'
 import { useStore } from '../lib/store'
@@ -70,6 +70,7 @@ export default function ExerciseScreen() {
 function HowTo({ exKey, item, week }: { exKey: string; item?: ReturnType<typeof allItems>[number]; week: number }) {
   const ex = EXERCISES[exKey]
   const state = useStore((s) => s)
+  const { program } = useToday()
   const tip = item ? suggest(state, item, week) : null
   return (
     <>
@@ -77,7 +78,7 @@ function HowTo({ exKey, item, week }: { exKey: string; item?: ReturnType<typeof 
         <div>
           <h2 className="sec" style={{ marginLeft: 0 }}>Today</h2>
           <div className="group" style={{ background: 'var(--surface-2)' }}>
-            <div className="row"><span style={{ flex: 1 }}>Target</span><span className="value" style={{ color: 'var(--label)', fontWeight: 600 }}>{rangeText(item, setsFor(item, week, programOf(state.settings.program)))}</span></div>
+            <div className="row"><span style={{ flex: 1 }}>Target</span><span className="value" style={{ color: 'var(--label)', fontWeight: 600 }}>{rangeText(item, setsFor(item, week, program))}</span></div>
             {item.rest[0] > 0 && <div className="row"><span style={{ flex: 1 }}>Rest</span><span className="value">{restText(item.rest)}</span></div>}
             {tip && <div className="row"><span style={{ flex: 1, fontSize: 15, lineHeight: 1.4 }}>{tip.text}</span></div>}
           </div>

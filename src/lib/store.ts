@@ -82,6 +82,8 @@ export interface State {
   tests: Record<SkillTestId, SkillTest[]>
   /** dates that have progress photos (the photos themselves live in IndexedDB) */
   photoDates?: string[]
+  /** monthly calisthenics targets passed: goal id -> date */
+  skillGoals?: Record<string, string>
 }
 
 const KEY = 'gymcals:v1'
@@ -168,6 +170,15 @@ export const actions = {
 
   setSettings(patch: Partial<Settings>) {
     update((s) => ({ ...s, settings: { ...s.settings, ...patch } }))
+  },
+
+  setSkillGoal(id: string, date: string | null) {
+    update((s) => {
+      const goals = { ...s.skillGoals }
+      if (date) goals[id] = date
+      else delete goals[id]
+      return { ...s, skillGoals: goals }
+    })
   },
 
   setCheckin(date: string, patch: Partial<Checkin>) {

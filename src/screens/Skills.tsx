@@ -7,6 +7,10 @@ import { fmtNum, history } from '../lib/coach'
 import { fmtShort } from '../lib/dates'
 import { actions, useStore, type SkillTestId, type State } from '../lib/store'
 import { useToday } from '../lib/useToday'
+import { monthOf, SKILL_MONTHS, type SkillGoal } from '../data/skills'
+import { IconCheck } from '../components/Icons'
+import { Link } from 'react-router-dom'
+import { undoable } from '../lib/toast'
 
 const TRACKS = [
   {
@@ -49,7 +53,7 @@ function levelOf(state: State, id: string) {
 
 export default function SkillsScreen() {
   const state = useStore((s) => s)
-  const { date } = useToday()
+  const { date, week, program } = useToday()
   const [testing, setTesting] = useState<(typeof TRACKS)[number] | null>(null)
 
   const startAssist = state.baseline?.pullAssist ?? (history(state, 'assisted-pull-up').flatMap((e) => e.sets.map((s) => s.load)).find((l): l is number => l != null) || undefined)
@@ -76,6 +80,8 @@ export default function SkillsScreen() {
           </span>
         </div>
       </div>
+
+      <MonthlyGoals month={monthOf(week, program.weeks)} months={Math.min(SKILL_MONTHS.length, Math.ceil(program.weeks / 4))} passed={state.skillGoals ?? {}} date={date} />
 
       <div>
         <h2 className="sec">Foundations</h2>
@@ -115,6 +121,56 @@ export default function SkillsScreen() {
           }}
         />
       )}
+    </div>
+  )
+}
+
+/** This month's 2–3 calisthenics targets, each with a pass test; earlier and later months below. */
+function MonthlyGoals({ month, months, passed, date }: { month: number; months: number; passed: Record<string, string>; date: string }) {
+  const [showAll, setShowAll] = useState(false)
+  const current = SKILL_MONTHS[month - 1]
+  const done = current.goals.filter((g) => passed[g.id]).length
+  const toggle = (g: SkillGoal) => {
+    const was = passed[g.id] ?? null
+    actions.setSkillGoal(g.id, was ? null : date)
+    if (!was) undoable(`Passed: ${g.name}`, () => actions.setSkillGoal(g.id, null))
+  }
+  const goal = (g: SkillGoal) => (
+    <div key={g.id} className="row" style={{ alignItems: 'flex-start', gap: 12, ['--inset' as string]: '56px' }}>
+      <button
+        type="button"
+        aria-pressed={!!passed[g.id]}
+        aria-label={`${g.name}: ${passed[g.id] ? 'passed' : 'mark as passed'}`}
+        onClick={() => toggle(g)}
+        style={{ flex: 'none', width: 32, height: 32, borderRadius: 16, marginTop: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', border: passed[g.id] ? 0 : '2px solid var(--chevron)', background: passed[g.id] ? 'var(--good-fill)' : 'transparent', color: '#fff' }}
+      >
+        {passed[g.id] && <IconCheck size={15} />}
+      </button>
+      <span className="grow" style={{ gap: 3 }}>
+        <span style={{ fontWeight: 600 }}>{g.name}</span>
+        <span className="sub" style={{ lineHeight: 1.4 }}>{g.test}</span>
+        <span className="small">
+          {passed[g.id] ? <span style={{ color: 'var(--good)', fontWeight: 600 }}>Passed {fmtShort(passed[g.id])} · </span> : null}
+          <Link to={`/exercise/${g.ex}`} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 36, fontWeight: 600 }}>How to train it</Link>
+        </span>
+      </span>
+    </div>
+  )
+  return (
+    <div>
+      <h2 className="sec">Month {month} skills · {done} of {current.goals.length} passed</h2>
+      <div className="group">{current.goals.map((g) => goal(g))}</div>
+      <p className="sec-foot">Test when you’re fresh and tick a skill when you pass its test. 2–3 clear steps a month is a strong pace.</p>
+      <button type="button" className="link-btn" style={{ marginLeft: 4, minHeight: 40, fontWeight: 600 }} aria-expanded={showAll} onClick={() => setShowAll(!showAll)}>
+        {showAll ? 'Hide other months' : 'See all months'}
+      </button>
+      {showAll &&
+        SKILL_MONTHS.slice(0, months).filter((m) => m.month !== month).map((m) => (
+          <div key={m.month} style={{ marginTop: 12 }}>
+            <h3 className="sec">Month {m.month}{m.month > month ? ' · coming up' : ''}</h3>
+            <div className="group">{m.goals.map((g) => goal(g))}</div>
+          </div>
+        ))}
     </div>
   )
 }

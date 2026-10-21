@@ -3,3 +3,7 @@ dist
 *.local
 test-results
 playwright-report
+
+# Personal plan notes (health details) — keep out of the public repo
+docs/GymCals_Plan_Review.txt
+docs/*private*

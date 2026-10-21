@@ -247,17 +247,104 @@ const fiveOf = (days: PlanDay[]) => days.map((d) => (d.id === 'sat' ? { ...d, na
 const ATHLETIC_5 = fiveOf(ATHLETIC)
 const ATHLETIC_EXTENDED_5 = fiveOf(ATHLETIC_EXTENDED)
 
-export type TemplateId = 'original' | 'athletic'
+// ---------------- Mastery plan (Athletic base, reviewed by a coach and a physio) ----------------
+// V-taper priority (side delts and lats 3x a week, rear delts 2x), loaded abs 3x, pull-up practice
+// 2x, direct forearm work 2x, calisthenics skills while fresh, every session ≤ ~75 min.
+// No RDLs (they caused upper-back pain): hip thrust, 45° hip extension and curls cover the
+// hamstrings and glutes. Weeks 1–2 ease in with one set fewer; deload in week 6.
+
+const UPPER_WARMUP = ['3 min easy bike or walk', 'Open-book thoracic rotations and wall slides', 'Light band pull-aparts and 2 min wrist prep', '1–2 light ramp-up sets of the first lift']
+const LOWER_WARMUP = ['5 min easy bike or incline walk', 'Bodyweight squats 2 × 12–15 and leg swings', 'Glute bridges 1 × 15 and hip openers', 'Light practice sets before the first heavy lift']
+
+const MASTERY: PlanDay[] = [
+  {
+    id: 'mon', name: 'Upper A · Chest & Back Width', short: 'Upper A', focus: 'Chest · Lats · Side delts · Triceps', minutes: 70, hero: 'bench-press',
+    warmup: [...UPPER_WARMUP.slice(0, 3), 'Scapular push-ups 2 × 10–15', UPPER_WARMUP[3]],
+    groups: [
+      { title: 'Chest', items: [r('bench-press', 3, 6, 10, [120, 180], { note: 'Moderate arch, gentle shoulder-blade set' }), r('incline-dumbbell-press', 3, 8, 12, [90, 150])] },
+      { title: 'Back width', items: [r('lat-pulldown', 3, 8, 12, [90, 150], { note: 'Wide grip, no lean-back' }), r('seated-cable-row', 3, 8, 12, [90, 150], { note: 'Torso still' })] },
+      { title: 'Shoulders & arms', items: [r('lateral-raise', 4, 12, 20, [60, 90], { note: 'Side delts day 1' }), r('triceps-pushdown', 2, 10, 15, [60, 90], { note: 'Rope' })] },
+      { title: 'Calisthenics finisher', items: [r('push-up', 2, 6, 15, [90, 90], { note: 'As many as possible, stop 2 reps short' })] },
+    ],
+  },
+  {
+    id: 'tue', name: 'Legs · Squat, Glutes & Hamstrings', short: 'Legs', focus: 'Quads · Glutes · Hamstrings · Calves · Abs', minutes: 75, hero: 'squat',
+    warmup: LOWER_WARMUP,
+    groups: [
+      { title: 'Main lifts', items: [r('squat', 3, 6, 10, [150, 180], { note: 'Or hack squat / leg press' }), r('hip-thrust', 3, 8, 12, [120, 150], { note: 'Upper back below the shoulder blades, chin tucked' })] },
+      { title: 'Legs', items: [r('bulgarian-split-squat', 3, 8, 12, [90, 120], { perSide: true }), r('seated-leg-curl', 3, 10, 15, [60, 90]), r('leg-extension', 2, 10, 15, [60, 90]), r('calf-raise', 4, 8, 12, [60, 90], { note: 'Standing · 2 s pause at the bottom' })] },
+      { title: 'Abs', items: [r('cable-crunch', 3, 10, 15, [60, 90], { note: 'Abs day 1' })] },
+    ],
+  },
+  {
+    id: 'wed', name: 'Pull + Pull-up Skill', short: 'Pull', focus: 'Lats · Rear delts · Biceps · Forearms · Pull-ups', minutes: 75, hero: 'assisted-pull-up',
+    warmup: UPPER_WARMUP,
+    groups: [
+      { title: 'Pull-up skill · do these fresh', items: [r('scapular-pull-up', 2, 5, 8, [60, 90]), r('assisted-pull-up', 4, 5, 8, [120, 180], { note: 'Pull-up day 1 · −2.5 kg assist at 8 clean reps' }), r('negative-pull-up', 3, 3, 3, [120, 120], { note: '5 s lowering · from week 3' })] },
+      { title: 'Back', items: [r('chest-supported-row', 3, 8, 12, [90, 150]), r('straight-arm-pulldown', 2, 12, 15, [60, 90]), r('reverse-pec-deck', 3, 12, 20, [60, 90], { note: 'Rear delts day 1' })] },
+      { title: 'Arms & forearms', items: [r('incline-dumbbell-curl', 3, 8, 12, [60, 90]), r('hammer-curl', 2, 10, 15, [60, 90]), r('reverse-curl', 2, 12, 15, [60, 90], { note: 'Forearms day 1' })] },
+      { title: 'Grip finisher', items: [r('dead-hang', 2, 20, 45, [90, 90], { note: 'Max time, stop before your grip fails' })] },
+    ],
+  },
+  {
+    id: 'thu', name: 'Core, Skills + Cardio', short: 'Core', focus: 'Abs · L-sit · Handstand prep · Fat loss', minutes: 65, hero: 'hanging-knee-raise',
+    warmup: ['3 min easy bike or walk', '2 min wrist prep: circles, palm and finger stretches', 'Cat–cow and hip openers', 'Scapular push-ups 1 × 10'],
+    groups: [
+      { title: 'Skills · while fresh', items: [r('tuck-l-sit', 4, 10, 20, [90, 120], { note: 'On parallettes or blocks' }), r('pike-push-up', 3, 5, 10, [90, 120], { note: 'Handstand prep · stop if wrists complain' })] },
+      { title: 'Abs', items: [r('hanging-knee-raise', 3, 8, 12, [60, 90], { note: 'Abs day 2 · leg raises when knees get easy' }), r('hollow-hold', 3, 20, 30, [45, 60]), r('side-plank', 2, 30, 45, [45, 60], { perSide: true })] },
+      { title: 'Cardio', items: [r('incline-walk', 1, 25, 35, [0, 0], { note: 'Zone 2: you can still talk in short sentences' })] },
+    ],
+  },
+  {
+    id: 'fri', name: 'Upper B · 3D Shoulders & Arms', short: 'Upper B', focus: 'Side delts · Upper chest · Rear delts · Arms', minutes: 70, hero: 'incline-bench-press',
+    warmup: UPPER_WARMUP,
+    groups: [
+      { title: 'Pull-up skill', items: [r('assisted-pull-up', 2, 5, 8, [120, 120], { note: 'Pull-up day 2 · technique, not failure' })] },
+      { title: 'Main lifts', items: [r('incline-bench-press', 3, 8, 12, [120, 180]), r('dumbbell-shoulder-press', 3, 8, 12, [90, 150], { note: 'Seated, 2 reps in reserve' })] },
+      { title: 'Shoulders', items: [r('cable-lateral-raise', 4, 12, 20, [60, 90], { note: 'Side delts day 2' }), r('reverse-pec-deck', 2, 12, 20, [60, 90], { note: 'Rear delts day 2' })] },
+      { title: 'Arms', items: [r('preacher-curl', 3, 8, 12, [60, 90], { note: 'EZ-bar · control the bottom' }), r('triceps-extension', 3, 10, 15, [60, 90], { note: 'Overhead cable' }), r('triceps-pushdown', 2, 10, 15, [60, 90], { note: 'Rope' })] },
+    ],
+  },
+  {
+    id: 'sat', name: 'Light Legs, Shoulders, Forearms + Conditioning', short: 'Light legs', focus: 'Legs · Side delts · Forearms · Grip', minutes: 75, hero: 'farmers-carry',
+    warmup: LOWER_WARMUP.slice(0, 3),
+    groups: [
+      { title: 'Legs', items: [r('leg-press', 3, 12, 15, [90, 120]), r('back-extension', 3, 10, 15, [90, 90], { note: 'Neutral spine · hamstrings and glutes' }), r('seated-leg-curl', 2, 12, 15, [60, 90]), r('seated-calf-raise', 3, 12, 20, [60, 90])] },
+      { title: 'Shoulders & forearms', items: [r('lateral-raise', 3, 15, 20, [60, 60], { note: 'Light · side delts day 3' }), r('wrist-curl', 2, 15, 20, [45, 60], { note: 'Back to back with reverse wrist curls · forearms day 2' }), r('reverse-wrist-curl', 2, 15, 20, [45, 60]), r('farmers-carry', 2, 30, 45, [90, 120])] },
+      { title: 'Abs', items: [r('hanging-knee-raise', 3, 8, 12, [60, 90], { note: 'Abs day 3' })] },
+      { title: 'Cardio', items: [r('incline-walk', 1, 15, 20, [0, 0], { note: 'Brisk walk, cycle or sport' })] },
+      { title: 'Mobility', items: [r('mobility', 1, 5, 10, [0, 0])] },
+    ],
+  },
+  SUN,
+]
+
+/** Mastery eases in: weeks 1–2 do one set fewer on exercises with 3+ sets. */
+const masteryRamp = (days: PlanDay[], week: number) =>
+  week > 2
+    ? days
+    : days.map((d) => ({
+        ...d,
+        groups: d.groups
+          .map((g) => ({ ...g, items: g.items.filter((it) => it.ex !== 'negative-pull-up').map((it) => (it.sets >= 3 ? { ...it, sets: it.sets - 1 } : it)) }))
+          .filter((g) => g.items.length),
+      }))
+const MASTERY_5 = fiveOf(MASTERY)
+
+
+export type TemplateId = 'original' | 'athletic' | 'mastery'
 export const TEMPLATES: Record<TemplateId, { name: string; summary: string }> = {
   original: { name: 'Original', summary: 'Your PDF plan: upper/lower split with calisthenics every training day and two full leg days.' },
   athletic: { name: 'Athletic', summary: 'Upper-body and V-taper focus: one heavy and one light leg day, a core day, and 3D shoulders and arms.' },
+  mastery: { name: 'Mastery', summary: 'The reviewed best-of plan: side delts and lats 3× a week, abs 3×, pull-ups 2×, direct forearm work, full glute and hamstring work without RDLs. Easy first 2 weeks, deload in week 6. Best with 6 months.' },
 }
-export const templateOf = (id?: string): TemplateId => (id === 'athletic' ? 'athletic' : 'original')
+export const templateOf = (id?: string): TemplateId => (id === 'athletic' || id === 'mastery' ? id : 'original')
 /** Short id stored on each workout so past sessions keep the exercises they were done with. */
-export const planKey = (template: TemplateId, extended: boolean) => (template === 'athletic' ? (extended ? 'athletic-extended' : 'athletic') : 'original')
+export const planKey = (template: TemplateId, extended: boolean) => (template === 'athletic' ? (extended ? 'athletic-extended' : 'athletic') : template)
 
-const daysBase = (fiveDay: boolean, template: TemplateId = 'original', extended = false) =>
-  template === 'athletic' ? (extended ? (fiveDay ? ATHLETIC_EXTENDED_5 : ATHLETIC_EXTENDED) : fiveDay ? ATHLETIC_5 : ATHLETIC) : fiveDay ? FIVE_DAYS : DAYS
+const daysBase = (fiveDay: boolean, template: TemplateId = 'original', extended = false, week = 1) =>
+  template === 'mastery' ? masteryRamp(fiveDay ? MASTERY_5 : MASTERY, week)
+  : template === 'athletic' ? (extended ? (fiveDay ? ATHLETIC_EXTENDED_5 : ATHLETIC_EXTENDED) : fiveDay ? ATHLETIC_5 : ATHLETIC) : fiveDay ? FIVE_DAYS : DAYS
 
 export const JS_DAY: DayId[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 
@@ -270,7 +357,7 @@ export type ProgramId = 12 | 16 | 24
 export type PhaseId = 'foundation' | 'progression' | 'performance' | 'peak' | 'hypertrophy' | 'strength'
 
 export interface Phase { id: PhaseId; name: string; weeks: [number, number]; text: string }
-export interface Program { id: ProgramId; weeks: number; name: string; short: string; summary: string; phases: Phase[]; deloads: number[]; maintenance: number[] }
+export interface Program { id: ProgramId; weeks: number; name: string; short: string; summary: string; phases: Phase[]; deloads: number[]; maintenance: number[]; focus?: Record<number, string> }
 
 const BLOCK_1: Phase[] = [
   { id: 'foundation', name: 'Foundation', weeks: [1, 4], text: 'Learn the technique, use manageable weights, build push-ups, hangs and assisted pull-ups.' },
@@ -302,7 +389,21 @@ export const PROGRAMS: Record<ProgramId, Program> = {
   },
 }
 
-export const programOf = (id?: number): Program => PROGRAMS[(id as ProgramId) in PROGRAMS ? (id as ProgramId) : 12]
+const MASTERY_FOCUS: Record<number, string> = {
+  1: 'Easy start: one set fewer on bigger exercises. Learn the technique and note your starting weights.',
+  2: 'Still one set fewer. Add a rep where you can.',
+  3: 'Full sets from now, and pull-up negatives start. Top of the range on every set? Add a little weight.',
+  5: 'Keep adding reps or weight. Next week is lighter.',
+  6: 'Deload week: about 40% fewer sets at the same weights. Keep the skill practice.',
+  7: 'Back to full volume. Re-test push-ups, hang and L-sit; check waist and photos.',
+  8: 'Small increases in weight or reps. Aim for clean reps, not failure.',
+}
+/** The chosen length; the Mastery plan deloads earlier (week 6) and has its own weekly notes. */
+export const programOf = (id?: number, plan?: string): Program => {
+  const base = PROGRAMS[(id as ProgramId) in PROGRAMS ? (id as ProgramId) : 12]
+  if (plan !== 'mastery') return base
+  return { ...base, summary: base.summary.replace('a lighter week 7', 'a lighter week 6'), deloads: base.deloads.map((w) => (w === 7 ? 6 : w)), focus: MASTERY_FOCUS }
+}
 
 const FOCUS: Record<number, string> = {
   1: 'Learn the setup and technique for every exercise. Write down your starting weights and reps.',
@@ -341,7 +442,7 @@ const FOCUS_24: Record<number, string> = {
   24: 'Final re-test: lifts, push-ups, pull-ups, L-sit, measurements and photos. Compare with week 1.',
 }
 
-export const weekFocus = (week: number, p: Program) => (p.id === 16 ? FOCUS_16[week] : p.id === 24 ? FOCUS_24[week] : undefined) ?? FOCUS[week] ?? ''
+export const weekFocus = (week: number, p: Program) => p.focus?.[week] ?? (p.id === 16 ? FOCUS_16[week] : p.id === 24 ? FOCUS_24[week] : undefined) ?? FOCUS[week] ?? ''
 export const phaseOf = (week: number, p: Program = PROGRAMS[12]) => p.phases.find((x) => week >= x.weeks[0] && week <= x.weeks[1]) ?? p.phases[p.phases.length - 1]
 export const isDeload = (week: number, p: Program = PROGRAMS[12]) => p.deloads.includes(week)
 export const isMaintenance = (week: number, p: Program = PROGRAMS[12]) => p.maintenance.includes(week)
@@ -398,7 +499,7 @@ export function ctxForSession<T extends Partial<PlanCtx>>(ctx: T, plan?: string)
 export const daysFor = (fiveDay: boolean, ctx: Partial<PlanCtx> = {}) => {
   const program = ctx.program ?? PROGRAMS[12]
   const phase = phaseOf(ctx.week ?? 1, program).id
-  return daysBase(fiveDay, ctx.template, ctx.extended).map((d) => applyPhase(d, phase))
+  return daysBase(fiveDay, ctx.template, ctx.extended, ctx.week ?? 1).map((d) => applyPhase(d, phase))
 }
 export const dayFor = (id: DayId, fiveDay: boolean, ctx: Partial<PlanCtx> = {}) => daysFor(fiveDay, ctx).find((d) => d.id === id)!
 

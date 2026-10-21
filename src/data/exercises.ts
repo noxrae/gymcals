@@ -372,6 +372,30 @@ const DEFS: Record<string, Def> = {
     steps: ['World’s greatest stretch: lunge, hand down, rotate the arm up. 5 each side.', 'Hip circles and 90/90 hip switches.', 'Cat–cow and thoracic rotations for the upper back.', 'Shoulder pass-throughs with a band or towel. Move slowly, no forcing.'],
     mistake: 'Bouncing into stretches or pushing into pain.',
   },
+  'reverse-curl': {
+    name: 'Reverse EZ-bar Curl', kind: 'weight', step: 2.5, equipment: 'EZ bar or barbell',
+    primary: ['forearms', 'brachialis'], secondary: ['biceps'],
+    steps: ['Hold the bar palms-down, hands shoulder-width.', 'Keep your elbows pinned to your sides and wrists straight.', 'Curl the bar up to shoulder height.', 'Lower slowly over two to three seconds.'],
+    mistake: 'Letting the wrists bend back or swinging the bar up.',
+  },
+  'wrist-curl': {
+    name: 'Wrist Curl', kind: 'weight', step: 1, equipment: 'Dumbbells · bench',
+    primary: ['forearms'], secondary: [],
+    steps: ['Sit with forearms on your thighs, palms up, wrists just past the knees.', 'Let the dumbbells roll down to your fingertips.', 'Curl your wrists up as high as you can and squeeze.', 'Lower slowly. Light weight, full range.'],
+    mistake: 'Lifting the forearms off the thighs to cheat the weight up.',
+  },
+  'reverse-wrist-curl': {
+    name: 'Reverse Wrist Curl', kind: 'weight', step: 1, equipment: 'Dumbbells · bench',
+    primary: ['forearms'], secondary: [],
+    steps: ['Sit with forearms on your thighs, palms down, wrists past the knees.', 'Lower the backs of your hands toward the floor.', 'Raise your knuckles up as high as you can.', 'Lower slowly. Use a lighter weight than wrist curls.'],
+    mistake: 'Going too heavy and bouncing; the wrist extensors are small.',
+  },
+  'hollow-hold': {
+    name: 'Hollow Body Hold', kind: 'time', step: 0, equipment: 'Floor',
+    primary: ['abs'], secondary: ['hip-flexors', 'obliques'],
+    steps: ['Lie on your back and press your lower back into the floor.', 'Lift your shoulders, arms and legs slightly off the floor.', 'Make a shallow banana shape; bend the knees to make it easier.', 'Hold and breathe. Stop when the lower back lifts.'],
+    mistake: 'Lower back arching off the floor. Bend the knees or raise the legs higher.',
+  },
   'incline-walk': {
     name: 'Incline Walk / Bike', kind: 'cardio', step: 0, equipment: 'Treadmill, bike or elliptical',
     primary: [], secondary: [],
@@ -380,7 +404,7 @@ const DEFS: Record<string, Def> = {
   },
 }
 
-const PHOTO_COUNT: Record<string, number> = { 'dead-hang': 1, 'scapular-push-up': 1, 'pike-push-up': 1, 'tuck-l-sit': 1, 'elevated-pike-push-up': 0, 'advanced-tuck-l-sit': 0 }
+const PHOTO_COUNT: Record<string, number> = { 'hollow-hold': 1, 'dead-hang': 1, 'scapular-push-up': 1, 'pike-push-up': 1, 'tuck-l-sit': 1, 'elevated-pike-push-up': 0, 'advanced-tuck-l-sit': 0 }
 const VIDEOS = videos as Record<string, { id: string; title: string; channel: string } | null>
 
 export const EXERCISES: Record<string, Exercise> = Object.fromEntries(
@@ -439,6 +463,10 @@ export const ALTERNATIVES: Record<string, string[]> = {
   'hanging-knee-raise': ['dead-bug', 'plank'],
   'push-up': ['scapular-push-up'],
   'dead-bug-timed': ['plank', 'dead-bug'],
+  'reverse-curl': ['hammer-curl'],
+  'wrist-curl': ['farmers-carry'],
+  'reverse-wrist-curl': ['reverse-curl'],
+  'hollow-hold': ['dead-bug-timed', 'plank'],
 }
 
 /** Gym (machines, barbells, dumbbells, cables) vs calisthenics (bodyweight / bar skills) vs cardio. */
@@ -447,13 +475,13 @@ const CALISTHENICS = new Set([
   'push-up', 'scapular-push-up', 'pike-push-up', 'dead-hang', 'scapular-pull-up', 'assisted-pull-up', 'negative-pull-up',
   'hanging-knee-raise', 'dead-bug', 'side-plank', 'plank', 'tuck-l-sit', 'walking-lunge', 'mountain-climber',
   'pull-up', 'decline-push-up', 'hanging-leg-raise', 'diamond-push-up', 'elevated-pike-push-up', 'advanced-tuck-l-sit',
-  'dead-bug-timed', 'mobility',
+  'dead-bug-timed', 'mobility', 'hollow-hold',
 ])
 export const typeOf = (key: string): ExType => (CALISTHENICS.has(key) ? 'cali' : EXERCISES[key]?.kind === 'cardio' ? 'cardio' : 'gym')
 export const TYPE_LABEL: Record<ExType, string> = { gym: 'Gym', cali: 'Calisthenics', cardio: 'Cardio' }
 
 /** How the form demo animates: a held position, or start ↔ finish reps (fast for climbers). */
-export const HOLDS = new Set(['dead-hang', 'plank', 'side-plank', 'tuck-l-sit', 'advanced-tuck-l-sit', 'farmers-carry'])
+export const HOLDS = new Set(['dead-hang', 'plank', 'side-plank', 'tuck-l-sit', 'advanced-tuck-l-sit', 'farmers-carry', 'hollow-hold'])
 export const FAST = new Set(['mountain-climber'])
 /** No free photos exist for these, so the demo is an animated figure. */
 export const FIGURE_DEMO = new Set(['pike-push-up', 'scapular-push-up', 'tuck-l-sit', 'elevated-pike-push-up', 'advanced-tuck-l-sit'])

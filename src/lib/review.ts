@@ -55,6 +55,6 @@ export function weekReview(state: State, monday: string, week: number): WeekRevi
     waist: waists.at(-1) ?? null,
     protein: avg(days.map((c) => c.protein).filter((v): v is number => v != null)),
     sleep: avg(days.map((c) => c.sleep).filter((v): v is number => v != null)),
-    nextFocus: weekFocus(week + 1, programOf(state.settings.program)) || 'Plan complete. Compare your numbers with week 1 and choose your next program in Settings.',
+    nextFocus: weekFocus(week + 1, programOf(state.settings.program, state.settings.plan)) || 'Plan complete. Compare your numbers with week 1 and choose your next program in Settings.',
   }
 }

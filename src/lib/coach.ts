@@ -47,7 +47,7 @@ export interface Suggestion { load?: number; reps: number; text: string; up: boo
 export function suggest(state: State, item: PlanItem, week: number): Suggestion {
   const ex = EXERCISES[item.ex]
   const last = lastSets(state, item.ex)
-  const deload = isDeload(week, programOf(state.settings.program))
+  const deload = isDeload(week, programOf(state.settings.program, state.settings.plan))
 
   if (!last) {
     const first =
@@ -174,7 +174,7 @@ export function insights(state: State, date = today()): Insight[] {
   const out: Insight[] = []
   const week = weekOf(date, state.settings.startDate)
 
-  const program = programOf(state.settings.program)
+  const program = programOf(state.settings.program, state.settings.plan)
   if (isDeload(week, program)) out.push({ to: '/plan', tone: 'accent', title: 'Deload week', text: 'About 40% fewer sets at the same weights. It lets your body catch up so the next weeks go better.' })
   if (nextDeload(week, program) === week + 1) out.push({ to: '/plan', tone: 'accent', title: 'Lighter week next', text: `Week ${week + 1} is a deload. Push well this week, but don’t chase personal records.` })
   if (isMaintenance(week, program)) out.push({ to: '/settings?profile=1', tone: 'accent', title: 'Maintenance-calorie week', text: 'Eat at maintenance this week (your calorie target already shows it). A planned break makes a long fat-loss phase easier to stick to and protects strength.' })
@@ -229,6 +229,6 @@ export function calorieTarget(state: State, date = today()) {
   if (!weight) return null
   const c = calories(weight, p, state.settings.calorieAdjust ?? 0)
   // Planned maintenance weeks in the 4- and 6-month programs.
-  const maintenanceWeek = isMaintenance(weekOf(date, state.settings.startDate), programOf(state.settings.program))
+  const maintenanceWeek = isMaintenance(weekOf(date, state.settings.startDate), programOf(state.settings.program, state.settings.plan))
   return { weight, ...c, target: maintenanceWeek ? c.maintenance : c.target, maintenanceWeek }
 }

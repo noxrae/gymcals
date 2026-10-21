@@ -176,7 +176,7 @@ function ExerciseBlock({ item, index, planned, alternatives, week, date, log, is
   const state = useStore((s) => s)
   const tip = useMemo(() => suggest(state, item, week), [state, item, week])
   const prev = useMemo(() => lastSets(state, item.ex, date), [state, item.ex, date])
-  const count = setsFor(item, week, programOf(state.settings.program))
+  const count = setsFor(item, week, programOf(state.settings.program, state.settings.plan))
   const sets: SetLog[] = log ?? Array.from({ length: count }, () => ({ load: tip.load, reps: tip.reps, done: false }))
   const allDone = sets.length > 0 && sets.every((s) => s.done)
   const [open, setOpen] = useState(!allDone)

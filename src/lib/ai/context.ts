@@ -19,7 +19,7 @@ export interface CoachCtx {
 }
 
 export function coachCtx(state: State, date = today()): CoachCtx {
-  const program = programOf(state.settings.program)
+  const program = programOf(state.settings.program, state.settings.plan)
   const week = Math.min(program.weeks, Math.max(1, weekOf(date, state.settings.startDate)))
   // Follow the workout actually started today (e.g. a moved session), like the Today card does.
   const session = state.sessions[date]

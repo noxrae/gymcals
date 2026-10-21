@@ -65,10 +65,13 @@ const PHOTOS = {
   'seated-hip-abduction': ['Thigh_Abductor', [0, 1]],
   'dead-bug-timed': ['Dead_Bug', [0, 1]],
   mobility: ['Worlds_Greatest_Stretch', [0, 1]],
+  'reverse-curl': ['Reverse_Barbell_Curl', [0, 1]],
+  'wrist-curl': ['Seated_Dumbbell_Palms-Up_Wrist_Curl', [0, 1]],
+  'reverse-wrist-curl': ['Seated_Dumbbell_Palms-Down_Wrist_Curl', [0, 1]],
 }
 
 // Exercises with no free-exercise-db photo use their form video's thumbnail instead.
-const THUMB_ONLY = ['scapular-push-up', 'pike-push-up', 'tuck-l-sit']
+const THUMB_ONLY = ['scapular-push-up', 'pike-push-up', 'tuck-l-sit', 'hollow-hold']
 
 const PRIMARY = '#ff4a12'
 const SECONDARY = '#ff9a62'

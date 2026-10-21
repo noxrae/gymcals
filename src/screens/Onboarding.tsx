@@ -85,7 +85,7 @@ export default function Onboarding() {
           <div>
             <h2 className="sec">Which plan?</h2>
             <div className="seg" role="group" aria-label="Weekly plan">
-              {(['original', 'athletic'] as TemplateId[]).map((t) => (
+              {(['original', 'athletic', 'mastery'] as TemplateId[]).map((t) => (
                 <button key={t} type="button" aria-pressed={plan === t} onClick={() => setPlan(t)}>{TEMPLATES[t].name}</button>
               ))}
             </div>

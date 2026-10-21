@@ -42,7 +42,7 @@ export default function PlanScreen() {
       <div>
         <h2 className="sec">Weekly plan</h2>
         <div className="seg" role="group" aria-label="Weekly plan">
-          {(['original', 'athletic'] as TemplateId[]).map((t) => (
+          {(['original', 'athletic', 'mastery'] as TemplateId[]).map((t) => (
             <button key={t} type="button" aria-pressed={template === t} onClick={() => switchPlan(t, t === 'athletic' ? extended : false)}>{TEMPLATES[t].name}</button>
           ))}
         </div>

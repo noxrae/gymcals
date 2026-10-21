@@ -5,8 +5,8 @@ import { useStore } from './store'
 export function useToday() {
   const start = useStore((s) => s.settings.startDate)
   const fiveDay = useStore((s) => s.settings.fiveDay)
-  const program = programOf(useStore((s) => s.settings.program))
   const template = templateOf(useStore((s) => s.settings.plan))
+  const program = programOf(useStore((s) => s.settings.program), template)
   const extended = useStore((s) => !!s.settings.extended)
   const date = today()
   const rawWeek = weekOf(date, start)
