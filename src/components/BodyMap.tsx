@@ -1,4 +1,4 @@
-import { MUSCLES, muscleOverlay, type MuscleId, type View } from '../data/muscles'
+import { customOverlay, MUSCLES, muscleOverlay, type MuscleId, type View } from '../data/muscles'
 
 export interface MapMuscle { id: MuscleId; primary: boolean; n: number }
 
@@ -38,9 +38,12 @@ export function BodyMap({ muscles, focus, compact }: { muscles: MapMuscle[]; foc
             <img className="base" src={`muscles/body-${view}.svg`} alt="" />
             {muscles.flatMap((m) =>
               MUSCLES[m.id].views.includes(view)
-                ? MUSCLES[m.id].wger.map((w) => (
-                    <img key={`${m.id}-${w}`} src={muscleOverlay(w, m.primary)} alt="" style={{ opacity: !focus || focus === m.id ? 1 : 0.12 }} />
-                  ))
+                ? [
+                    ...MUSCLES[m.id].wger.map((w) => (
+                      <img key={`${m.id}-${w}`} src={muscleOverlay(w, m.primary)} alt="" style={{ opacity: !focus || focus === m.id ? 1 : 0.12 }} />
+                    )),
+                    ...(MUSCLES[m.id].custom ? [<img key={`${m.id}-custom`} src={customOverlay(MUSCLES[m.id].custom!, view, m.primary)} alt="" style={{ opacity: !focus || focus === m.id ? 1 : 0.12 }} />] : []),
+                  ]
                 : [],
             )}
             {!compact &&

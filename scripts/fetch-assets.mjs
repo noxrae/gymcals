@@ -70,6 +70,7 @@ const PHOTOS = {
   'reverse-wrist-curl': ['Seated_Dumbbell_Palms-Down_Wrist_Curl', [0, 1]],
   'cable-pull-through': ['Pull_Through', [0, 1]],
   'reverse-hyper': ['Reverse_Hyperextension', [0, 1]],
+  'cable-fly': ['Cable_Crossover', [0, 1]],
 }
 
 // Exercises with no free-exercise-db photo use their form video's thumbnail instead.

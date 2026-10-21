@@ -16,7 +16,7 @@ describe('Mastery plan', () => {
     tue: ['squat 3×6–10', 'hip-thrust 3×8–12', 'back-extension 3×8–12', 'seated-leg-curl 3×8–12', 'bulgarian-split-squat 2×8–12', 'leg-extension 2×10–15', 'calf-raise 4×8–12'],
     wed: ['scapular-pull-up 2×5–8', 'negative-pull-up 3×3–3', 'assisted-pull-up 3×5–8', 'chest-supported-row 3×8–12', 'reverse-pec-deck 3×12–20', 'incline-dumbbell-curl 3×8–12', 'hammer-curl 2×10–15', 'reverse-curl 2×12–15', 'dead-hang 2×20–45'],
     thu: ['tuck-l-sit 4×10–20', 'pike-push-up 3×5–10', 'wall-handstand 3×15–30', 'hanging-knee-raise 3×8–12', 'hollow-hold 3×20–30', 'side-plank 2×30–45', 'calf-raise 2×10–15', 'incline-walk 1×25–35'],
-    fri: ['assisted-pull-up 2×5–8', 'incline-bench-press 3×8–12', 'dumbbell-shoulder-press 3×8–12', 'cable-lateral-raise 4×12–20', 'reverse-pec-deck 3×12–20', 'preacher-curl 3×8–12', 'triceps-extension 3×10–15', 'triceps-pushdown 2×10–15'],
+    fri: ['assisted-pull-up 2×5–8', 'incline-bench-press 3×8–12', 'dumbbell-shoulder-press 3×8–12', 'cable-fly 2×12–15', 'cable-lateral-raise 3×12–20', 'reverse-pec-deck 3×12–20', 'preacher-curl 3×8–12', 'triceps-extension 3×10–15', 'triceps-pushdown 2×10–15'],
     sat: ['leg-press 3×12–15', 'cable-pull-through 3×12–15', 'seated-leg-curl 3×12–15', 'seated-calf-raise 3×12–20', 'lateral-raise 3×15–20', 'hanging-knee-raise 3×8–12', 'farmers-carry 2×30–45', 'wrist-curl 2×15–20', 'reverse-wrist-curl 2×15–20'],
     sun: [],
   }
@@ -72,6 +72,8 @@ describe('Mastery plan', () => {
   it('meets the goals the reviews set', () => {
     const d = week()
     expect(weeklySets(d, 'side-delts')).toBeGreaterThanOrEqual(12)
+    expect(weeklySets(d, 'chest')).toBeGreaterThanOrEqual(13)
+    expect(daysTraining(d, 'chest')).toBeGreaterThanOrEqual(2)
     expect(daysTraining(d, 'side-delts')).toBeGreaterThanOrEqual(3)
     expect(weeklySets(d, 'lats')).toBeGreaterThanOrEqual(12)
     expect(weeklySets(d, 'rear-delts')).toBeGreaterThanOrEqual(6)

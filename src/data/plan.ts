@@ -311,7 +311,8 @@ const MASTERY: PlanDay[] = [
     groups: [
       { title: 'Pull-up skill', items: [r('assisted-pull-up', 2, 5, 8, [120, 120], { note: 'Pull-ups 2 of 2 · technique, not failure' })] },
       { title: 'Main lifts', items: [r('incline-bench-press', 3, 8, 12, [120, 180]), r('dumbbell-shoulder-press', 3, 8, 12, [90, 150], { note: 'Seated, 2 reps in reserve, never to failure' })] },
-      { title: 'Shoulders', items: [r('cable-lateral-raise', 4, 12, 20, [60, 90], { note: 'Side delts 2 of 3' }), r('reverse-pec-deck', 3, 12, 20, [60, 90], { note: 'Rear delts 2 of 2' })] },
+      { title: 'Chest', items: [r('cable-fly', 2, 12, 15, [60, 90], { note: 'Chest 2 of 2 · full stretch, squeeze' })] },
+      { title: 'Shoulders', items: [r('cable-lateral-raise', 3, 12, 20, [60, 90], { note: 'Side delts 2 of 3' }), r('reverse-pec-deck', 3, 12, 20, [60, 90], { note: 'Rear delts 2 of 2' })] },
       { title: 'Arms', items: [r('preacher-curl', 3, 8, 12, [60, 90], { note: 'EZ-bar · control the bottom' }), r('triceps-extension', 3, 10, 15, [60, 90], { note: 'Overhead cable' }), r('triceps-pushdown', 2, 10, 15, [60, 90], { note: 'Rope' })] },
     ],
   },
@@ -383,6 +384,8 @@ export const TEMPLATES: Record<TemplateId, { name: string; summary: string }> = 
   mastery: { name: 'Mastery', summary: 'The reviewed best-of plan: side delts and lats 3× a week, abs 3×, pull-ups 2×, direct forearm work, full glute and hamstring work without RDLs. A gentle 4-week start, deload in week 6. Best with 6 months.' },
 }
 export const templateOf = (id?: string): TemplateId => (id === 'athletic' || id === 'mastery' ? id : 'original')
+/** Human name for a stored plan key ('athletic-extended' -> 'Athletic · Extended'). Old workouts without one are Original. */
+export const planLabel = (key?: string) => (key === 'athletic-extended' ? 'Athletic · Extended' : TEMPLATES[templateOf(key)].name)
 /** Short id stored on each workout so past sessions keep the exercises they were done with. */
 export const planKey = (template: TemplateId, extended: boolean) => (template === 'athletic' ? (extended ? 'athletic-extended' : 'athletic') : template)
 

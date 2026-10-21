@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { photoUrl } from '../data/exercises'
-import { ctxForSession, dayFor, daysFor } from '../data/plan'
+import { ctxForSession, dayFor, daysFor, planKey, planLabel } from '../data/plan'
 import { avgWeight, calorieTarget, fmtNum, insights } from '../lib/coach'
 import { addDays, daysBetween, fmtLong, mondayOf } from '../lib/dates'
 import { useStore } from '../lib/store'
@@ -47,7 +47,7 @@ export default function TodayScreen() {
         <Link to={session ? `/workout/${shown.id}` : `/day/${shown.id}`} className="hero" style={{ height: 'min(118vw, 470px)' }}>
           <img src={photoUrl(shown.hero)} alt="" style={{ objectPosition: '50% 30%' }} />
           <div className="content">
-            <span className="kicker">{deload ? 'Deload week · lighter' : `${shown.short} day`}</span>
+            <span className="kicker">{session && (session.plan ?? 'original') !== planKey(ctx.template ?? 'original', !!ctx.extended) ? `${session.finishedAt ? 'Done' : 'Started'} with ${planLabel(session.plan)}` : deload ? 'Deload week · lighter' : `${shown.short} day`}</span>
             <span className="disp" style={{ fontSize: 'clamp(48px, 15vw, 64px)' }}>{shown.name}</span>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
               <span style={{ fontSize: 15, color: 'rgba(255,255,255,.85)' }}>

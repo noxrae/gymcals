@@ -402,6 +402,12 @@ const DEFS: Record<string, Def> = {
     steps: ['Face away from a low cable, rope between your legs, feet a bit wider than hips.', 'Push your hips back with soft knees and a flat back until you feel the hamstrings stretch.', 'Drive the hips forward and stand tall, squeezing your glutes.', 'Arms just hold the rope; the hips do the work.'],
     mistake: 'Squatting it down or pulling with the arms instead of hinging at the hips.',
   },
+  'cable-fly': {
+    name: 'Cable Fly', kind: 'weight', step: 1.25, equipment: 'Cable crossover · handles',
+    primary: ['chest'], secondary: ['front-delts'],
+    steps: ['Handles at shoulder height or a little higher, one step forward, soft bend in the elbows.', 'Open your arms wide until you feel a stretch across the chest.', 'Bring the hands together in a hugging arc, squeezing the chest.', 'Return slowly; keep the elbow bend the same throughout.'],
+    mistake: 'Bending and straightening the elbows so it turns into a press.',
+  },
   'reverse-hyper': {
     name: 'Reverse Hyperextension', kind: 'weight', step: 2.5, equipment: 'Reverse hyper machine (or a high bench)',
     primary: ['glutes', 'hamstrings'], secondary: ['lower-back'],
@@ -476,6 +482,7 @@ export const ALTERNATIVES: Record<string, string[]> = {
   'back-extension': ['cable-pull-through', 'reverse-hyper', 'hip-thrust'],
   'cable-pull-through': ['back-extension', 'reverse-hyper', 'hip-thrust'],
   'reverse-hyper': ['back-extension', 'cable-pull-through'],
+  'cable-fly': ['chest-press'],
   'wall-handstand': ['pike-push-up', 'elevated-pike-push-up'],
   'leg-curl': ['seated-leg-curl'],
   'seated-calf-raise': ['calf-raise'],

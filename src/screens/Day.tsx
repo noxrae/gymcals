@@ -4,7 +4,8 @@ import { Chevron, IconInfo } from '../components/Icons'
 import { ExerciseThumb } from '../components/Media'
 import { dayMix, groupType, TypeBadge } from '../components/TypeBadge'
 import { EXERCISES, photoUrl } from '../data/exercises'
-import { allItems, ctxForSession, dayFor, setsFor, type DayId } from '../data/plan'
+import { allItems, ctxForSession, dayFor, planKey, planLabel, setsFor, type DayId } from '../data/plan'
+import { addDays, mondayOf } from '../lib/dates'
 import { rangeText } from '../lib/coach'
 import { actions, useStore } from '../lib/store'
 import { useToday } from '../lib/useToday'
@@ -13,7 +14,14 @@ export default function DayScreen() {
   const { dayId } = useParams<{ dayId: DayId }>()
   const { date, week, dayId: todayId, fiveDay, ctx, program, deload, phase } = useToday()
   const session = useStore((s) => s.sessions[date])
-  const day = dayId ? dayFor(dayId, fiveDay, session && session.dayId === dayId ? ctxForSession(ctx, session.plan) : ctx) : undefined
+  const sessions = useStore((s) => s.sessions)
+  // A workout in progress keeps its own plan; otherwise this always shows the plan you've chosen.
+  const live = session && session.dayId === dayId && !session.finishedAt
+  const day = dayId ? dayFor(dayId, fiveDay, live ? ctxForSession(ctx, session.plan) : ctx) : undefined
+  const current = planKey(ctx.template ?? 'original', !!ctx.extended)
+  const WEEK = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+  const thisWeekDate = dayId ? addDays(mondayOf(date), WEEK.indexOf(dayId)) : ''
+  const doneThisWeek = sessions[thisWeekDate]?.dayId === dayId && sessions[thisWeekDate]?.finishedAt ? sessions[thisWeekDate] : undefined
   const navigate = useNavigate()
   if (!day) return <Navigate to="/" replace />
 
@@ -66,6 +74,17 @@ export default function DayScreen() {
         <span style={{ width: 1, background: 'var(--sep)' }} />
         <Stat value={day.minutes} label="Minutes" />
       </div>
+
+      {doneThisWeek && (
+        <div className="callout" style={{ margin: '16px 16px 0' }}>
+          <span>
+            <b>Done {thisWeekDate === date ? 'today' : 'this week'}</b>
+            {(doneThisWeek.plan ?? 'original') !== current
+              ? ` with the ${planLabel(doneThisWeek.plan)} plan. Below is your ${planLabel(current)} version for next time.`
+              : '. Below is what’s next time.'}
+          </span>
+        </div>
+      )}
 
       {deload && (
         <div className="callout accent" style={{ margin: '16px 16px 0' }}>

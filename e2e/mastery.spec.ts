@@ -69,3 +69,27 @@ test('the workout screen shows each exercise’s note, including the week-1 inst
   await expect(page.getByRole('region', { name: 'Barbell Hip Thrust', exact: true }).getByText(/^Weeks 1–2: thick pad/)).toBeVisible()
   await noErrors(errors)
 })
+
+test('after switching plans, done days say which plan they used and show the new plan', async ({ page }) => {
+  const done = (date: string, dayId: string) => ({ date, dayId, startedAt: 0, finishedAt: 3_600_000, plan: 'athletic-extended', log: { 'bench-press': [{ load: 40, reps: 8, done: true }] } })
+  const errors = await open(page, { settings: { startDate: '2026-10-12', plan: 'athletic', extended: true }, sessions: { '2026-10-19': done('2026-10-19', 'mon'), '2026-10-21': done('2026-10-21', 'wed') } }, { at: new Date('2026-10-21T18:00:00'), path: '/plan' })
+  await page.getByRole('group', { name: 'Weekly plan' }).getByRole('button', { name: 'Mastery' }).click()
+  await expect(page.getByText('Done with Athletic · Extended')).toHaveCount(2)
+  await page.goto('/#/day/mon')
+  await expect(page.getByText(/Below is your Mastery version for next time/)).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Upper A · Chest & Back Width' })).toBeVisible()
+  await page.goto('/#/day/wed')
+  await expect(page.getByRole('link', { name: 'Review today’s workout' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Pull + Pull-up Skill' })).toBeVisible()
+  await page.goto('/#/')
+  await expect(page.getByText('Done with Athletic · Extended')).toBeVisible()
+  await noErrors(errors)
+})
+
+test('forearm exercises highlight the forearms on the muscle map', async ({ page }) => {
+  const errors = await open(page, history(), { path: '/exercise/wrist-curl?tab=muscles' })
+  await expect(page.getByRole('img', { name: 'front view: Forearms' })).toBeVisible()
+  await expect(page.getByRole('img', { name: 'back view: Forearms' })).toBeVisible()
+  expect(await page.locator('img[src$="p-forearms-front.svg"]').count()).toBe(1)
+  await noErrors(errors)
+})

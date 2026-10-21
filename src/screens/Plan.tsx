@@ -5,7 +5,7 @@ import { ExerciseThumb } from '../components/Media'
 import { mixText } from '../components/TypeBadge'
 import { WhyPlan } from '../components/WhyPlan'
 import { EXERCISES } from '../data/exercises'
-import { daysFor, isDeload, isMaintenance, PROGRAMS, TEMPLATES, weekFocus, type ProgramId, type TemplateId } from '../data/plan'
+import { daysFor, isDeload, isMaintenance, planKey, planLabel, PROGRAMS, TEMPLATES, weekFocus, type ProgramId, type TemplateId } from '../data/plan'
 import { Toggle } from '../components/Toggle'
 import { addDays, mondayOf } from '../lib/dates'
 import { actions, useStore } from '../lib/store'
@@ -61,7 +61,7 @@ export default function PlanScreen() {
             <button key={id} type="button" aria-pressed={program.id === id} onClick={() => choose(id)}>{PROGRAMS[id].name}</button>
           ))}
         </div>
-        <p className="sec-foot" style={{ marginLeft: 4 }}>{program.summary} Switch any time; your history stays.</p>
+        <p className="sec-foot" style={{ marginLeft: 4 }}>{program.summary} Weeks 1–12 are the same in every length; the 4- and 6-month programs add new blocks from week 13 (see “All {program.weeks} weeks”). Switch any time; your history stays.</p>
       </div>
 
       <div style={{ borderRadius: 20, background: 'var(--ink-card)', color: '#fff', padding: '22px 20px', display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -99,6 +99,7 @@ export default function PlanScreen() {
                     <span className="small" style={{ color: isToday ? 'var(--accent-ink)' : 'var(--label-2)', fontWeight: isToday ? 600 : 400 }}>{isToday ? 'Today' : WEEKDAYS[i]}</span>
                     <span style={{ fontWeight: isToday ? 600 : 400 }}>{d.name}</span>
                     {d.groups.length > 0 && <span className="sub">{mixText(d)}</span>}
+                    {done && (sessions[dDate]?.plan ?? 'original') !== planKey(template, extended) && <span className="small" style={{ color: 'var(--good)', fontWeight: 600 }}>Done with {planLabel(sessions[dDate]?.plan)}</span>}
                   </span>
                   {done ? <IconCheckCircle /> : <span className="small muted">{d.minutes ? `${d.minutes} min` : 'Walk only'}</span>}
                   <Chevron />

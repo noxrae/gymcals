@@ -15,6 +15,8 @@ export interface Muscle {
   latin: string
   does: string
   wger: number[]
+  /** our own overlay (e.g. 'forearms'), drawn as `<p|s>-<name>-<view>.svg` for muscles wger doesn't draw */
+  custom?: string
   views: View[]
   marker?: { view: View; x: number; y: number }
 }
@@ -27,7 +29,7 @@ export const MUSCLES: Record<MuscleId, Muscle> = {
   biceps: { name: 'Biceps', latin: 'Biceps brachii', does: 'Bends your elbow and turns your palm up.', wger: [1], views: ['front'], marker: { view: 'front', x: 71.3, y: 30.4 } },
   brachialis: { name: 'Brachialis', latin: 'Brachialis', does: 'Bends your elbow, strongest with a neutral grip.', wger: [13], views: ['front'], marker: { view: 'front', x: 25.2, y: 31.3 } },
   triceps: { name: 'Triceps', latin: 'Triceps brachii', does: 'Straightens your elbow.', wger: [5], views: ['back'], marker: { view: 'back', x: 73.3, y: 30.4 } },
-  forearms: { name: 'Forearms', latin: 'Wrist & finger flexors', does: 'Grip strength. Not drawn on the map.', wger: [], views: [] },
+  forearms: { name: 'Forearms', latin: 'Wrist & finger flexors and extensors', does: 'Grip, wrist strength and forearm size. Flexors on the palm side, extensors on the back.', wger: [], custom: 'forearms', views: ['front', 'back'], marker: { view: 'front', x: 19, y: 43 } },
   lats: { name: 'Lats', latin: 'Latissimus dorsi', does: 'Pulls your elbows down and back. The main muscle behind a V-taper.', wger: [12], views: ['back'], marker: { view: 'back', x: 61, y: 33.3 } },
   'mid-back': { name: 'Mid back', latin: 'Rhomboids & middle trapezius', does: 'Squeezes your shoulder blades together.', wger: [9], views: ['back'], marker: { view: 'back', x: 40, y: 24.5 } },
   traps: { name: 'Traps', latin: 'Trapezius', does: 'Moves and steadies your shoulder blades.', wger: [9], views: ['back'], marker: { view: 'back', x: 40, y: 21.5 } },
@@ -44,3 +46,4 @@ export const MUSCLES: Record<MuscleId, Muscle> = {
 }
 
 export const muscleOverlay = (wgerId: number, primary: boolean) => `muscles/${primary ? 'p' : 's'}-${wgerId}.svg`
+export const customOverlay = (name: string, view: View, primary: boolean) => `muscles/${primary ? 'p' : 's'}-${name}-${view}.svg`

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="369" viewBox="0 0 200 369">
+  <!-- Forearm muscles (wrist and finger flexors), drawn for GymCals to match the wger.de map -->
+  <path d="M44,124 C52,124 61,127 60,131 C59,140 56,151 51,161 C47,169 42,176 38,180 C33,181 28,180 25,178 C26,170 28,161 31,152 C34,143 38,133 44,124 Z" style="fill:#ff4a12;fill-opacity:0.92;stroke:none"/>
+  <path d="M 156,124 C 148,124 139,127 140,131 C 141,140 144,151 149,161 C 153,169 158,176 162,180 C 167,181 172,180 175,178 C 174,170 172,161 169,152 C 166,143 162,133 156,124 Z" style="fill:#ff4a12;fill-opacity:0.92;stroke:none"/>
+</svg>
