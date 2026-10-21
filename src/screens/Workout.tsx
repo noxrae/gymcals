@@ -90,7 +90,7 @@ export default function WorkoutScreen() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 12 }}>
-        {!finished && <WarmupCard />}
+        {!finished && <WarmupCard steps={day.warmup} />}
         {day.groups.map((g) => (
           <div key={g.title} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <h2 className="sec" style={{ margin: '10px 0 0', padding: '0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -354,10 +354,11 @@ function ExerciseBlock({ item, index, planned, alternatives, week, date, log, is
 }
 
 /** General warm-up from the plan, as a quick checklist. */
-function WarmupCard() {
+const GENERAL_WARMUP = ['3–5 min easy walk, bike or elliptical', 'Shoulder circles, band pull-aparts, hip hinges, bodyweight squats', 'Ramp-up sets before your first big lift (shown under it)']
+
+function WarmupCard({ steps = GENERAL_WARMUP }: { steps?: string[] }) {
   const [open, setOpen] = useState(false)
-  const [ticks, setTicks] = useState<boolean[]>([false, false, false])
-  const steps = ['3–5 min easy walk, bike or elliptical', 'Shoulder circles, band pull-aparts, hip hinges, bodyweight squats', 'Ramp-up sets before your first big lift (shown under it)']
+  const [ticks, setTicks] = useState<boolean[]>(() => steps.map(() => false))
   const count = ticks.filter(Boolean).length
   const all = count === steps.length
   useEffect(() => {
@@ -367,7 +368,7 @@ function WarmupCard() {
     <section style={{ margin: '0 12px', borderRadius: 14, background: all ? 'var(--good-soft)' : 'var(--surface-2)', transition: 'background-color .3s ease' }}>
       <button type="button" className="row" onClick={() => setOpen(!open)} aria-expanded={open} style={{ minHeight: 52 }}>
         <span style={{ flex: 'none', width: 26, height: 26, borderRadius: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', background: all ? 'var(--good-fill)' : 'var(--surface)', boxShadow: all ? undefined : 'inset 0 0 0 1.5px var(--chevron)', color: all ? '#fff' : 'var(--label)', fontSize: 11, fontWeight: 700 }}>
-          {all ? <IconCheck size={13} /> : `${count}/3`}
+          {all ? <IconCheck size={13} /> : `${count}/${steps.length}`}
         </span>
         <span className="grow"><span style={{ fontWeight: 600 }}>{all ? 'Warmed up' : 'Warm-up · 8–12 min'}</span></span>
         <span style={{ transform: open ? 'rotate(90deg)' : undefined, transition: 'transform .25s var(--ease)', display: 'flex' }}><Chevron /></span>

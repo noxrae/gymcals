@@ -27,7 +27,7 @@ test.describe('Athletic plan', () => {
 
   test('the day screens show the new exercises with Gym / Calisthenics labels', async ({ page }) => {
     const errors = await open(page, { ...history(), settings: { plan: 'athletic' } }, { path: '/day/wed' })
-    await expect(page.getByRole('heading', { name: /Back, Biceps \+ Pull-ups/ })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Back & Biceps \+ Pull-up Skills/ })).toBeVisible()
     for (const n of ['Straight-arm Pulldown', 'Reverse Pec-Deck', 'Incline Dumbbell Curl']) await expect(page.getByText(n, { exact: true })).toBeVisible()
     await page.getByText('Reverse Pec-Deck', { exact: true }).click()
     await expect(page.getByText('Pec-deck machine (rear-delt setting)')).toBeVisible()
@@ -109,5 +109,18 @@ test('a past workout still shows exercises the plan has since dropped (RDL → h
   await expect(page.getByRole('region', { name: 'Barbell Hip Thrust', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Also logged' })).toBeVisible()
   await expect(page.getByText('40×10, 40×10, 40×9')).toBeVisible()
+  await noErrors(errors)
+})
+
+test('Athletic Tuesday shows its own warm-up; Extended Saturday has a mobility timer', async ({ page }) => {
+  const errors = await open(page, { ...history(), settings: { plan: 'athletic' } }, { at: new Date('2026-10-13T09:00:00'), path: '/workout/tue' })
+  await page.getByRole('button', { name: /Warm-up · / }).click()
+  for (const t of ['5 min light cardio on a bike or incline treadmill', 'Dynamic leg swings, front-to-back and side-to-side']) await expect(page.getByText(t)).toBeVisible()
+  await expect(page.getByText('0/4')).toBeVisible()
+  await expect(page.getByRole('region', { name: '45° Hip Extension', exact: true })).toBeVisible()
+  await page.goto('/#/plan')
+  await page.getByRole('switch', { name: /Extended/ }).click()
+  await page.goto('/#/day/sat')
+  await expect(page.getByText('Mobility Routine', { exact: true })).toBeVisible()
   await noErrors(errors)
 })

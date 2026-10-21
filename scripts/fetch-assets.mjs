@@ -63,6 +63,8 @@ const PHOTOS = {
   'hip-thrust': ['Barbell_Hip_Thrust', [0, 1]],
   'back-extension': ['Hyperextensions_Back_Extensions', [0, 1]],
   'seated-hip-abduction': ['Thigh_Abductor', [0, 1]],
+  'dead-bug-timed': ['Dead_Bug', [0, 1]],
+  mobility: ['Worlds_Greatest_Stretch', [0, 1]],
 }
 
 // Exercises with no free-exercise-db photo use their form video's thumbnail instead.

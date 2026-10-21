@@ -349,9 +349,9 @@ const DEFS: Record<string, Def> = {
     mistake: 'Arching the lower back at the top instead of finishing with the glutes. Stop if the bench presses on a painful spot.',
   },
   'back-extension': {
-    name: 'Back Extension (45°)', kind: 'weight', step: 2.5, equipment: '45° back-extension bench · optional plate',
+    name: '45° Hip Extension', kind: 'weight', step: 2.5, equipment: '45° back-extension bench · optional plate',
     primary: ['glutes', 'hamstrings'], secondary: ['lower-back'],
-    steps: ['Pad just below your hip bones, feet locked in.', 'Keep your spine neutral and hinge forward from the hips.', 'Squeeze your glutes and hamstrings to raise your torso to a straight line.', 'Stop in line with your legs. Start with bodyweight; hold a plate to your chest later.'],
+    steps: ['Set the pad just below your hip crease, feet locked in.', 'Keep your spine neutral and hinge at the hips until you feel a deep hamstring stretch.', 'Pull yourself up with your glutes and hamstrings to a straight line. Don’t hyper-extend at the top.', 'Start with bodyweight; hold a plate across your chest as you get stronger.'],
     mistake: 'Over-arching at the top or rounding the back to get lower.',
   },
   'seated-hip-abduction': {
@@ -359,6 +359,18 @@ const DEFS: Record<string, Def> = {
     primary: ['glutes'], secondary: [],
     steps: ['Sit tall with the pads on the outside of your knees.', 'Push your knees out as wide as you comfortably can.', 'Pause for a moment at the widest point.', 'Return slowly without letting the stack slam.'],
     mistake: 'Rocking the torso to swing the weight out.',
+  },
+  'dead-bug-timed': {
+    name: 'Dead Bug (timed)', kind: 'time', step: 0, equipment: 'Floor',
+    primary: ['abs'], secondary: ['hip-flexors', 'obliques'],
+    steps: ['Lie on your back, arms up, knees bent at 90° over your hips.', 'Press your lower back gently into the floor.', 'Slowly lower the opposite arm and leg, then return and switch sides.', 'Keep alternating, breathing steadily, for the whole time.'],
+    mistake: 'Lower back arching off the floor. Make the reach smaller.',
+  },
+  mobility: {
+    name: 'Mobility Routine', kind: 'cardio', step: 0, equipment: 'Floor or mat',
+    primary: [], secondary: [],
+    steps: ['World’s greatest stretch: lunge, hand down, rotate the arm up. 5 each side.', 'Hip circles and 90/90 hip switches.', 'Cat–cow and thoracic rotations for the upper back.', 'Shoulder pass-throughs with a band or towel. Move slowly, no forcing.'],
+    mistake: 'Bouncing into stretches or pushing into pain.',
   },
   'incline-walk': {
     name: 'Incline Walk / Bike', kind: 'cardio', step: 0, equipment: 'Treadmill, bike or elliptical',
@@ -425,6 +437,8 @@ export const ALTERNATIVES: Record<string, string[]> = {
   'bulgarian-split-squat': ['walking-lunge', 'leg-press'],
   'cable-crunch': ['dead-bug', 'plank'],
   'hanging-knee-raise': ['dead-bug', 'plank'],
+  'push-up': ['scapular-push-up'],
+  'dead-bug-timed': ['plank', 'dead-bug'],
 }
 
 /** Gym (machines, barbells, dumbbells, cables) vs calisthenics (bodyweight / bar skills) vs cardio. */
@@ -433,8 +447,9 @@ const CALISTHENICS = new Set([
   'push-up', 'scapular-push-up', 'pike-push-up', 'dead-hang', 'scapular-pull-up', 'assisted-pull-up', 'negative-pull-up',
   'hanging-knee-raise', 'dead-bug', 'side-plank', 'plank', 'tuck-l-sit', 'walking-lunge', 'mountain-climber',
   'pull-up', 'decline-push-up', 'hanging-leg-raise', 'diamond-push-up', 'elevated-pike-push-up', 'advanced-tuck-l-sit',
+  'dead-bug-timed', 'mobility',
 ])
-export const typeOf = (key: string): ExType => (EXERCISES[key]?.kind === 'cardio' ? 'cardio' : CALISTHENICS.has(key) ? 'cali' : 'gym')
+export const typeOf = (key: string): ExType => (CALISTHENICS.has(key) ? 'cali' : EXERCISES[key]?.kind === 'cardio' ? 'cardio' : 'gym')
 export const TYPE_LABEL: Record<ExType, string> = { gym: 'Gym', cali: 'Calisthenics', cardio: 'Cardio' }
 
 /** How the form demo animates: a held position, or start ↔ finish reps (fast for climbers). */

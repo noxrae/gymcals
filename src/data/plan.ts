@@ -28,6 +28,8 @@ export interface PlanDay {
   hero: string
   groups: PlanGroup[]
   optionalCardio?: string
+  /** day-specific warm-up checklist (otherwise the general one) */
+  warmup?: string[]
 }
 
 const r = (ex: string, sets: number, min: number, max: number, rest: [number, number], extra: Partial<PlanItem> = {}): PlanItem => ({ ex, sets, min, max, rest, ...extra })
@@ -126,53 +128,54 @@ const ATHLETIC: PlanDay[] = [
   {
     id: 'mon', name: 'Upper A · Chest & Back Width', short: 'Upper A', focus: 'Upper chest · Lats · Side delts · Triceps', minutes: 65, hero: 'bench-press',
     groups: [
-      { title: 'Main lifts', items: [r('bench-press', 3, 6, 8, [120, 180], { note: 'Overall chest mass' }), r('incline-dumbbell-press', 3, 8, 10, [90, 150], { note: 'Upper chest shelf' })] },
-      { title: 'Back width', items: [r('lat-pulldown', 3, 8, 12, [90, 150], { note: 'Wide grip' }), r('seated-cable-row', 3, 8, 12, [90, 150])] },
-      { title: 'Shoulders & arms', items: [r('lateral-raise', 4, 12, 15, [60, 90], { note: 'Shoulder width' }), r('triceps-pushdown', 3, 10, 12, [60, 90])] },
+      { title: 'Chest', items: [r('bench-press', 3, 6, 8, [120, 180], { note: 'Overall chest mass' }), r('incline-dumbbell-press', 3, 8, 10, [90, 150], { note: 'Upper chest shelf' })] },
+      { title: 'Back width', items: [r('lat-pulldown', 3, 8, 12, [90, 150], { note: 'Wide grip · lat width (V-taper)' }), r('seated-cable-row', 3, 8, 12, [90, 150], { note: 'Mid-back thickness' })] },
+      { title: 'Shoulders & arms', items: [r('lateral-raise', 4, 12, 15, [60, 90], { note: 'Side delts (shoulder width)' }), r('triceps-pushdown', 3, 10, 12, [60, 90], { note: 'Rope · triceps mass' })] },
     ],
   },
   {
-    id: 'tue', name: 'Heavy Leg Day', short: 'Heavy legs', focus: 'Quads · Glutes · Hamstrings · Calves', minutes: 65, hero: 'squat',
-    // No RDLs: they caused upper-back pain. Hip thrusts and back extensions train the same muscles with far less upper-spine load.
+    // Spine-safe Tuesday: the RDL is replaced (upper-back pain) by hip thrusts and 45° hip extensions.
+    id: 'tue', name: 'Heavy Leg Day · Spine-safe', short: 'Heavy legs', focus: 'Quads · Glutes · Hamstrings · Calves', minutes: 70, hero: 'squat',
+    optionalCardio: '10–15 min easy cycling or walking to flush out soreness',
+    warmup: ['5 min light cardio on a bike or incline treadmill', '1–2 sets of 12–15 bodyweight squats', 'Dynamic leg swings, front-to-back and side-to-side', 'Light practice sets on squats before your heavy sets'],
     groups: [
-      { title: 'Main lifts', items: [r('squat', 3, 6, 8, [150, 180], { note: 'Or hack squat — whichever you control best' }), r('hip-thrust', 3, 8, 10, [120, 150], { note: 'Replaces RDL · no upper-spine strain' })] },
-      { title: 'Accessories', items: [r('bulgarian-split-squat', 2, 8, 10, [90, 120], { perSide: true }), r('leg-curl', 3, 10, 12, [60, 90], { note: 'Lying or seated' }), r('back-extension', 2, 10, 12, [60, 90], { note: 'Neutral spine, don’t over-arch' }), r('calf-raise', 4, 12, 15, [60, 90], { note: 'Standing' })] },
+      { title: 'Main lifts', items: [r('squat', 3, 6, 8, [120, 180], { note: 'Or hack squat · chest proud, core braced' }), r('hip-thrust', 3, 8, 10, [120, 180], { note: 'RDL replacement #1 · chin tucked' }), r('back-extension', 3, 10, 12, [90, 90], { note: 'RDL replacement #2 · neutral spine' })] },
+      { title: 'Accessories', items: [r('bulgarian-split-squat', 2, 8, 10, [90, 90], { perSide: true, note: 'Upright torso' }), r('leg-curl', 3, 10, 12, [60, 90], { note: 'Lying or seated · pause at the top' }), r('calf-raise', 4, 12, 15, [60, 60], { note: 'Standing · full range' })] },
     ],
   },
   {
-    id: 'wed', name: 'Back, Biceps + Pull-ups', short: 'Pull', focus: 'Back width · Rear delts · Biceps · Pull-up skill', minutes: 65, hero: 'assisted-pull-up',
+    id: 'wed', name: 'Back & Biceps + Pull-up Skills', short: 'Pull', focus: 'Back width · Rear delts · Biceps · Pull-up skill', minutes: 65, hero: 'assisted-pull-up',
     groups: [
-      { title: 'Pull-up skill · do these fresh', items: [r('assisted-pull-up', 4, 5, 8, [120, 180], { note: 'Strict reps, reduce assistance over time' })] },
-      { title: 'Back', items: [r('chest-supported-row', 3, 8, 12, [90, 150]), r('straight-arm-pulldown', 3, 12, 15, [60, 90]), r('reverse-pec-deck', 3, 12, 15, [60, 90])] },
-      { title: 'Arms', items: [r('incline-dumbbell-curl', 3, 8, 12, [60, 90]), r('hammer-curl', 3, 10, 12, [60, 90])] },
+      { title: 'Pull-up skill · do these fresh', items: [r('assisted-pull-up', 4, 5, 8, [120, 180], { note: 'Strict pull-up mastery' })] },
+      { title: 'Back', items: [r('chest-supported-row', 3, 8, 12, [90, 150], { note: 'Mid-back thickness' }), r('straight-arm-pulldown', 3, 12, 15, [60, 90], { note: 'Lat isolation' }), r('reverse-pec-deck', 3, 12, 15, [60, 90], { note: 'Rear delts & posture' })] },
+      { title: 'Arms', items: [r('incline-dumbbell-curl', 3, 8, 12, [60, 90], { note: 'Biceps long head' }), r('hammer-curl', 3, 10, 12, [60, 90], { note: 'Brachialis & forearms' })] },
     ],
   },
   {
-    id: 'thu', name: 'Abs, Core, L-Sit + Cardio', short: 'Core', focus: 'Abs · Core compression · Fat loss', minutes: 55, hero: 'hanging-knee-raise',
+    id: 'thu', name: 'Core, Abs & Tuck L-Sit + Cardio', short: 'Core', focus: 'Abs · Core compression · Fat loss', minutes: 55, hero: 'hanging-knee-raise',
     groups: [
-      { title: 'Skill first · while fresh', items: [r('tuck-l-sit', 4, 10, 15, [90, 120])] },
-      { title: 'Core · bodyweight', items: [r('hanging-knee-raise', 3, 10, 12, [60, 90], { note: 'Or leg raises when knees get easy' }), r('dead-bug', 2, 10, 10, [45, 60], { perSide: true, note: 'About 45 seconds per set' })] },
-      { title: 'Core · cable', items: [r('cable-crunch', 3, 12, 15, [60, 90])] },
-      { title: 'Cardio', items: [r('incline-walk', 1, 25, 30, [0, 0], { note: 'Zone 2: brisk walk or easy cycle' })] },
+      { title: 'Skill & lower abs', items: [r('tuck-l-sit', 4, 10, 15, [90, 120], { note: 'Core compression' }), r('hanging-knee-raise', 3, 10, 12, [60, 90], { note: 'Knee or leg raises · lower abs' })] },
+      { title: 'Core · cable', items: [r('cable-crunch', 3, 12, 15, [60, 90], { note: 'Upper / mid abs' })] },
+      { title: 'Core · bodyweight', items: [r('dead-bug-timed', 2, 45, 45, [45, 60], { note: 'Deep core stability' })] },
+      { title: 'Cardio', items: [r('incline-walk', 1, 25, 30, [0, 0], { note: 'Zone 2: brisk walk or cycle' })] },
     ],
   },
   {
-    id: 'fri', name: 'Upper B · 3D Shoulders & Arms', short: 'Upper B', focus: 'Side delts · Upper chest · Biceps · Triceps', minutes: 65, hero: 'incline-bench-press',
+    id: 'fri', name: 'Upper B · 3D Shoulders, Upper Chest & Arms', short: 'Upper B', focus: 'Side delts · Upper chest · Biceps · Triceps', minutes: 65, hero: 'incline-bench-press',
     groups: [
-      { title: 'Main lifts', items: [r('incline-bench-press', 3, 8, 10, [120, 180]), r('dumbbell-shoulder-press', 3, 8, 10, [90, 150])] },
+      { title: 'Main lifts', items: [r('incline-bench-press', 3, 8, 10, [120, 180], { note: 'Upper chest' }), r('dumbbell-shoulder-press', 3, 8, 10, [90, 150], { note: 'Seated · front / side delts' })] },
       { title: 'Shoulders', items: [r('cable-lateral-raise', 4, 12, 15, [60, 90], { note: '3D side-delt caps' })] },
-      { title: 'Arms', items: [r('preacher-curl', 3, 8, 12, [60, 90], { note: 'EZ-bar' }), r('triceps-extension', 3, 10, 12, [60, 90], { note: 'Overhead cable' })] },
-      { title: 'Push-ups', items: [r('push-up', 2, 8, 15, [90, 90], { note: 'Near failure, clean reps' })] },
+      { title: 'Arms', items: [r('preacher-curl', 3, 8, 12, [60, 90], { note: 'EZ-bar · biceps peak' }), r('triceps-extension', 3, 10, 12, [60, 90], { note: 'Overhead cable · long head' })] },
+      { title: 'Push-ups', items: [r('push-up', 2, 8, 15, [90, 90], { note: 'Or scapular push-ups (Swap) · near failure' })] },
     ],
   },
   {
-    id: 'sat', name: 'Light Legs, Grip + Conditioning', short: 'Light legs', focus: 'Legs · Grip · Conditioning', minutes: 45, hero: 'farmers-carry',
+    id: 'sat', name: 'Light Legs, Grip & Conditioning', short: 'Light legs', focus: 'Legs · Grip · Conditioning', minutes: 45, hero: 'farmers-carry',
     groups: [
-      { title: 'Light legs', items: [r('leg-extension', 3, 12, 15, [60, 90], { note: 'A pump, not heavy fatigue' }), r('seated-leg-curl', 3, 12, 15, [60, 90])] },
-      { title: 'Grip', items: [r('farmers-carry', 3, 30, 45, [90, 120], { note: 'About 40–50 m' })] },
-      { title: 'Hang', items: [r('dead-hang', 3, 20, 60, [90, 90], { note: 'Max time, stop before your grip fails' })] },
-      { title: 'Core', items: [r('cable-crunch', 3, 12, 15, [60, 90], { added: true, note: 'Second ab day for the six-pack' })] },
-      { title: 'Cardio & mobility', items: [r('incline-walk', 1, 15, 20, [0, 0], { note: 'Light, then a few minutes of mobility' })] },
+      { title: 'Light legs', items: [r('leg-extension', 3, 12, 15, [60, 90], { note: 'Quad pump without heavy fatigue' }), r('seated-leg-curl', 3, 12, 15, [60, 90], { note: 'Hamstring health' })] },
+      { title: 'Grip', items: [r('farmers-carry', 3, 30, 45, [90, 120], { note: '40–50 m per carry (about 30–45 s)' })] },
+      { title: 'Hang', items: [r('dead-hang', 3, 20, 60, [90, 90], { note: 'Max time · stop before your grip fails' })] },
+      { title: 'Cardio & mobility', items: [r('incline-walk', 1, 15, 20, [0, 0], { note: 'Light cardio, then mobility' })] },
     ],
   },
   SUN,
@@ -182,28 +185,28 @@ const ATHLETIC_EXTENDED: PlanDay[] = [
   {
     id: 'mon', name: 'Upper A · Chest, Back & Triceps', short: 'Upper A', focus: 'Chest · Lats · Side delts · Triceps', minutes: 80, hero: 'bench-press',
     groups: [
-      { title: 'Main lifts', items: [r('bench-press', 3, 6, 10, [120, 180], { note: 'Shoulder blades stable, controlled descent' }), r('incline-dumbbell-press', 3, 8, 12, [90, 150], { note: 'Modest incline' })] },
-      { title: 'Back width', items: [r('lat-pulldown', 3, 8, 12, [90, 150]), r('seated-cable-row', 3, 8, 12, [90, 150], { note: 'No momentum' })] },
-      { title: 'Shoulders & arms', items: [r('lateral-raise', 4, 12, 20, [60, 90], { added: true, note: '+1 set for shoulder width' }), r('triceps-pushdown', 2, 10, 15, [60, 90])] },
+      { title: 'Chest', items: [r('bench-press', 3, 6, 10, [120, 180], { note: 'Shoulder blades stable, controlled descent' }), r('incline-dumbbell-press', 3, 8, 12, [90, 150], { note: 'Modest incline' })] },
+      { title: 'Back width', items: [r('lat-pulldown', 3, 8, 12, [90, 150], { note: 'Back width for the V-taper' }), r('seated-cable-row', 3, 8, 12, [90, 150], { note: 'No momentum' })] },
+      { title: 'Shoulders & arms', items: [r('lateral-raise', 3, 12, 20, [60, 90]), r('triceps-pushdown', 2, 10, 15, [60, 90], { note: 'Rope' })] },
       { title: 'Push foundation', items: [r('push-up', 2, 6, 15, [90, 120], { note: 'Stop before technique breaks down' }), r('scapular-push-up', 2, 10, 15, [60, 60])] },
     ],
   },
   {
-    id: 'tue', name: 'Complete Leg Day', short: 'Legs', focus: 'Quads · Hamstrings · Glutes · Calves', minutes: 80, hero: 'squat',
-    optionalCardio: '10–15 min easy cycling or walking',
-    // No RDLs: they caused upper-back pain. Curls cover the hamstrings; glute-drive/hip thrust only once a clinician clears it.
+    // Tuesday without RDLs (upper-back pain): curls for hamstrings, abduction for glutes.
+    // Glute-drive / hip thrust is left out until a clinician clears it.
+    id: 'tue', name: 'Complete Leg Day · No RDL', short: 'Legs', focus: 'Quads · Hamstrings · Glutes · Calves', minutes: 80, hero: 'squat',
     groups: [
-      { title: 'Main lift', items: [r('squat', 3, 6, 10, [150, 180], { note: 'Or hack squat. Warm up with lighter sets' })] },
-      { title: 'Hamstrings · replaces RDL', items: [r('seated-leg-curl', 3, 10, 15, [60, 90], { note: 'Hips and back supported, lower slowly' }), r('leg-curl', 2, 10, 15, [60, 90], { note: 'Lying · only if lying face-down is comfortable' })] },
-      { title: 'Quads & glutes', items: [r('bulgarian-split-squat', 2, 8, 12, [90, 120], { perSide: true }), r('leg-extension', 2, 10, 15, [60, 90]), r('seated-hip-abduction', 2, 12, 20, [60, 90], { note: 'Glute medius' })] },
-      { title: 'Calves', items: [r('calf-raise', 3, 10, 15, [60, 90], { note: 'Standing' }), r('seated-calf-raise', 2, 12, 20, [60, 90])] },
+      { title: 'Main lift', items: [r('squat', 3, 6, 10, [120, 180], { note: 'Or hack squat' })] },
+      { title: 'Hamstrings · replaces RDL', items: [r('seated-leg-curl', 3, 10, 15, [60, 120], { note: 'Hips and back supported, lower slowly' }), r('leg-curl', 2, 10, 15, [60, 120], { note: 'Lying · only if lying face-down is comfortable' })] },
+      { title: 'Quads & glutes', items: [r('bulgarian-split-squat', 2, 8, 12, [90, 120], { perSide: true }), r('leg-extension', 2, 10, 15, [60, 120]), r('seated-hip-abduction', 2, 12, 20, [60, 120], { note: 'Glute medius' })] },
+      { title: 'Calves', items: [r('calf-raise', 3, 10, 15, [60, 120], { note: 'Standing' }), r('seated-calf-raise', 2, 12, 20, [60, 120])] },
     ],
   },
   {
-    id: 'wed', name: 'Back Width, Biceps + Pull-ups', short: 'Pull', focus: 'Lats · Back thickness · Rear delts · Biceps', minutes: 80, hero: 'assisted-pull-up',
+    id: 'wed', name: 'Back Width, Biceps + Pull-up Skills', short: 'Pull', focus: 'Lats · Back thickness · Rear delts · Biceps', minutes: 80, hero: 'assisted-pull-up',
     groups: [
       { title: 'Pull-up skill · do these fresh', items: [r('assisted-pull-up', 3, 5, 8, [120, 180], { note: 'No swinging, lower under control' })] },
-      { title: 'Back', items: [r('lat-pulldown', 2, 8, 12, [90, 150]), r('chest-supported-row', 3, 8, 12, [90, 150]), r('straight-arm-pulldown', 2, 12, 15, [60, 90]), r('reverse-pec-deck', 3, 12, 20, [60, 90])] },
+      { title: 'Back', items: [r('lat-pulldown', 2, 8, 12, [90, 150]), r('chest-supported-row', 3, 8, 12, [90, 150]), r('straight-arm-pulldown', 2, 12, 15, [60, 90]), r('reverse-pec-deck', 3, 12, 20, [60, 90], { note: 'Or rear-delt fly' })] },
       { title: 'Arms', items: [r('dumbbell-curl', 3, 8, 12, [60, 90]), r('hammer-curl', 2, 10, 15, [60, 90])] },
       { title: 'Scapular control', items: [r('scapular-pull-up', 2, 5, 8, [60, 90], { note: 'Small, controlled movement' })] },
     ],
@@ -211,29 +214,29 @@ const ATHLETIC_EXTENDED: PlanDay[] = [
   {
     id: 'thu', name: 'Abs, Core + Cardio', short: 'Core', focus: 'Abs · Core stability · Endurance', minutes: 65, hero: 'hanging-knee-raise',
     groups: [
-      { title: 'Core · bodyweight', items: [r('hanging-knee-raise', 3, 8, 12, [60, 90]), r('dead-bug', 2, 10, 10, [45, 60], { perSide: true }), r('side-plank', 2, 30, 45, [45, 60], { perSide: true })] },
+      { title: 'Lower abs', items: [r('hanging-knee-raise', 3, 8, 12, [60, 90])] },
       { title: 'Core · cable', items: [r('cable-crunch', 3, 10, 15, [60, 90])] },
-      { title: 'L-sit practice', items: [r('tuck-l-sit', 3, 10, 20, [90, 120], { note: 'Shoulders down, only as long as you control it' })] },
+      { title: 'Core & L-sit', items: [r('dead-bug', 2, 10, 10, [45, 60], { perSide: true }), r('side-plank', 2, 30, 45, [45, 60], { perSide: true }), r('tuck-l-sit', 3, 10, 20, [90, 120], { note: 'Shoulders down, only as long as you control it' })] },
       { title: 'Cardio', items: [r('incline-walk', 1, 25, 35, [0, 0], { note: 'Moderate: you can still talk in short sentences' })] },
     ],
   },
   {
     id: 'fri', name: 'Upper B · Shoulders & Arms', short: 'Upper B', focus: '3D delts · Upper chest · Biceps · Triceps', minutes: 85, hero: 'incline-bench-press',
     groups: [
-      { title: 'Main lifts', items: [r('incline-bench-press', 3, 8, 12, [120, 180]), r('dumbbell-shoulder-press', 3, 8, 12, [90, 150])] },
-      { title: 'Shoulders & back', items: [r('cable-lateral-raise', 4, 12, 20, [60, 90], { added: true, note: '+1 set for 3D shoulders' }), r('reverse-pec-deck', 2, 12, 20, [60, 90]), r('seated-cable-row', 2, 10, 12, [60, 90])] },
-      { title: 'Arms', items: [r('preacher-curl', 3, 8, 12, [60, 90]), r('triceps-extension', 3, 10, 15, [60, 90], { note: 'Overhead cable' }), r('triceps-pushdown', 2, 10, 15, [60, 90])] },
+      { title: 'Main lifts', items: [r('incline-bench-press', 3, 8, 12, [120, 180]), r('dumbbell-shoulder-press', 3, 8, 12, [90, 150], { note: 'Seated' })] },
+      { title: 'Shoulders & back', items: [r('cable-lateral-raise', 3, 12, 20, [60, 90]), r('reverse-pec-deck', 2, 12, 20, [60, 90], { note: 'Or rear-delt fly' }), r('seated-cable-row', 2, 10, 12, [60, 90])] },
+      { title: 'Arms', items: [r('preacher-curl', 3, 8, 12, [60, 90], { note: 'EZ-bar or preacher' }), r('triceps-extension', 3, 10, 15, [60, 90], { note: 'Overhead cable' }), r('triceps-pushdown', 2, 10, 15, [60, 90], { note: 'Rope' })] },
       { title: 'Optional skill', items: [r('pike-push-up', 2, 5, 10, [90, 120], { note: 'Optional — only if shoulders and wrists feel good' })] },
     ],
   },
   {
-    id: 'sat', name: 'Light Legs + Calisthenics', short: 'Light legs', focus: 'Leg accessories · Grip · Conditioning', minutes: 55, hero: 'farmers-carry',
+    id: 'sat', name: 'Light Legs + Calisthenics', short: 'Light legs', focus: 'Leg accessories · Grip · Conditioning', minutes: 60, hero: 'farmers-carry',
     groups: [
-      { title: 'Light legs', items: [r('seated-leg-curl', 2, 12, 15, [60, 90], { note: 'Skip if still sore from Tuesday' }), r('leg-extension', 2, 12, 15, [60, 90]), r('seated-calf-raise', 3, 12, 20, [60, 90])] },
+      { title: 'Light legs', items: [r('leg-extension', 2, 12, 15, [60, 90], { note: 'Skip if still sore from Tuesday' }), r('seated-leg-curl', 2, 12, 15, [60, 90]), r('calf-raise', 3, 12, 20, [60, 90], { note: 'Standing' })] },
       { title: 'Hang', items: [r('dead-hang', 3, 20, 40, [90, 90])] },
       { title: 'Grip', items: [r('farmers-carry', 3, 30, 45, [90, 120])] },
-      { title: 'Core', items: [r('cable-crunch', 3, 12, 15, [60, 90], { added: true, note: 'Second ab day for the six-pack' })] },
-      { title: 'Cardio & mobility', items: [r('incline-walk', 1, 15, 20, [0, 0], { note: 'Brisk walk, cycling or sport, then 5–10 min mobility' })] },
+      { title: 'Conditioning', items: [r('incline-walk', 1, 15, 20, [0, 0], { note: 'Brisk walk, cycling or sport' })] },
+      { title: 'Mobility', items: [r('mobility', 1, 5, 10, [0, 0])] },
     ],
   },
   SUN,
