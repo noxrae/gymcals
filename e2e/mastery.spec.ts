@@ -62,3 +62,10 @@ test('switch 45° hip extension to an alternative by name, and it is remembered'
   expect((await stored(page)).sessions['2026-10-13'].swaps ?? {}).toEqual({})
   await noErrors(errors)
 })
+
+test('the workout screen shows each exercise’s note, including the week-1 instructions', async ({ page }) => {
+  const errors = await open(page, { ...history(), settings: { plan: 'mastery', startDate: '2026-10-12' } }, { at: new Date('2026-10-13T08:00:00'), path: '/workout/tue' })
+  await expect(page.getByRole('region', { name: 'Squat', exact: true }).getByText(/^Weeks 1–2: empty bar or goblet squat/)).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Barbell Hip Thrust', exact: true }).getByText(/^Weeks 1–2: thick pad/)).toBeVisible()
+  await noErrors(errors)
+})

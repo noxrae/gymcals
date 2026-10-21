@@ -244,6 +244,7 @@ function ExerciseBlock({ item, index, planned, alternatives, week, date, log, is
         <Link to={`/exercise/${ex.key}`} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1, color: 'var(--label)' }}>
           <span style={{ fontSize: 17, fontWeight: 650, letterSpacing: '-0.015em' }}>{ex.name}</span>
           <span className="small muted">{rangeText(item, count)}{item.rest[0] ? ` · rest ${restText(item.rest)}` : ''}</span>
+          {item.note && planned === item.ex && <span className="small" style={{ color: /^Weeks? \d/.test(item.note) ? 'var(--accent-ink)' : 'var(--label-2)', fontWeight: /^Weeks? \d/.test(item.note) ? 600 : 400 }}>{item.note}</span>}
           {planned !== item.ex && <span className="small" style={{ color: 'var(--accent-ink)' }}>Swapped for {EXERCISES[planned].name}</span>}
         </Link>
         {alternatives.length > 0 && !item.alt && !sets.some((s) => s.done) && (
