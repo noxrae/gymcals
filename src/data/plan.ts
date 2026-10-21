@@ -435,13 +435,13 @@ export const PROGRAMS: Record<ProgramId, Program> = {
   },
   16: {
     id: 16, weeks: 16, name: '4 months', short: '4 mo',
-    summary: '12 weeks plus a 4-week peak: heavier main lifts (5–8 reps), full pull-ups and harder calisthenics.',
+    summary: 'Weeks 1–12 build the base (foundation, progression, performance), then a 4-week peak: heavier main lifts (5–8 reps), full pull-ups and harder calisthenics.',
     phases: [...BLOCK_1, { id: 'peak', name: 'Peak', weeks: [13, 16], text: 'Recover in week 13, then heavier main lifts (5–8 reps), full pull-ups, decline and diamond push-ups, advanced L-sit.' }],
     deloads: [7, 13], maintenance: [13],
   },
   24: {
     id: 24, weeks: 24, name: '6 months', short: '6 mo',
-    summary: 'Three blocks: 12 weeks, a 6-week hypertrophy block for size (extra shoulder and lat work), then 6 weeks of strength and definition.',
+    summary: 'Three blocks: weeks 1–12 build the base, weeks 13–18 a hypertrophy block for size (extra shoulder and lat work), then weeks 19–24 strength and definition.',
     phases: [
       ...BLOCK_1,
       { id: 'hypertrophy', name: 'Hypertrophy', weeks: [13, 18], text: 'More muscle: main lifts 8–12 reps, extra side-delt and lat sets for the V-taper, harder calisthenics.' },

@@ -58,7 +58,9 @@ test('small touch targets: buttons and links are at least 32px tall', async ({ p
   const small: string[] = []
   for (const r of ROUTES) {
     await page.goto(`/#${r}`)
-    await page.waitForTimeout(300)
+    await page.waitForTimeout(150)
+    // Measure after enter animations settle (buttons scale/slide in, which made this flaky under load).
+    await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => null))))
     small.push(...(await page.evaluate((route) => [...document.querySelectorAll('button, a')]
       .filter((el) => {
         const b = el.getBoundingClientRect()
