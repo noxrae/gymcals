@@ -113,6 +113,13 @@ describe('Mastery plan', () => {
     expect(weekFocus(1, programOf(12, 'mastery'))).toMatch(/one set fewer/)
   })
 
+  it('weekly notes match the staged start (negatives and handstands from week 5)', () => {
+    const p = programOf(24, 'mastery')
+    expect(weekFocus(3, p)).not.toMatch(/negative/i)
+    expect(weekFocus(5, p)).toMatch(/negatives, wall handstands and diamond push-ups start/)
+    expect(weekFocus(6, p)).toMatch(/^Deload/)
+  })
+
   it('works with 5-day mode and long programs', () => {
     expect(dayFor('sat', true, M()).groups).toHaveLength(0)
     expect(allItems(dayFor('wed', false, { ...M(14), program: PROGRAMS[16] })).map((i) => i.ex)).toContain('pull-up')

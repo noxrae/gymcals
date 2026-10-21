@@ -36,7 +36,7 @@ Installing as an app and offline mode need HTTPS. A free host such as GitHub Pag
 ## Testing
 
 ```bash
-npm test           # 123 unit tests: coach logic and AI fallbacks, plans and programs, dates, warm-up maths, weekly review
+npm test           # 129 unit tests: coach logic and AI fallbacks, plans and programs, dates, warm-up maths, weekly review
 npm run e2e        # 42 end-to-end tests in Microsoft Edge at phone size (builds and serves the app)
 ```
 

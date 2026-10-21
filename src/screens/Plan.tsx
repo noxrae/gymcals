@@ -131,7 +131,7 @@ export default function PlanScreen() {
         )}
       </div>
 
-      <WhyPlan days={daysFor(fiveDay, ctx)} />
+      <WhyPlan days={daysFor(fiveDay, ctx)} deload={program.deloads[0]} />
     </div>
   )
 }

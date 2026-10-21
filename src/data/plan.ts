@@ -380,7 +380,7 @@ export type TemplateId = 'original' | 'athletic' | 'mastery'
 export const TEMPLATES: Record<TemplateId, { name: string; summary: string }> = {
   original: { name: 'Original', summary: 'Your PDF plan: upper/lower split with calisthenics every training day and two full leg days.' },
   athletic: { name: 'Athletic', summary: 'Upper-body and V-taper focus: one heavy and one light leg day, a core day, and 3D shoulders and arms.' },
-  mastery: { name: 'Mastery', summary: 'The reviewed best-of plan: side delts and lats 3× a week, abs 3×, pull-ups 2×, direct forearm work, full glute and hamstring work without RDLs. Easy first 2 weeks, deload in week 6. Best with 6 months.' },
+  mastery: { name: 'Mastery', summary: 'The reviewed best-of plan: side delts and lats 3× a week, abs 3×, pull-ups 2×, direct forearm work, full glute and hamstring work without RDLs. A gentle 4-week start, deload in week 6. Best with 6 months.' },
 }
 export const templateOf = (id?: string): TemplateId => (id === 'athletic' || id === 'mastery' ? id : 'original')
 /** Short id stored on each workout so past sessions keep the exercises they were done with. */
@@ -434,10 +434,11 @@ export const PROGRAMS: Record<ProgramId, Program> = {
 }
 
 const MASTERY_FOCUS: Record<number, string> = {
-  1: 'Easy start: one set fewer on bigger exercises. Learn the technique and note your starting weights.',
-  2: 'Still one set fewer. Add a rep where you can.',
-  3: 'Full sets from now, and pull-up negatives start. Top of the range on every set? Add a little weight.',
-  5: 'Keep adding reps or weight. Next week is lighter.',
+  1: 'Easy start: one set fewer on bigger exercises, light squats, hip thrusts and hangs. Learn the technique and note your starting weights.',
+  2: 'Still one set fewer and light loads. Add a rep where you can.',
+  3: 'Full sets from now, with moderate loads on squats and hip thrusts. Top of the range on every set? Add a little weight.',
+  4: 'Moderate loads, clean reps. Next week the full plan starts.',
+  5: 'Full plan: pull-up negatives, wall handstands and diamond push-ups start. Next week is lighter.',
   6: 'Deload week: about 40% fewer sets at the same weights. Keep the skill practice.',
   7: 'Back to full volume. Re-test push-ups, hang and L-sit; check waist and photos.',
   8: 'Small increases in weight or reps. Aim for clean reps, not failure.',

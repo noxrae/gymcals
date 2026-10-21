@@ -4,7 +4,7 @@ import type { PlanDay } from '../data/plan'
 import { daysTraining, weeklySets } from '../data/volume'
 
 // The evidence behind the plan, in plain words, with honest expectations for the goals.
-const points = (days: PlanDay[]) => [
+const points = (days: PlanDay[], deload: number) => [
   {
     title: 'Progressive overload',
     text: 'You add a rep or a little weight only when every set hits the top of the range (double progression). This steady, measurable increase is the core driver of strength and muscle in every major review (ACSM 2026).',
@@ -31,7 +31,7 @@ const points = (days: PlanDay[]) => [
   },
   {
     title: 'Protein, sleep and recovery',
-    text: 'About 1.6–1.8 g of protein per kg (125–140 g for you) protects muscle in a deficit (Morton et al., 2018). Sleep 7–9 hours, keep 2–3 reps in reserve, and use the week 7 deload, because adaptation happens during recovery.',
+    text: `About 1.6–1.8 g of protein per kg (125–140 g for you) protects muscle in a deficit (Morton et al., 2018). Sleep 7–9 hours, keep 2–3 reps in reserve, and use the week ${deload} deload, because adaptation happens during recovery.`,
   },
   {
     title: 'Cardio without losing muscle',
@@ -39,9 +39,9 @@ const points = (days: PlanDay[]) => [
   },
 ]
 
-export function WhyPlan({ days }: { days: PlanDay[] }) {
+export function WhyPlan({ days, deload = 7 }: { days: PlanDay[]; deload?: number }) {
   const [open, setOpen] = useState<number | null>(null)
-  const POINTS = points(days)
+  const POINTS = points(days, deload)
   return (
     <div>
       <h2 className="sec">Why this plan works</h2>
