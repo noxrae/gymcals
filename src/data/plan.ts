@@ -447,8 +447,10 @@ const MASTERY_FOCUS: Record<number, string> = {
   8: 'Small increases in weight or reps. Aim for clean reps, not failure.',
 }
 /** The chosen length; the Mastery plan deloads earlier (week 6) and has its own weekly notes. */
+/** The lengths offered in the app. 12 weeks is no longer offered; old 12-week settings run as 6 months. */
+export const LENGTHS: ProgramId[] = [16, 24]
 export const programOf = (id?: number, plan?: string): Program => {
-  const base = PROGRAMS[(id as ProgramId) in PROGRAMS ? (id as ProgramId) : 12]
+  const base = PROGRAMS[id === 16 ? 16 : 24]
   if (plan !== 'mastery') return base
   return { ...base, summary: base.summary.replace('a lighter week 7', 'a lighter week 6'), deloads: base.deloads.map((w) => (w === 7 ? 6 : w)), focus: MASTERY_FOCUS }
 }

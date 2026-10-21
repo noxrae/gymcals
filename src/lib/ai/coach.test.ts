@@ -136,7 +136,7 @@ describe('built-in coach understands everyday questions', () => {
     ['stretching after workout', /dynamic warm-ups/],
     ['can i do workout twice a day', /Once a day/],
     ['is lateral raise enough for shoulders', /Lateral Raise/],
-    ['should I change my program', /12 weeks/],
+    ['should I change my program', /6 months/],
     ['which plans are there', /Mastery/],
     ['how do I use the plank timer', /Start timer/],
   ]

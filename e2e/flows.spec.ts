@@ -15,7 +15,7 @@ test.describe('first launch', () => {
     await page.getByLabel('Max clean push-ups').fill('8')
     await page.getByLabel('Longest dead hang').fill('20')
     await page.getByLabel('Pull-up assist for 5 clean reps').fill('45')
-    await page.getByRole('button', { name: 'Start my 12 weeks' }).click()
+    await page.getByRole('button', { name: 'Start my 6 months' }).click()
 
     await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible()
     await expect(page.getByText('Week 1', { exact: true })).toBeVisible()
@@ -41,8 +41,9 @@ test.describe('first launch', () => {
     await expect(page.getByText('Starts in 5 d')).toBeVisible()
   })
 
-  test('after week 12 the plan shows as complete', async ({ page }) => {
-    await open(page, { settings: { startDate: shift(TODAY, -90) } })
+  test('after the last week the plan shows as complete', async ({ page }) => {
+    // 6 months (24 weeks) is the default length now; 12 weeks is no longer offered.
+    await open(page, { settings: { startDate: shift(TODAY, -175) } })
     await expect(page.getByText('Plan complete')).toBeVisible()
   })
 })
@@ -413,7 +414,7 @@ test.describe('settings and data', () => {
     // Restore through the hidden file input on the Settings screen.
     await page.getByRole('button', { name: 'Get started' }).click()
     await page.getByRole('button', { name: 'Continue' }).click()
-    await page.getByRole('button', { name: 'Start my 12 weeks' }).click()
+    await page.getByRole('button', { name: 'Start my 6 months' }).click()
     await page.goto('/#/settings')
     await page.locator('input[type=file]').setInputFiles(file!)
     await expect(page.getByRole('status')).toHaveText('Backup restored.')

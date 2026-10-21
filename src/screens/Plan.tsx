@@ -5,7 +5,7 @@ import { ExerciseThumb } from '../components/Media'
 import { mixText } from '../components/TypeBadge'
 import { WhyPlan } from '../components/WhyPlan'
 import { EXERCISES } from '../data/exercises'
-import { daysFor, isDeload, isMaintenance, planKey, planLabel, PROGRAMS, TEMPLATES, weekFocus, type ProgramId, type TemplateId } from '../data/plan'
+import { daysFor, isDeload, isMaintenance, LENGTHS, planKey, planLabel, PROGRAMS, TEMPLATES, weekFocus, type ProgramId, type TemplateId } from '../data/plan'
 import { Toggle } from '../components/Toggle'
 import { addDays, mondayOf } from '../lib/dates'
 import { actions, useStore } from '../lib/store'
@@ -57,11 +57,11 @@ export default function PlanScreen() {
       <div>
         <h2 className="sec">Length</h2>
         <div className="seg" role="group" aria-label="Program length">
-          {([12, 16, 24] as ProgramId[]).map((id) => (
+          {LENGTHS.map((id) => (
             <button key={id} type="button" aria-pressed={program.id === id} onClick={() => choose(id)}>{PROGRAMS[id].name}</button>
           ))}
         </div>
-        <p className="sec-foot" style={{ marginLeft: 4 }}>{program.summary} Weeks 1–12 are the same in every length; the 4- and 6-month programs add new blocks from week 13 (see “All {program.weeks} weeks”). Switch any time; your history stays.</p>
+        <p className="sec-foot" style={{ marginLeft: 4 }}>{program.summary} Weeks 1–12 are the same in both lengths; from week 13, 4 months adds a peak block and 6 months adds a muscle-building block, then strength (see “All {program.weeks} weeks”). Switch any time; your history stays.</p>
       </div>
 
       <div style={{ borderRadius: 20, background: 'var(--ink-card)', color: '#fff', padding: '22px 20px', display: 'flex', flexDirection: 'column', gap: 18 }}>

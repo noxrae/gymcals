@@ -151,7 +151,7 @@ export function useStore<T>(select: (s: State) => T): T {
 // ---------- actions ----------
 
 export const actions = {
-  finishSetup(startDate: string, baseline: Baseline, program = 12, plan: TemplateId = 'original', extended = false) {
+  finishSetup(startDate: string, baseline: Baseline, program = 24, plan: TemplateId = 'original', extended = false) {
     update((s) => ({
       ...s,
       settings: { ...s.settings, startDate, program, plan, extended },

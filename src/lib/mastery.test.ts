@@ -110,7 +110,9 @@ describe('Mastery plan', () => {
     expect(isDeload(7, programOf(12, 'mastery'))).toBe(false)
     expect(programOf(24, 'mastery').deloads).toEqual([6, 13, 19])
     expect(isDeload(7, programOf(12, 'athletic'))).toBe(true)
-    expect(programOf(12)).toBe(PROGRAMS[12])
+    expect(programOf(12)).toBe(PROGRAMS[24]) // 12 weeks is no longer offered; old settings run as 6 months
+    expect(programOf(16)).toBe(PROGRAMS[16])
+    expect(programOf()).toBe(PROGRAMS[24])
     expect(weekFocus(6, programOf(12, 'mastery'))).toMatch(/^Deload/)
     expect(weekFocus(1, programOf(12, 'mastery'))).toMatch(/one set fewer/)
   })

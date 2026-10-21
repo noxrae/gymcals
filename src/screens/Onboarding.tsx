@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { BottomBar } from '../components/Chrome'
 import { photoUrl } from '../data/exercises'
-import { PROGRAMS, TEMPLATES, type ProgramId, type TemplateId } from '../data/plan'
+import { LENGTHS, PROGRAMS, TEMPLATES, type ProgramId, type TemplateId } from '../data/plan'
 import { Toggle } from '../components/Toggle'
 import { addDays, fmtLong, mondayOf, today } from '../lib/dates'
 import { actions, type Baseline } from '../lib/store'
@@ -18,7 +18,7 @@ export default function Onboarding() {
   const thisMonday = mondayOf(today())
   const nextMonday = addDays(thisMonday, 7)
   const [start, setStart] = useState(thisMonday)
-  const [program, setProgram] = useState<ProgramId>(12)
+  const [program, setProgram] = useState<ProgramId>(24)
   const [plan, setPlan] = useState<TemplateId>('original')
   const [extended, setExtended] = useState(false)
   const [b, setB] = useState({ weight: '76.7', waist: '', pushups: '', deadHang: '', pullAssist: '' })
@@ -41,7 +41,7 @@ export default function Onboarding() {
         <div className="hero" style={{ borderRadius: 0, height: '100dvh' }}>
           <img src={photoUrl('dead-hang')} alt="Athlete hanging from a pull-up bar" style={{ objectPosition: '50% 30%' }} />
           <div className="content" style={{ bottom: 'calc(env(safe-area-inset-bottom) + 28px)', gap: 18 }}>
-            <span className="kicker">12-week athletic plan</span>
+            <span className="kicker">Athletic transformation plan</span>
             <h1 className="disp" style={{ fontSize: 76 }}>Stronger.<br />Leaner.<br />Wider.</h1>
             <p style={{ fontSize: 17, color: 'rgba(255,255,255,.85)', lineHeight: 1.45 }}>
               Your gym and calisthenics plan, with form videos, muscle maps and a coach that tells you when to go heavier.
@@ -99,7 +99,7 @@ export default function Onboarding() {
           <div>
             <h2 className="sec">How long?</h2>
             <div className="seg" role="group" aria-label="Program length">
-              {([12, 16, 24] as ProgramId[]).map((id) => (
+              {LENGTHS.map((id) => (
                 <button key={id} type="button" aria-pressed={program === id} onClick={() => setProgram(id)}>{PROGRAMS[id].name}</button>
               ))}
             </div>

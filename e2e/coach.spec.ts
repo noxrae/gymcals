@@ -17,7 +17,7 @@ test.describe('4- and 6-month programs', () => {
 
   test('switching program on Plan keeps history and shows the longer calendar', async ({ page }) => {
     const errors = await open(page, history(), { path: '/plan' })
-    await expect(page.getByRole('img', { name: 'Week 6 of 12' })).toBeVisible()
+    await expect(page.getByRole('img', { name: 'Week 6 of 24' })).toBeVisible()
     await page.getByRole('group', { name: 'Program length' }).getByRole('button', { name: '4 months' }).click()
     await expect(page.getByRole('img', { name: 'Week 6 of 16' })).toBeVisible()
     await page.getByRole('tab', { name: 'All 16 weeks' }).click()

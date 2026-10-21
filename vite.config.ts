@@ -8,11 +8,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png', 'rest-sw.js'],
+      includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'rest-sw.js'],
       manifest: {
-        name: 'GymCals — 12-Week Athletic Plan',
+        name: 'GymCals — Athletic Transformation',
         short_name: 'GymCals',
-        description: 'Your 12-week gym + calisthenics plan, logger and coach.',
+        description: 'Your 4- or 6-month gym + calisthenics plan, logger and coach.',
         theme_color: '#000000',
         background_color: '#F2F2F7',
         display: 'standalone',
@@ -21,7 +21,7 @@ export default defineConfig({
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {

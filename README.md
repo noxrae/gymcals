@@ -1,6 +1,6 @@
 # GymCals
 
-A personal app for a gym + calisthenics plan (12 weeks, 4 months or 6 months). It's an installable web app (PWA) that works offline, keeps all data on the device, and uses only free resources.
+A personal app for a gym + calisthenics plan (4 or 6 months). It's an installable web app (PWA) that works offline, keeps all data on the device, and uses only free resources.
 
 ## Features
 
@@ -12,7 +12,7 @@ A personal app for a gym + calisthenics plan (12 weeks, 4 months or 6 months). I
   - warm-up checklist, and warm-up sets with plate loading for barbell lifts
   - swap an exercise when equipment is busy
 - **Exercise pages**: an embedded YouTube form video, start and finish photos, numbered steps, a common mistake, an anatomical muscle map with tap-to-focus, and your history chart.
-- **Plan**: three weekly plans (Original, Athletic with an Extended version, and Mastery), three lengths (12 weeks, 4 months, 6 months) with phases and deloads, this week's schedule, and a 5-day mode.
+- **Plan**: three weekly plans (Original, Athletic with an Extended version, and Mastery), two lengths (4 months, 6 months) with phases and deloads, this week's schedule, and a 5-day mode.
 - **Coach**: a free built-in coach that answers from your plan and numbers, offline; optional free Gemini key or Chrome's on-device AI.
 - **Progress**: weight against the target pace, waist, best lifts, skill tests and private progress photos with side-by-side compare.
 - **Skills**: push, pull and core levels, a first-pull-up milestone, and test logging.

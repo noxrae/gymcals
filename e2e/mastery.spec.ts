@@ -7,7 +7,8 @@ test('choose Mastery on Plan: its week shows, Extended is only for Athletic, his
   await expect(page.getByText('Switched to the Mastery plan')).toBeVisible()
   await expect(page.getByRole('switch', { name: /Extended/ })).toHaveCount(0)
   await expect(page.getByText('Leg Day · Quads, Glutes & Hamstrings')).toBeVisible()
-  await expect(page.getByText(/lighter week 6/)).toBeVisible()
+  await expect(page.getByRole('tab', { name: 'All 24 weeks' })).toBeVisible()
+  await expect(page.getByRole('group', { name: 'Program length' }).getByRole('button')).toHaveText(['4 months', '6 months'])
   const s = await stored(page)
   expect(s.settings.plan).toBe('mastery')
   expect(Object.keys(s.sessions)).toHaveLength(15)
@@ -33,7 +34,7 @@ test('Skills shows this month’s targets; passing one is saved and can be undon
   await expect(page.getByRole('heading', { name: 'Month 2 skills · 0 of 3 passed' })).toBeVisible()
   await page.getByRole('button', { name: 'See all months' }).click()
   await expect(page.getByRole('heading', { name: 'Month 3 · coming up' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: /Month 4/ })).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Month 6 · coming up' })).toBeVisible()
   await noErrors(errors)
 })
 

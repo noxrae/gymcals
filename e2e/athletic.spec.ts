@@ -72,7 +72,7 @@ test.describe('Athletic plan', () => {
     await page.getByRole('switch', { name: /Extended/ }).click()
     await page.getByRole('button', { name: 'Continue' }).click()
     await page.getByLabel('Weight').fill('76.7')
-    await page.getByRole('button', { name: 'Start my 12 weeks' }).click()
+    await page.getByRole('button', { name: 'Start my 6 months' }).click()
     await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible()
     expect((await stored(page)).settings).toMatchObject({ plan: 'athletic', extended: true })
     await noErrors(errors)
