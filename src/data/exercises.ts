@@ -402,6 +402,12 @@ const DEFS: Record<string, Def> = {
     steps: ['Face away from a low cable, rope between your legs, feet a bit wider than hips.', 'Push your hips back with soft knees and a flat back until you feel the hamstrings stretch.', 'Drive the hips forward and stand tall, squeezing your glutes.', 'Arms just hold the rope; the hips do the work.'],
     mistake: 'Squatting it down or pulling with the arms instead of hinging at the hips.',
   },
+  'reverse-hyper': {
+    name: 'Reverse Hyperextension', kind: 'weight', step: 2.5, equipment: 'Reverse hyper machine (or a high bench)',
+    primary: ['glutes', 'hamstrings'], secondary: ['lower-back'],
+    steps: ['Lie face-down with your hips at the edge of the pad, holding the handles.', 'Let your legs hang down, knees soft.', 'Swing the legs up with the glutes until they line up with your body. No higher.', 'Lower under control; don’t let the weight swing you.'],
+    mistake: 'Kicking the legs up too high and arching the lower back.',
+  },
   'wall-handstand': {
     name: 'Chest-to-wall Handstand', kind: 'time', step: 0, equipment: 'Wall · clear floor space',
     primary: ['front-delts', 'side-delts'], secondary: ['triceps', 'traps', 'abs'],
@@ -467,8 +473,9 @@ export const ALTERNATIVES: Record<string, string[]> = {
   // RDLs are no longer offered as a swap (they caused upper-back pain); these are the alternatives.
   'romanian-deadlift': ['hip-thrust', 'back-extension', 'cable-pull-through', 'seated-leg-curl'],
   'hip-thrust': ['cable-pull-through', 'back-extension'],
-  'back-extension': ['cable-pull-through', 'hip-thrust'],
-  'cable-pull-through': ['back-extension', 'hip-thrust'],
+  'back-extension': ['cable-pull-through', 'reverse-hyper', 'hip-thrust'],
+  'cable-pull-through': ['back-extension', 'reverse-hyper', 'hip-thrust'],
+  'reverse-hyper': ['back-extension', 'cable-pull-through'],
   'wall-handstand': ['pike-push-up', 'elevated-pike-push-up'],
   'leg-curl': ['seated-leg-curl'],
   'seated-calf-raise': ['calf-raise'],

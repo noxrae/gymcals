@@ -47,3 +47,18 @@ test('week 1 of Mastery brings the upper-back lifts back light; week 5 has the f
   await expect(page.getByText('Dead Bug', { exact: true })).toBeVisible()
   await noErrors(errors)
 })
+
+test('switch 45° hip extension to an alternative by name, and it is remembered', async ({ page }) => {
+  const errors = await open(page, { ...history(), settings: { plan: 'mastery', startDate: '2026-09-07' } }, { at: new Date('2026-10-13T08:00:00'), path: '/day/tue' })
+  await expect(page.getByText('or Cable Pull-through · Reverse Hyperextension — switch in the workout')).toBeVisible()
+  await page.goto('/#/workout/tue')
+  const pick = page.getByRole('group', { name: 'Choose 45° Hip Extension or an alternative' })
+  await expect(pick.getByRole('button', { name: '45° Hip Extension' })).toHaveAttribute('aria-pressed', 'true')
+  await pick.getByRole('button', { name: 'Cable Pull-through' }).click()
+  await expect(page.getByRole('region', { name: 'Cable Pull-through', exact: true })).toBeVisible()
+  await expect(page.getByRole('group', { name: 'Choose 45° Hip Extension or an alternative' }).getByRole('button', { name: 'Cable Pull-through' })).toHaveAttribute('aria-pressed', 'true')
+  expect((await stored(page)).sessions['2026-10-13'].swaps).toEqual({ 'back-extension': 'cable-pull-through' })
+  await page.getByRole('group', { name: 'Choose 45° Hip Extension or an alternative' }).getByRole('button', { name: '45° Hip Extension' }).click()
+  expect((await stored(page)).sessions['2026-10-13'].swaps ?? {}).toEqual({})
+  await noErrors(errors)
+})

@@ -246,11 +246,32 @@ function ExerciseBlock({ item, index, planned, alternatives, week, date, log, is
           <span className="small muted">{rangeText(item, count)}{item.rest[0] ? ` · rest ${restText(item.rest)}` : ''}</span>
           {planned !== item.ex && <span className="small" style={{ color: 'var(--accent-ink)' }}>Swapped for {EXERCISES[planned].name}</span>}
         </Link>
-        {alternatives.length > 0 && !sets.some((s) => s.done) && (
+        {alternatives.length > 0 && !item.alt && !sets.some((s) => s.done) && (
           <button type="button" className="link-btn" style={{ fontSize: 14, fontWeight: 600, minHeight: 40 }} onClick={() => setSwapping(true)}>Swap</button>
         )}
         <Link to={`/exercise/${ex.key}?tab=muscles`} aria-label={`Muscles and video: ${ex.name}`} style={{ width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--label-2)' }}><IconInfo size={21} /></Link>
       </div>
+
+      {item.alt && item.alt.length > 0 && (
+        <div role="group" aria-label={`Choose ${EXERCISES[planned].name} or an alternative`} style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '0 16px 10px' }}>
+          {[planned, ...item.alt].map((k) => {
+            const on = k === item.ex
+            const locked = !on && sets.some((x) => x.done)
+            return (
+              <button
+                key={k}
+                type="button"
+                aria-pressed={on}
+                disabled={locked}
+                onClick={() => actions.setSwap(date, planned, k === planned ? null : k)}
+                style={{ minHeight: 36, padding: '0 12px', borderRadius: 18, border: on ? 0 : '1px solid var(--sep)', background: on ? 'var(--btn)' : 'transparent', color: on ? 'var(--btn-ink)' : 'var(--label)', fontSize: 14, fontWeight: 600, opacity: locked ? 0.45 : 1 }}
+              >
+                {EXERCISES[k].name}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {ex.kind !== 'cardio' && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', margin: '0 16px 10px', fontSize: 14, lineHeight: 1.4, color: tip.up ? 'var(--accent-ink)' : 'var(--label-2)' }}>

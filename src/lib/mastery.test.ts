@@ -51,6 +51,13 @@ describe('Mastery plan', () => {
     expect(allItems(dayFor('tue', false, M(3))).find((i) => i.ex === 'squat')!.note).toMatch(/^Weeks 3–4: moderate/)
   })
 
+  it('45° hip extension has one-tap alternatives by name', () => {
+    const hip = allItems(dayFor('tue', false, M(5))).find((i) => i.ex === 'back-extension')!
+    expect(hip.alt).toEqual(['cable-pull-through', 'reverse-hyper'])
+    for (const k of hip.alt!) expect(EXERCISES[k].primary).toEqual(expect.arrayContaining(['glutes', 'hamstrings']))
+    expect(allItems(dayFor('tue', false, M(1))).find((i) => i.ex === 'back-extension')!.alt).toHaveLength(2)
+  })
+
   it('the one heavy leg day is dedicated: hinge, glutes, hamstrings and quads, no RDLs', () => {
     const tue = allItems(dayFor('tue', false, M(5))).map((i) => i.ex)
     for (const ex of ['squat', 'hip-thrust', 'back-extension', 'seated-leg-curl', 'bulgarian-split-squat']) expect(tue).toContain(ex)

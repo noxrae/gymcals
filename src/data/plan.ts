@@ -14,6 +14,8 @@ export interface PlanItem {
   perSide?: boolean
   note?: string
   added?: boolean
+  /** one-tap alternatives shown by name next to the exercise (pick by equipment or comfort) */
+  alt?: string[]
 }
 
 /** Each group holds one kind of training (gym, calisthenics or cardio) so the app can label it clearly. */
@@ -279,7 +281,7 @@ const MASTERY: PlanDay[] = [
     warmup: LOWER_WARMUP,
     groups: [
       { title: 'Main lifts', items: [r('squat', 3, 6, 10, [150, 180], { note: 'Stop where the pelvis starts to tuck · no grinding reps' }), r('hip-thrust', 3, 8, 12, [120, 150], { note: 'Pad, bench just below the shoulder blades, ribs down' })] },
-      { title: 'Hamstrings · RDL alternatives', items: [r('back-extension', 3, 8, 12, [90, 120], { note: 'Hold a plate · hip hinge, neutral spine' }), r('seated-leg-curl', 3, 8, 12, [60, 90], { note: 'Lean forward, slow lowering' })] },
+      { title: 'Hamstrings · RDL alternatives', items: [r('back-extension', 3, 8, 12, [90, 120], { note: 'Hold a plate · hip hinge, neutral spine', alt: ['cable-pull-through', 'reverse-hyper'] }), r('seated-leg-curl', 3, 8, 12, [60, 90], { note: 'Lean forward, slow lowering' })] },
       { title: 'Quads & calves', items: [r('bulgarian-split-squat', 2, 8, 12, [90, 120], { perSide: true }), r('leg-extension', 2, 10, 15, [60, 90]), r('calf-raise', 4, 8, 12, [60, 90], { note: 'Standing · 2 s pause at the bottom' })] },
     ],
   },

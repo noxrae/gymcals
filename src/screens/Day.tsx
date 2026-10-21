@@ -91,6 +91,7 @@ export default function DayScreen() {
                       {it.added && <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-ink)', background: 'var(--accent-soft)', padding: '2px 7px', borderRadius: 999 }}>NEW</span>}
                     </span>
                     <span className="sub">{rangeText(it, setsFor(it, week, program))}{it.note ? ` · ${it.note}` : ''}</span>
+                    {it.alt && <span className="small" style={{ color: 'var(--accent-ink)', fontWeight: 600 }}>or {it.alt.map((k) => EXERCISES[k].name).join(' · ')} — switch in the workout</span>}
                   </span>
                 </Link>
                 {ex.primary.length > 0 && (
