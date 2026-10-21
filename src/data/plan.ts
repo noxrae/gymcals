@@ -280,8 +280,8 @@ const MASTERY: PlanDay[] = [
     id: 'tue', name: 'Leg Day · Quads, Glutes & Hamstrings', short: 'Legs', focus: 'Quads · Glutes · Hamstrings · Calves', minutes: 75, hero: 'squat',
     warmup: LOWER_WARMUP,
     groups: [
-      { title: 'Main lifts', items: [r('squat', 3, 6, 10, [150, 180], { note: 'Stop where the pelvis starts to tuck · no grinding reps' }), r('hip-thrust', 3, 8, 12, [120, 150], { note: 'Pad, bench just below the shoulder blades, ribs down' })] },
-      { title: 'Hamstrings · RDL alternatives', items: [r('back-extension', 3, 8, 12, [90, 120], { note: 'Hold a plate · hip hinge, neutral spine', alt: ['cable-pull-through', 'reverse-hyper'] }), r('seated-leg-curl', 3, 8, 12, [60, 90], { note: 'Lean forward, slow lowering' })] },
+      { title: 'Main lifts', items: [r('squat', 3, 6, 10, [150, 180], { note: 'Stop where the pelvis starts to tuck · no grinding reps', alt: ['hack-squat', 'leg-press'] }), r('hip-thrust', 3, 8, 12, [120, 150], { note: 'Pad, bench just below the shoulder blades, ribs down' })] },
+      { title: 'Hamstrings · RDL alternatives', items: [r('back-extension', 3, 8, 12, [90, 120], { note: 'Plate held low on the sternum · hip hinge, neutral spine', alt: ['cable-pull-through', 'reverse-hyper'] }), r('seated-leg-curl', 3, 8, 12, [60, 90], { note: 'Lean forward, slow lowering' })] },
       { title: 'Quads & calves', items: [r('bulgarian-split-squat', 2, 8, 12, [90, 120], { perSide: true }), r('leg-extension', 2, 10, 15, [60, 90]), r('calf-raise', 4, 8, 12, [60, 90], { note: 'Standing · 2 s pause at the bottom' })] },
     ],
   },
@@ -299,7 +299,7 @@ const MASTERY: PlanDay[] = [
     id: 'thu', name: 'Core, Skills + Cardio', short: 'Core', focus: 'Abs · L-sit · Handstand · Calves · Fat loss', minutes: 70, hero: 'hanging-knee-raise',
     warmup: ['3 min easy bike or walk', '2 min wrist prep: circles, palm and finger stretches', 'Cat–cow and hip openers', 'Scapular push-ups 1 × 10'],
     groups: [
-      { title: 'Skills · while fresh', items: [r('tuck-l-sit', 4, 10, 20, [90, 120], { note: 'L-sit practice 2 of 2 · parallettes or blocks' }), r('pike-push-up', 3, 5, 10, [90, 120], { note: 'Handstand prep' }), r('wall-handstand', 3, 15, 30, [90, 120], { note: 'From month 2' })] },
+      { title: 'Skills · while fresh', items: [r('tuck-l-sit', 4, 10, 20, [90, 120], { note: 'L-sit practice 2 of 2 · parallettes or blocks' }), r('pike-push-up', 3, 5, 10, [90, 120], { note: 'Handstand prep' }), r('wall-handstand', 3, 15, 30, [90, 120], { note: 'From week 7 · ≤30 s, stop well before shaking' })] },
       { title: 'Abs', items: [r('hanging-knee-raise', 3, 8, 12, [60, 90], { note: 'Abs 2 of 3' }), r('hollow-hold', 3, 20, 30, [45, 60]), r('side-plank', 2, 30, 45, [45, 60], { perSide: true })] },
       { title: 'Calves', items: [r('calf-raise', 2, 10, 15, [60, 90], { note: 'Standing' })] },
       { title: 'Cardio', items: [r('incline-walk', 1, 25, 35, [0, 0], { note: 'Zone 2: you can still talk in short sentences' })] },
@@ -352,7 +352,22 @@ const STAGE_2: Record<string, Tweak> = {
   'pike-push-up': { note: 'Weeks 3–4: feet on the floor if the incline version felt easy' },
 }
 function masteryWeek(days: PlanDay[], week: number): PlanDay[] {
-  if (week >= 5) return days
+  if (week >= 9) return days
+  if (week >= 5) {
+    // Weeks 5–8: negatives and the hip-extension plate start; wall handstands wait until week 7,
+    // diamond push-ups until week 9, so not everything new lands in the same week.
+    return days.map((d) => ({
+      ...d,
+      groups: d.groups
+        .map((g) => ({
+          ...g,
+          items: g.items
+            .filter((it) => !(it.ex === 'wall-handstand' && week < 7))
+            .map((it) => (d.id === 'mon' && it.ex === 'diamond-push-up' ? { ...it, ex: 'push-up', min: 6, max: 15, note: 'Regular push-ups until week 9 · stop 2 reps short' } : it)),
+        }))
+        .filter((g) => g.items.length),
+    }))
+  }
   const stage = week <= 2 ? STAGE_1 : STAGE_2
   return days.map((d) => ({
     ...d,
@@ -363,7 +378,7 @@ function masteryWeek(days: PlanDay[], week: number): PlanDay[] {
           .filter((it) => it.ex !== 'negative-pull-up' && it.ex !== 'wall-handstand')
           .map((it) => {
             let next: PlanItem = { ...it, ...stage[it.ex] }
-            if (d.id === 'mon' && it.ex === 'diamond-push-up') next = { ...next, ex: 'push-up', min: 6, max: 15, note: 'Month 1: regular push-ups · stop 2 reps short' }
+            if (d.id === 'mon' && it.ex === 'diamond-push-up') next = { ...next, ex: 'push-up', min: 6, max: 15, note: 'Regular push-ups until week 9 · stop 2 reps short' }
             if (d.id === 'wed' && it.ex === 'assisted-pull-up') next = { ...next, sets: 4 }
             if (d.id === 'wed' && (it.ex === 'hammer-curl' || it.ex === 'reverse-curl')) next = { ...next, sets: 1 }
             if (d.id === 'thu' && it.ex === 'tuck-l-sit') next = { ...next, sets: 3 }
@@ -441,10 +456,10 @@ const MASTERY_FOCUS: Record<number, string> = {
   2: 'Still one set fewer and light loads. Add a rep where you can.',
   3: 'Full sets from now, with moderate loads on squats and hip thrusts. Top of the range on every set? Add a little weight.',
   4: 'Moderate loads, clean reps. Next week the full plan starts.',
-  5: 'Full plan: pull-up negatives, wall handstands and diamond push-ups start. Next week is lighter.',
+  5: 'Pull-up negatives and the hip-extension plate start. Next week is lighter.',
   6: 'Deload week: about 40% fewer sets at the same weights. Keep the skill practice.',
-  7: 'Back to full volume. Re-test push-ups, hang and L-sit; check waist and photos.',
-  8: 'Small increases in weight or reps. Aim for clean reps, not failure.',
+  7: 'Back to full volume, and wall handstands start. Re-test push-ups, hang and L-sit; check waist and photos.',
+  8: 'Small increases in weight or reps. Aim for clean reps, not failure. Diamond push-ups start next week.',
 }
 /** The chosen length; the Mastery plan deloads earlier (week 6) and has its own weekly notes. */
 /** The lengths offered in the app. 12 weeks is no longer offered; old 12-week settings run as 6 months. */
@@ -546,10 +561,39 @@ export function ctxForSession<T extends Partial<PlanCtx>>(ctx: T, plan?: string)
   return { ...ctx, template: templateOf(plan.split('-')[0]), extended: plan.endsWith('-extended') }
 }
 
+/** Mastery-only adjustments in the 6-month blocks (final coach + physio review). */
+function masteryPhase(day: PlanDay, phase: PhaseId): PlanDay {
+  if (phase !== 'hypertrophy' && phase !== 'strength' && phase !== 'peak') return day
+  const heavy = phase === 'strength' || phase === 'peak'
+  const groups = day.groups
+    .map((g) => ({
+      ...g,
+      items: g.items
+        // Strength: full pull-ups are the main lift now; negatives are dropped (elbow and grip load).
+        .filter((it) => !(heavy && it.ex === 'negative-pull-up'))
+        // Strength: Monday's L-sit block goes, to keep heavier Monday near 75 min (L-sit stays on Thursday).
+        .filter((it) => !(heavy && day.id === 'mon' && (it.ex === 'tuck-l-sit' || it.ex === 'advanced-tuck-l-sit')))
+        .map((it): PlanItem => {
+          if (it.ex === 'bulgarian-split-squat') return { ...it, min: 8, max: 12, rest: [90, 120] }
+          if (phase === 'hypertrophy' && it.ex === 'cable-fly') return { ...it, sets: 3 }
+          if (phase === 'hypertrophy' && it.ex === 'incline-dumbbell-press') return { ...it, sets: 4 }
+          if (heavy && it.ex === 'incline-dumbbell-press') return { ...it, min: 6, max: 10, rest: [120, 150] }
+          if (heavy && it.ex === 'back-extension') return { ...it, sets: 2 }
+          if (heavy && (it.ex === 'wrist-curl' || it.ex === 'reverse-wrist-curl')) return { ...it, sets: 1 }
+          if (heavy && day.id === 'sat' && (it.ex === 'hanging-leg-raise' || it.ex === 'hanging-knee-raise')) return { ...it, ex: 'cable-crunch', min: 10, max: 15, note: 'Abs 3 of 3 · off the bar to rest grip and elbows' }
+          if (heavy && it.ex === 'pull-up' && day.id === 'wed') return { ...it, note: 'Main lift now · band if you can’t get 3 clean reps' }
+          return it
+        }),
+    }))
+    .filter((g) => g.items.length)
+  return { ...day, groups }
+}
+
 export const daysFor = (fiveDay: boolean, ctx: Partial<PlanCtx> = {}) => {
-  const program = ctx.program ?? PROGRAMS[12]
+  const program = ctx.program ?? PROGRAMS[24]
   const phase = phaseOf(ctx.week ?? 1, program).id
-  return daysBase(fiveDay, ctx.template, ctx.extended, ctx.week ?? 1).map((d) => applyPhase(d, phase))
+  const days = daysBase(fiveDay, ctx.template, ctx.extended, ctx.week ?? 1).map((d) => applyPhase(d, phase))
+  return ctx.template === 'mastery' ? days.map((d) => masteryPhase(d, phase)) : days
 }
 export const dayFor = (id: DayId, fiveDay: boolean, ctx: Partial<PlanCtx> = {}) => daysFor(fiveDay, ctx).find((d) => d.id === id)!
 

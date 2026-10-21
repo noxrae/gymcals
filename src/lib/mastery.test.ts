@@ -5,12 +5,12 @@ import { monthOf, SKILL_MONTHS } from '../data/skills'
 import { daysTraining, weeklySets } from '../data/volume'
 import videos from '../data/videos.json' with { type: 'json' }
 
-const M = (week = 5) => ({ template: 'mastery' as const, week })
+const M = (week = 9) => ({ template: 'mastery' as const, week })
 const line = (d: PlanDay) => allItems(d).map((i) => `${i.ex} ${i.sets}×${i.min}–${i.max}`)
-const week = (w = 5) => daysFor(false, M(w))
+const week = (w = 9) => daysFor(false, M(w))
 
 describe('Mastery plan', () => {
-  // The full plan from week 5 (weeks 1–4 bring the upper-back lifts back in stages; see below).
+  // The full plan from week 9 (weeks 1–4 stage the upper-back lifts; weeks 5–8 stagger the new skills).
   const PLAN: Record<string, string[]> = {
     mon: ['tuck-l-sit 2×10–15', 'bench-press 3×6–10', 'incline-dumbbell-press 3×8–12', 'lat-pulldown 3×8–12', 'seated-cable-row 3×8–12', 'lateral-raise 3×12–20', 'triceps-pushdown 2×10–15', 'diamond-push-up 2×5–12', 'cable-crunch 3×10–15'],
     tue: ['squat 3×6–10', 'hip-thrust 3×8–12', 'back-extension 3×8–12', 'seated-leg-curl 3×8–12', 'bulgarian-split-squat 2×8–12', 'leg-extension 2×10–15', 'calf-raise 4×8–12'],
@@ -20,8 +20,8 @@ describe('Mastery plan', () => {
     sat: ['leg-press 3×12–15', 'cable-pull-through 3×12–15', 'seated-leg-curl 3×12–15', 'seated-calf-raise 3×12–20', 'lateral-raise 3×15–20', 'hanging-knee-raise 3×8–12', 'farmers-carry 2×30–45', 'wrist-curl 2×15–20', 'reverse-wrist-curl 2×15–20'],
     sun: [],
   }
-  it.each(Object.keys(PLAN))('%s matches the reviewed plan (from week 5)', (id) => {
-    expect(line(dayFor(id as DayId, false, M(5)))).toEqual(PLAN[id])
+  it.each(Object.keys(PLAN))('%s matches the reviewed plan (from week 9)', (id) => {
+    expect(line(dayFor(id as DayId, false, M(9)))).toEqual(PLAN[id])
   })
 
   it('weeks 1–2 (stage 1): fewer sets, light re-entry of the upper-back lifts, no negatives or wall handstands', () => {
@@ -117,11 +117,41 @@ describe('Mastery plan', () => {
     expect(weekFocus(1, programOf(12, 'mastery'))).toMatch(/one set fewer/)
   })
 
-  it('weekly notes match the staged start (negatives and handstands from week 5)', () => {
+  it('weekly notes match the staged start', () => {
     const p = programOf(24, 'mastery')
     expect(weekFocus(3, p)).not.toMatch(/negative/i)
-    expect(weekFocus(5, p)).toMatch(/negatives, wall handstands and diamond push-ups start/)
+    expect(weekFocus(5, p)).toMatch(/negatives and the hip-extension plate start/)
     expect(weekFocus(6, p)).toMatch(/^Deload/)
+    expect(weekFocus(7, p)).toMatch(/wall handstands start/)
+  })
+
+  it('weeks 5–8 stagger the new skills: negatives first, handstands from week 7, diamonds from week 9', () => {
+    const w5 = (id: DayId) => allItems(dayFor(id, false, M(5))).map((i) => i.ex)
+    expect(w5('wed')).toContain('negative-pull-up')
+    expect(w5('thu')).not.toContain('wall-handstand')
+    expect(w5('mon')).toContain('push-up')
+    expect(allItems(dayFor('thu', false, M(7))).map((i) => i.ex)).toContain('wall-handstand')
+    expect(allItems(dayFor('mon', false, M(8))).map((i) => i.ex)).not.toContain('diamond-push-up')
+    expect(allItems(dayFor('mon', false, M(9))).map((i) => i.ex)).toContain('diamond-push-up')
+  })
+
+  it('6-month blocks: more chest in hypertrophy; safer strength phase (final review)', () => {
+    const P = PROGRAMS[24]
+    const hyp = (id: DayId) => allItems(dayFor(id, false, { ...M(14), program: P }))
+    expect(hyp('fri').find((i) => i.ex === 'cable-fly')!.sets).toBe(3)
+    expect(hyp('mon').find((i) => i.ex === 'incline-dumbbell-press')!.sets).toBe(4)
+    const str = (id: DayId) => allItems(dayFor(id, false, { ...M(20), program: P }))
+    expect(str('wed').map((i) => i.ex)).not.toContain('negative-pull-up')
+    expect(str('wed').find((i) => i.ex === 'pull-up')).toBeTruthy()
+    expect(str('mon').map((i) => i.ex)).not.toContain('advanced-tuck-l-sit')
+    expect(str('tue').find((i) => i.ex === 'bulgarian-split-squat')).toMatchObject({ min: 8, max: 12 })
+    expect(str('tue').find((i) => i.ex === 'back-extension')!.sets).toBe(2)
+    expect(str('tue').find((i) => i.ex === 'squat')).toMatchObject({ min: 5, max: 8, alt: ['hack-squat', 'leg-press'] })
+    expect(str('mon').find((i) => i.ex === 'incline-dumbbell-press')).toMatchObject({ min: 6, max: 10 })
+    expect(str('sat').map((i) => i.ex)).not.toContain('hanging-leg-raise')
+    expect(str('sat').find((i) => i.ex === 'wrist-curl')!.sets).toBe(1)
+    // The other plans are not touched by these Mastery-only rules.
+    expect(allItems(dayFor('wed', false, { template: 'original', week: 20, program: P })).map((i) => i.ex)).toContain('negative-pull-up')
   })
 
   it('works with 5-day mode and long programs', () => {

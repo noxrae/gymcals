@@ -31,7 +31,7 @@ const points = (days: PlanDay[], deload: number) => [
   },
   {
     title: 'Protein, sleep and recovery',
-    text: `About 1.6–1.8 g of protein per kg (125–140 g for you) protects muscle in a deficit (Morton et al., 2018). Sleep 7–9 hours, keep 2–3 reps in reserve, and use the week ${deload} deload, because adaptation happens during recovery.`,
+    text: `About 1.8–2.1 g of protein per kg (140–165 g for you) protects and builds muscle in a deficit (Morton et al., 2018). Sleep 7–9 hours, keep 2–3 reps in reserve, and use the week ${deload} deload, because adaptation happens during recovery.`,
   },
   {
     title: 'Cardio without losing muscle',

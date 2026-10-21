@@ -91,7 +91,7 @@ export default function SettingsScreen() {
             <Stepper label="Protein" unit="g" value={s.proteinTarget} step={5} onChange={(v) => actions.setSettings({ proteinTarget: v })} />
             <Stepper label="Steps" value={s.stepTarget} step={500} onChange={(v) => actions.setSettings({ stepTarget: v })} />
           </div>
-          <p className="sec-foot">Your plan suggests 125–140 g of protein and 7,000–10,000 steps.</p>
+          <p className="sec-foot">Aim for 140–165 g of protein (about 1.8–2.1 g per kg) in 4–5 meals, and 8,000–10,000 steps.</p>
         </div>
 
         <div>

@@ -6,12 +6,12 @@ import { absZone, bmr, calories, navyBodyFat, profileComplete, vTaper } from './
 const me = { heightCm: 175, age: 25, sex: 'male' as const, activity: 'medium' as const }
 
 describe('calorie target', () => {
-  it('uses Mifflin–St Jeor and a ~450 kcal deficit', () => {
+  it('uses Mifflin–St Jeor and a ~400 kcal deficit (recomposition)', () => {
     expect(bmr(76.7, me)).toBeCloseTo(1740.75)
-    expect(calories(76.7, me)).toMatchObject({ maintenance: 2790, target: 2340 })
+    expect(calories(76.7, me)).toMatchObject({ maintenance: 2790, target: 2390 })
   })
   it('applies the fine-tune and never goes below safe floors', () => {
-    expect(calories(76.7, me, -150).target).toBe(2190)
+    expect(calories(76.7, me, -150).target).toBe(2240)
     const tiny = calories(45, { heightCm: 150, age: 60, sex: 'female', activity: 'low' }, -1000)
     expect(tiny.target).toBeGreaterThanOrEqual(1300)
   })

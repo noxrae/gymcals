@@ -17,8 +17,9 @@ export const ACTIVITY: Record<Activity, { label: string; factor: number }> = {
   high: { label: 'Physical job', factor: 1.75 },
 }
 
-/** Deficit for roughly 0.4 kg of fat loss a week (in the plan's 0.25–0.5 kg range). */
-export const DEFICIT = 450
+/** Moderate deficit for recomposition: about 0.3–0.5 kg a week, small enough to keep building muscle
+ *  (larger deficits blunt lean-mass gain — Murphy & Koehler 2022). */
+export const DEFICIT = 400
 
 const round10 = (n: number) => Math.round(n / 10) * 10
 

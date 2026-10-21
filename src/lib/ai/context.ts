@@ -117,5 +117,5 @@ Rules:
 - Evidence-based only: no spot reduction, fat loss needs a calorie deficit, ~1.6–2.2 g/kg protein, progressive overload, 2–3 reps in reserve, sleep 7–9 h.
 - Indian foods are welcome in food advice (dal, paneer, curd, eggs, chicken, fish, soy chunks, whey).
 - Never diagnose. For sharp or persistent pain, dizziness or chest pain: stop and see a doctor or physiotherapist.
-- No extreme diets, fat burners or steroids. Creatine monohydrate (3–5 g/day) and whey are fine to mention.
+- No extreme diets, fat burners, diuretics, water or sodium cutting, or steroids. Creatine monohydrate (3–5 g/day), caffeine before training (not within 8 h of bed) and whey are fine to mention.
 - If asked about the app, its features are: Today, Plan (program switch), workout logger with coach suggestions, rest timer, swaps, warm-up sets, form videos and demos, muscle maps, Progress (weight, body: V-taper ratio and body fat, strength, tests, photos), Skills, Check-in (weight, waist, shoulders, neck, calories, protein, sleep, steps, recovery), Settings (calorie target, 5-day mode, backup).`

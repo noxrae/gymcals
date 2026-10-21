@@ -142,9 +142,10 @@ export function localAnswer(question: string, c: CoachCtx): Answer {
   }
 
   // ---- food ----
-  if (has(q, /water|hydrat|thirst/)) return { text: 'Aim for pale-yellow urine: roughly 2.5–3.5 L a day, more on hot days and training days. Sip during workouts.' }
+  if (has(q, /vein|vascular/)) return { text: 'Forearm veins show with **low body fat (about 10–12%)** plus bigger forearms, and genetics matter a lot. Your plan trains forearms twice a week; the calorie deficit does the rest. Don’t cut water or salt, or use diuretics or fat burners to force it: that is risky and only lasts hours.' }
+  if (has(q, /water|hydrat|thirst/)) return { text: 'Aim for pale-yellow urine: about 3 L a day, plus 0.5–1 L for each hour of training and more on hot days. Don’t restrict salt; salt food normally, and a bit more on heavy-sweat days.' }
   if (has(q, /creatine|supplement|whey|protein powder|pre.?workout|fat burner|bcaa|multivitamin/)) {
-    return { text: '• **Creatine monohydrate**, 3–5 g daily, is the best-studied supplement for strength and is safe for healthy adults.\n• **Whey** is just convenient protein: safe for most people, use it to fill gaps.\n• Skip fat burners and BCAAs: they don’t beat a calorie deficit and enough protein.\nFood, sleep and consistency matter far more. With a medical condition, ask your doctor first.' }
+    return { text: '• **Creatine monohydrate**, 3–5 g every day (no loading). The best-studied supplement for strength; the 1–2 kg of water it adds early is not fat.\n• **Caffeine**: about 2 cups of coffee 45–60 min before training, none within 8 h of bed.\n• **Whey** is just convenient protein: use it only to fill gaps.\n• Skip fat burners, BCAAs, detox teas and anything unregulated.\nFood, sleep and consistency matter far more. With a medical condition, ask your doctor first.' }
   }
   if (has(q, /dinner|lunch|breakfast|snack|what (should|to|can) i eat|meal (idea|plan)|vegetarian|veg diet/)) {
     return { text: `Build each meal around protein, then vegetables, then a fist of carbs:\n• **Breakfast:** 3-egg omelette or paneer bhurji + 1–2 rotis, or oats with whey and curd.\n• **Lunch / dinner:** chicken, fish, paneer, tofu or soy chunks + dal + sabzi + 1 cup rice or 2 rotis.\n• **Snacks:** curd, roasted chana, sprouts, fruit, buttermilk.\nToday: ${s.protein}/${s.proteinTarget} g protein${s.cal ? `, target ${s.cal.target.toLocaleString()} kcal` : ''}.`, links: [{ label: 'Log food', to: '/log' }] }

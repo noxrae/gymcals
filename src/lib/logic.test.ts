@@ -223,7 +223,7 @@ describe('backup import', () => {
     const merged = mergeState({ version: 1, settings: { startDate: '2026-09-07' }, sessions: {}, checkins: {}, tests: { pushups: [] } } as unknown as State)
     expect(merged.tests.lsit).toEqual([])
     expect(merged.tests.deadHang).toEqual([])
-    expect(merged.settings.proteinTarget).toBe(130)
+    expect(merged.settings.proteinTarget).toBe(150)
     expect(merged.settings.fiveDay).toBe(false)
   })
 })

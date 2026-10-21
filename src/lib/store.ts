@@ -90,7 +90,7 @@ const KEY = 'gymcals:v1'
 
 const initial: State = {
   version: 1,
-  settings: { startDate: null, proteinTarget: 130, stepTarget: 8000, sound: true, vibrate: true, fiveDay: false, keepAwake: true },
+  settings: { startDate: null, proteinTarget: 150, stepTarget: 8000, sound: true, vibrate: true, fiveDay: false, keepAwake: true },
   sessions: {},
   checkins: {},
   tests: { pushups: [], deadHang: [], lsit: [] },

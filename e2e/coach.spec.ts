@@ -154,7 +154,7 @@ test.describe('AI coach · on-device and offline', () => {
     const input = page.getByRole('textbox', { name: 'Ask your coach' })
     await input.fill('how much water should i drink')
     await input.press('Enter')
-    await expect(page.getByText(/2\.5–3\.5 L/)).toBeVisible()
+    await expect(page.getByText(/about 3 L a day/)).toBeVisible()
     await expect(page.getByText(/No internet connection\. Answered by the built-in coach/)).toBeVisible()
     await context.setOffline(false)
   })
