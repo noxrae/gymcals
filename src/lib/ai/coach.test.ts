@@ -144,7 +144,7 @@ describe('built-in coach understands everyday questions', () => {
 
 describe('RDL pain on the Athletic plan', () => {
   it('suggests back-friendly swaps for RDLs and knows the new exercises', () => {
-    expect(ans('my upper back hurts during romanian deadlift')).toMatch(/Barbell Hip Thrust or 45° Hip Extension or Seated Leg Curl/)
+    expect(ans('my upper back hurts during romanian deadlift')).toMatch(/Barbell Hip Thrust or 45° Hip Extension or Cable Pull-through or Seated Leg Curl/)
     expect(ans('how to do hip thrust')).toMatch(/\*\*Barbell Hip Thrust\*\*/)
     expect(ans('hyperextension form')).toMatch(/45° Hip Extension/)
     expect(ans('what muscles does the abductor machine work')).toMatch(/Seated Hip Abduction/)

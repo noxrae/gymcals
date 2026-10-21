@@ -5,37 +5,78 @@ import { monthOf, SKILL_MONTHS } from '../data/skills'
 import { daysTraining, weeklySets } from '../data/volume'
 import videos from '../data/videos.json' with { type: 'json' }
 
-const M = (week = 3) => ({ template: 'mastery' as const, week })
+const M = (week = 5) => ({ template: 'mastery' as const, week })
 const line = (d: PlanDay) => allItems(d).map((i) => `${i.ex} ${i.sets}×${i.min}–${i.max}`)
-const week = (w = 3) => daysFor(false, M(w))
+const week = (w = 5) => daysFor(false, M(w))
 
 describe('Mastery plan', () => {
+  // The full plan from week 5 (weeks 1–4 bring the upper-back lifts back in stages; see below).
   const PLAN: Record<string, string[]> = {
-    mon: ['bench-press 3×6–10', 'incline-dumbbell-press 3×8–12', 'lat-pulldown 3×8–12', 'seated-cable-row 3×8–12', 'lateral-raise 4×12–20', 'triceps-pushdown 2×10–15', 'push-up 2×6–15'],
-    tue: ['squat 3×6–10', 'hip-thrust 3×8–12', 'bulgarian-split-squat 3×8–12', 'seated-leg-curl 3×10–15', 'leg-extension 2×10–15', 'calf-raise 4×8–12', 'cable-crunch 3×10–15'],
-    wed: ['scapular-pull-up 2×5–8', 'assisted-pull-up 4×5–8', 'negative-pull-up 3×3–3', 'chest-supported-row 3×8–12', 'straight-arm-pulldown 2×12–15', 'reverse-pec-deck 3×12–20', 'incline-dumbbell-curl 3×8–12', 'hammer-curl 2×10–15', 'reverse-curl 2×12–15', 'dead-hang 2×20–45'],
-    thu: ['tuck-l-sit 4×10–20', 'pike-push-up 3×5–10', 'hanging-knee-raise 3×8–12', 'hollow-hold 3×20–30', 'side-plank 2×30–45', 'incline-walk 1×25–35'],
-    fri: ['assisted-pull-up 2×5–8', 'incline-bench-press 3×8–12', 'dumbbell-shoulder-press 3×8–12', 'cable-lateral-raise 4×12–20', 'reverse-pec-deck 2×12–20', 'preacher-curl 3×8–12', 'triceps-extension 3×10–15', 'triceps-pushdown 2×10–15'],
-    sat: ['leg-press 3×12–15', 'back-extension 3×10–15', 'seated-leg-curl 2×12–15', 'seated-calf-raise 3×12–20', 'lateral-raise 3×15–20', 'wrist-curl 2×15–20', 'reverse-wrist-curl 2×15–20', 'farmers-carry 2×30–45', 'hanging-knee-raise 3×8–12', 'incline-walk 1×15–20', 'mobility 1×5–10'],
+    mon: ['tuck-l-sit 2×10–15', 'bench-press 3×6–10', 'incline-dumbbell-press 3×8–12', 'lat-pulldown 3×8–12', 'seated-cable-row 3×8–12', 'lateral-raise 3×12–20', 'triceps-pushdown 2×10–15', 'diamond-push-up 2×5–12', 'cable-crunch 3×10–15'],
+    tue: ['squat 3×6–10', 'hip-thrust 3×8–12', 'back-extension 3×8–12', 'seated-leg-curl 3×8–12', 'bulgarian-split-squat 2×8–12', 'leg-extension 2×10–15', 'calf-raise 4×8–12'],
+    wed: ['scapular-pull-up 2×5–8', 'negative-pull-up 3×3–3', 'assisted-pull-up 3×5–8', 'chest-supported-row 3×8–12', 'reverse-pec-deck 3×12–20', 'incline-dumbbell-curl 3×8–12', 'hammer-curl 2×10–15', 'reverse-curl 2×12–15', 'dead-hang 2×20–45'],
+    thu: ['tuck-l-sit 4×10–20', 'pike-push-up 3×5–10', 'wall-handstand 3×15–30', 'hanging-knee-raise 3×8–12', 'hollow-hold 3×20–30', 'side-plank 2×30–45', 'calf-raise 2×10–15', 'incline-walk 1×25–35'],
+    fri: ['assisted-pull-up 2×5–8', 'incline-bench-press 3×8–12', 'dumbbell-shoulder-press 3×8–12', 'cable-lateral-raise 4×12–20', 'reverse-pec-deck 3×12–20', 'preacher-curl 3×8–12', 'triceps-extension 3×10–15', 'triceps-pushdown 2×10–15'],
+    sat: ['leg-press 3×12–15', 'cable-pull-through 3×12–15', 'seated-leg-curl 3×12–15', 'seated-calf-raise 3×12–20', 'lateral-raise 3×15–20', 'hanging-knee-raise 3×8–12', 'farmers-carry 2×30–45', 'wrist-curl 2×15–20', 'reverse-wrist-curl 2×15–20'],
     sun: [],
   }
-  it.each(Object.keys(PLAN))('%s matches the reviewed plan (from week 3)', (id) => {
-    expect(line(dayFor(id as DayId, false, M(3)))).toEqual(PLAN[id])
+  it.each(Object.keys(PLAN))('%s matches the reviewed plan (from week 5)', (id) => {
+    expect(line(dayFor(id as DayId, false, M(5)))).toEqual(PLAN[id])
+  })
+
+  it('weeks 1–2 (stage 1): fewer sets, light re-entry of the upper-back lifts, no negatives or wall handstands', () => {
+    const wed = line(dayFor('wed', false, M(1)))
+    expect(wed).toContain('assisted-pull-up 3×5–8')
+    expect(wed).toContain('hammer-curl 1×10–15')
+    expect(wed).toContain('reverse-curl 1×12–15')
+    expect(wed).toContain('dead-hang 2×10–20')
+    expect(wed.some((l) => l.startsWith('negative-pull-up'))).toBe(false)
+    const thu = line(dayFor('thu', false, M(2)))
+    expect(thu.some((l) => l.startsWith('wall-handstand') || l.startsWith('hanging-knee-raise'))).toBe(false)
+    expect(thu).toContain('dead-bug 2×8–10')
+    expect(line(dayFor('mon', false, M(1)))).toContain('push-up 2×6–15')
+    const squat = allItems(dayFor('tue', false, M(1))).find((i) => i.ex === 'squat')!
+    expect(squat.sets).toBe(2)
+    expect(squat.note).toMatch(/^Weeks 1–2: empty bar or goblet/)
+    expect(allItems(dayFor('sat', false, M(1))).find((i) => i.ex === 'farmers-carry')!.max).toBe(30)
+  })
+
+  it('weeks 3–4 (stage 2): full sets, moderate loads, curls and L-sit still reduced', () => {
+    const wed = line(dayFor('wed', false, M(3)))
+    expect(wed).toContain('assisted-pull-up 4×5–8')
+    expect(wed).toContain('hammer-curl 1×10–15')
+    expect(wed.some((l) => l.startsWith('negative-pull-up'))).toBe(false)
+    expect(line(dayFor('thu', false, M(4)))).toContain('tuck-l-sit 3×10–20')
+    expect(line(dayFor('thu', false, M(4)))).toContain('hanging-knee-raise 3×8–12')
+    expect(allItems(dayFor('tue', false, M(3))).find((i) => i.ex === 'squat')!.note).toMatch(/^Weeks 3–4: moderate/)
+  })
+
+  it('the one heavy leg day is dedicated: hinge, glutes, hamstrings and quads, no RDLs', () => {
+    const tue = allItems(dayFor('tue', false, M(5))).map((i) => i.ex)
+    for (const ex of ['squat', 'hip-thrust', 'back-extension', 'seated-leg-curl', 'bulgarian-split-squat']) expect(tue).toContain(ex)
+    expect(allItems(dayFor('sat', false, M(5))).map((i) => i.ex)).toContain('cable-pull-through')
+    const d = week(5)
+    expect(weeklySets(d, 'hamstrings')).toBeGreaterThanOrEqual(10)
+    expect(weeklySets(d, 'glutes')).toBeGreaterThanOrEqual(10)
+    expect(weeklySets(d, 'quads')).toBeGreaterThanOrEqual(10)
+    expect(weeklySets(d, 'calves')).toBeGreaterThanOrEqual(9)
   })
 
   it('meets the goals the reviews set', () => {
     const d = week()
     expect(weeklySets(d, 'side-delts')).toBeGreaterThanOrEqual(12)
-    expect(daysTraining(d, 'side-delts')).toBe(3)
+    expect(daysTraining(d, 'side-delts')).toBeGreaterThanOrEqual(3)
     expect(weeklySets(d, 'lats')).toBeGreaterThanOrEqual(12)
+    expect(weeklySets(d, 'rear-delts')).toBeGreaterThanOrEqual(6)
     expect(daysTraining(d, 'lats')).toBe(3)
     expect(daysTraining(d, 'rear-delts')).toBe(2)
     expect(daysTraining(d, 'abs')).toBeGreaterThanOrEqual(3)
+    expect(d.flatMap(allItems).filter((i) => i.ex === 'tuck-l-sit').length).toBe(2)
     expect(weeklySets(d, 'forearms')).toBeGreaterThanOrEqual(8)
     expect(daysTraining(d, 'forearms')).toBeGreaterThanOrEqual(2)
     expect(daysTraining(d, 'hamstrings')).toBe(2)
     expect(daysTraining(d, 'glutes')).toBeGreaterThanOrEqual(2)
-    expect(daysTraining(d, 'calves')).toBe(2)
+    expect(daysTraining(d, 'calves')).toBe(3)
     expect(d.filter((x) => allItems(x).some((i) => i.ex === 'assisted-pull-up')).length).toBe(2)
     expect(d.flatMap(allItems).some((i) => i.ex === 'romanian-deadlift')).toBe(false)
   })
@@ -55,15 +96,6 @@ describe('Mastery plan', () => {
     }
   })
 
-  it('weeks 1–2 ease in: one set fewer on bigger exercises, negatives start in week 3', () => {
-    const w1 = line(dayFor('wed', false, M(1)))
-    expect(w1).toContain('assisted-pull-up 3×5–8')
-    expect(w1.some((l) => l.startsWith('negative-pull-up'))).toBe(false)
-    expect(line(dayFor('mon', false, M(2)))).toContain('lateral-raise 3×12–20')
-    expect(line(dayFor('mon', false, M(2)))).toContain('triceps-pushdown 2×10–15')
-    expect(line(dayFor('wed', false, M(3)))).toContain('negative-pull-up 3×3–3')
-  })
-
   it('deloads in week 6 (other plans keep week 7)', () => {
     expect(isDeload(6, programOf(12, 'mastery'))).toBe(true)
     expect(isDeload(7, programOf(12, 'mastery'))).toBe(false)
@@ -76,7 +108,7 @@ describe('Mastery plan', () => {
 
   it('works with 5-day mode and long programs', () => {
     expect(dayFor('sat', true, M()).groups).toHaveLength(0)
-    expect(allItems(dayFor('wed', false, { ...M(14), program: PROGRAMS[16] }))[1].ex).toBe('pull-up')
+    expect(allItems(dayFor('wed', false, { ...M(14), program: PROGRAMS[16] })).map((i) => i.ex)).toContain('pull-up')
     expect(planKey('mastery', true)).toBe('mastery')
     expect(templateOf('mastery')).toBe('mastery')
   })

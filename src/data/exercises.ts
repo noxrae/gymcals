@@ -396,6 +396,18 @@ const DEFS: Record<string, Def> = {
     steps: ['Lie on your back and press your lower back into the floor.', 'Lift your shoulders, arms and legs slightly off the floor.', 'Make a shallow banana shape; bend the knees to make it easier.', 'Hold and breathe. Stop when the lower back lifts.'],
     mistake: 'Lower back arching off the floor. Bend the knees or raise the legs higher.',
   },
+  'cable-pull-through': {
+    name: 'Cable Pull-through', kind: 'weight', step: 2.5, equipment: 'Low cable · rope',
+    primary: ['glutes', 'hamstrings'], secondary: ['lower-back'],
+    steps: ['Face away from a low cable, rope between your legs, feet a bit wider than hips.', 'Push your hips back with soft knees and a flat back until you feel the hamstrings stretch.', 'Drive the hips forward and stand tall, squeezing your glutes.', 'Arms just hold the rope; the hips do the work.'],
+    mistake: 'Squatting it down or pulling with the arms instead of hinging at the hips.',
+  },
+  'wall-handstand': {
+    name: 'Chest-to-wall Handstand', kind: 'time', step: 0, equipment: 'Wall · clear floor space',
+    primary: ['front-delts', 'side-delts'], secondary: ['triceps', 'traps', 'abs'],
+    steps: ['Hands a foot from the wall, walk your feet up the wall as you walk your hands in.', 'Stop when your body is in a straight line, chest facing the wall.', 'Push the floor away, squeeze glutes and legs, look between your hands.', 'Walk down slowly. Start with 10–15 s and build up.'],
+    mistake: 'Banana-shaped back or sinking into the shoulders. Stop if the wrists or upper back hurt.',
+  },
   'incline-walk': {
     name: 'Incline Walk / Bike', kind: 'cardio', step: 0, equipment: 'Treadmill, bike or elliptical',
     primary: [], secondary: [],
@@ -404,7 +416,7 @@ const DEFS: Record<string, Def> = {
   },
 }
 
-const PHOTO_COUNT: Record<string, number> = { 'hollow-hold': 1, 'dead-hang': 1, 'scapular-push-up': 1, 'pike-push-up': 1, 'tuck-l-sit': 1, 'elevated-pike-push-up': 0, 'advanced-tuck-l-sit': 0 }
+const PHOTO_COUNT: Record<string, number> = { 'hollow-hold': 1, 'wall-handstand': 1, 'dead-hang': 1, 'scapular-push-up': 1, 'pike-push-up': 1, 'tuck-l-sit': 1, 'elevated-pike-push-up': 0, 'advanced-tuck-l-sit': 0 }
 const VIDEOS = videos as Record<string, { id: string; title: string; channel: string } | null>
 
 export const EXERCISES: Record<string, Exercise> = Object.fromEntries(
@@ -452,9 +464,12 @@ export const ALTERNATIVES: Record<string, string[]> = {
   'cable-lateral-raise': ['lateral-raise'],
   'lateral-raise': ['cable-lateral-raise'],
   'seated-leg-curl': ['leg-curl'],
-  'romanian-deadlift': ['hip-thrust', 'back-extension', 'seated-leg-curl'],
-  'hip-thrust': ['back-extension', 'romanian-deadlift'],
-  'back-extension': ['hip-thrust', 'romanian-deadlift'],
+  // RDLs are no longer offered as a swap (they caused upper-back pain); these are the alternatives.
+  'romanian-deadlift': ['hip-thrust', 'back-extension', 'cable-pull-through', 'seated-leg-curl'],
+  'hip-thrust': ['cable-pull-through', 'back-extension'],
+  'back-extension': ['cable-pull-through', 'hip-thrust'],
+  'cable-pull-through': ['back-extension', 'hip-thrust'],
+  'wall-handstand': ['pike-push-up', 'elevated-pike-push-up'],
   'leg-curl': ['seated-leg-curl'],
   'seated-calf-raise': ['calf-raise'],
   'calf-raise': ['seated-calf-raise'],
@@ -475,13 +490,13 @@ const CALISTHENICS = new Set([
   'push-up', 'scapular-push-up', 'pike-push-up', 'dead-hang', 'scapular-pull-up', 'assisted-pull-up', 'negative-pull-up',
   'hanging-knee-raise', 'dead-bug', 'side-plank', 'plank', 'tuck-l-sit', 'walking-lunge', 'mountain-climber',
   'pull-up', 'decline-push-up', 'hanging-leg-raise', 'diamond-push-up', 'elevated-pike-push-up', 'advanced-tuck-l-sit',
-  'dead-bug-timed', 'mobility', 'hollow-hold',
+  'dead-bug-timed', 'mobility', 'hollow-hold', 'wall-handstand',
 ])
 export const typeOf = (key: string): ExType => (CALISTHENICS.has(key) ? 'cali' : EXERCISES[key]?.kind === 'cardio' ? 'cardio' : 'gym')
 export const TYPE_LABEL: Record<ExType, string> = { gym: 'Gym', cali: 'Calisthenics', cardio: 'Cardio' }
 
 /** How the form demo animates: a held position, or start ↔ finish reps (fast for climbers). */
-export const HOLDS = new Set(['dead-hang', 'plank', 'side-plank', 'tuck-l-sit', 'advanced-tuck-l-sit', 'farmers-carry', 'hollow-hold'])
+export const HOLDS = new Set(['dead-hang', 'plank', 'side-plank', 'tuck-l-sit', 'advanced-tuck-l-sit', 'farmers-carry', 'hollow-hold', 'wall-handstand'])
 export const FAST = new Set(['mountain-climber'])
 /** No free photos exist for these, so the demo is an animated figure. */
 export const FIGURE_DEMO = new Set(['pike-push-up', 'scapular-push-up', 'tuck-l-sit', 'elevated-pike-push-up', 'advanced-tuck-l-sit'])

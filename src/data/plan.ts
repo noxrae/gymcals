@@ -250,85 +250,127 @@ const ATHLETIC_EXTENDED_5 = fiveOf(ATHLETIC_EXTENDED)
 // ---------------- Mastery plan (Athletic base, reviewed by a coach and a physio) ----------------
 // V-taper priority (side delts and lats 3x a week, rear delts 2x), loaded abs 3x, pull-up practice
 // 2x, direct forearm work 2x, calisthenics skills while fresh, every session ≤ ~75 min.
-// No RDLs (they caused upper-back pain): hip thrust, 45° hip extension and curls cover the
-// hamstrings and glutes. Weeks 1–2 ease in with one set fewer; deload in week 6.
+// No RDLs (they caused upper-back pain): hip thrust, loaded 45° hip extension, seated curls and
+// cable pull-throughs cover the hamstrings and glutes. Weeks 1–4 bring the upper-back lifts back in
+// stages; deload in week 6.
 
 const UPPER_WARMUP = ['3 min easy bike or walk', 'Open-book thoracic rotations and wall slides', 'Light band pull-aparts and 2 min wrist prep', '1–2 light ramp-up sets of the first lift']
 const LOWER_WARMUP = ['5 min easy bike or incline walk', 'Bodyweight squats 2 × 12–15 and leg swings', 'Glute bridges 1 × 15 and hip openers', 'Light practice sets before the first heavy lift']
 
+// The full plan (week 5 onward). Weeks 1–4 are adjusted by masteryWeek() below.
 const MASTERY: PlanDay[] = [
   {
-    id: 'mon', name: 'Upper A · Chest & Back Width', short: 'Upper A', focus: 'Chest · Lats · Side delts · Triceps', minutes: 70, hero: 'bench-press',
-    warmup: [...UPPER_WARMUP.slice(0, 3), 'Scapular push-ups 2 × 10–15', UPPER_WARMUP[3]],
+    id: 'mon', name: 'Upper A · Chest & Back Width', short: 'Upper A', focus: 'Chest · Lats · Side delts · Triceps · Abs', minutes: 75, hero: 'bench-press',
+    warmup: UPPER_WARMUP,
     groups: [
+      { title: 'Skill practice', items: [r('tuck-l-sit', 2, 10, 15, [60, 90], { note: 'L-sit practice 1 of 2 · parallettes or blocks' })] },
       { title: 'Chest', items: [r('bench-press', 3, 6, 10, [120, 180], { note: 'Moderate arch, gentle shoulder-blade set' }), r('incline-dumbbell-press', 3, 8, 12, [90, 150])] },
       { title: 'Back width', items: [r('lat-pulldown', 3, 8, 12, [90, 150], { note: 'Wide grip, no lean-back' }), r('seated-cable-row', 3, 8, 12, [90, 150], { note: 'Torso still' })] },
-      { title: 'Shoulders & arms', items: [r('lateral-raise', 4, 12, 20, [60, 90], { note: 'Side delts day 1' }), r('triceps-pushdown', 2, 10, 15, [60, 90], { note: 'Rope' })] },
-      { title: 'Calisthenics finisher', items: [r('push-up', 2, 6, 15, [90, 90], { note: 'As many as possible, stop 2 reps short' })] },
+      { title: 'Shoulders & arms', items: [r('lateral-raise', 3, 12, 20, [60, 90], { note: 'Side delts 1 of 3 · superset with pushdowns to save time' }), r('triceps-pushdown', 2, 10, 15, [60, 90], { note: 'Rope' })] },
+      { title: 'Calisthenics finisher', items: [r('diamond-push-up', 2, 5, 12, [90, 90], { note: 'Stop 2 reps short' })] },
+      { title: 'Abs', items: [r('cable-crunch', 3, 10, 15, [60, 90], { note: 'Abs 1 of 3' })] },
     ],
   },
   {
-    id: 'tue', name: 'Legs · Squat, Glutes & Hamstrings', short: 'Legs', focus: 'Quads · Glutes · Hamstrings · Calves · Abs', minutes: 75, hero: 'squat',
+    // The one heavy leg day, fully dedicated: squat for quads, hip thrust for glutes, and the best
+    // RDL alternatives for hamstrings (loaded 45° hip extension = hip hinge; seated leg curl,
+    // which grows hamstrings more than lying curls — Maeo et al. 2021).
+    id: 'tue', name: 'Leg Day · Quads, Glutes & Hamstrings', short: 'Legs', focus: 'Quads · Glutes · Hamstrings · Calves', minutes: 75, hero: 'squat',
     warmup: LOWER_WARMUP,
     groups: [
-      { title: 'Main lifts', items: [r('squat', 3, 6, 10, [150, 180], { note: 'Or hack squat / leg press' }), r('hip-thrust', 3, 8, 12, [120, 150], { note: 'Upper back below the shoulder blades, chin tucked' })] },
-      { title: 'Legs', items: [r('bulgarian-split-squat', 3, 8, 12, [90, 120], { perSide: true }), r('seated-leg-curl', 3, 10, 15, [60, 90]), r('leg-extension', 2, 10, 15, [60, 90]), r('calf-raise', 4, 8, 12, [60, 90], { note: 'Standing · 2 s pause at the bottom' })] },
-      { title: 'Abs', items: [r('cable-crunch', 3, 10, 15, [60, 90], { note: 'Abs day 1' })] },
+      { title: 'Main lifts', items: [r('squat', 3, 6, 10, [150, 180], { note: 'Stop where the pelvis starts to tuck · no grinding reps' }), r('hip-thrust', 3, 8, 12, [120, 150], { note: 'Pad, bench just below the shoulder blades, ribs down' })] },
+      { title: 'Hamstrings · RDL alternatives', items: [r('back-extension', 3, 8, 12, [90, 120], { note: 'Hold a plate · hip hinge, neutral spine' }), r('seated-leg-curl', 3, 8, 12, [60, 90], { note: 'Lean forward, slow lowering' })] },
+      { title: 'Quads & calves', items: [r('bulgarian-split-squat', 2, 8, 12, [90, 120], { perSide: true }), r('leg-extension', 2, 10, 15, [60, 90]), r('calf-raise', 4, 8, 12, [60, 90], { note: 'Standing · 2 s pause at the bottom' })] },
     ],
   },
   {
     id: 'wed', name: 'Pull + Pull-up Skill', short: 'Pull', focus: 'Lats · Rear delts · Biceps · Forearms · Pull-ups', minutes: 75, hero: 'assisted-pull-up',
     warmup: UPPER_WARMUP,
     groups: [
-      { title: 'Pull-up skill · do these fresh', items: [r('scapular-pull-up', 2, 5, 8, [60, 90]), r('assisted-pull-up', 4, 5, 8, [120, 180], { note: 'Pull-up day 1 · −2.5 kg assist at 8 clean reps' }), r('negative-pull-up', 3, 3, 3, [120, 120], { note: '5 s lowering · from week 3' })] },
-      { title: 'Back', items: [r('chest-supported-row', 3, 8, 12, [90, 150]), r('straight-arm-pulldown', 2, 12, 15, [60, 90]), r('reverse-pec-deck', 3, 12, 20, [60, 90], { note: 'Rear delts day 1' })] },
-      { title: 'Arms & forearms', items: [r('incline-dumbbell-curl', 3, 8, 12, [60, 90]), r('hammer-curl', 2, 10, 15, [60, 90]), r('reverse-curl', 2, 12, 15, [60, 90], { note: 'Forearms day 1' })] },
-      { title: 'Grip finisher', items: [r('dead-hang', 2, 20, 45, [90, 90], { note: 'Max time, stop before your grip fails' })] },
+      { title: 'Pull-up skill · do these fresh', items: [r('scapular-pull-up', 2, 5, 8, [60, 90]), r('negative-pull-up', 3, 3, 3, [120, 120], { note: '5 s lowering, before the assisted sets' }), r('assisted-pull-up', 3, 5, 8, [120, 180], { note: 'Pull-ups 1 of 2 · −2.5 kg assist at 8 clean reps' })] },
+      { title: 'Back', items: [r('chest-supported-row', 3, 8, 12, [90, 150]), r('reverse-pec-deck', 3, 12, 20, [60, 90], { note: 'Rear delts 1 of 2' })] },
+      { title: 'Arms & forearms', items: [r('incline-dumbbell-curl', 3, 8, 12, [60, 90]), r('hammer-curl', 2, 10, 15, [60, 90]), r('reverse-curl', 2, 12, 15, [60, 90], { note: 'Forearms 1 of 2' })] },
+      { title: 'Grip finisher', items: [r('dead-hang', 2, 20, 45, [90, 90], { note: 'Active shoulders, stop before the grip fails' })] },
     ],
   },
   {
-    id: 'thu', name: 'Core, Skills + Cardio', short: 'Core', focus: 'Abs · L-sit · Handstand prep · Fat loss', minutes: 65, hero: 'hanging-knee-raise',
+    id: 'thu', name: 'Core, Skills + Cardio', short: 'Core', focus: 'Abs · L-sit · Handstand · Calves · Fat loss', minutes: 70, hero: 'hanging-knee-raise',
     warmup: ['3 min easy bike or walk', '2 min wrist prep: circles, palm and finger stretches', 'Cat–cow and hip openers', 'Scapular push-ups 1 × 10'],
     groups: [
-      { title: 'Skills · while fresh', items: [r('tuck-l-sit', 4, 10, 20, [90, 120], { note: 'On parallettes or blocks' }), r('pike-push-up', 3, 5, 10, [90, 120], { note: 'Handstand prep · stop if wrists complain' })] },
-      { title: 'Abs', items: [r('hanging-knee-raise', 3, 8, 12, [60, 90], { note: 'Abs day 2 · leg raises when knees get easy' }), r('hollow-hold', 3, 20, 30, [45, 60]), r('side-plank', 2, 30, 45, [45, 60], { perSide: true })] },
+      { title: 'Skills · while fresh', items: [r('tuck-l-sit', 4, 10, 20, [90, 120], { note: 'L-sit practice 2 of 2 · parallettes or blocks' }), r('pike-push-up', 3, 5, 10, [90, 120], { note: 'Handstand prep' }), r('wall-handstand', 3, 15, 30, [90, 120], { note: 'From month 2' })] },
+      { title: 'Abs', items: [r('hanging-knee-raise', 3, 8, 12, [60, 90], { note: 'Abs 2 of 3' }), r('hollow-hold', 3, 20, 30, [45, 60]), r('side-plank', 2, 30, 45, [45, 60], { perSide: true })] },
+      { title: 'Calves', items: [r('calf-raise', 2, 10, 15, [60, 90], { note: 'Standing' })] },
       { title: 'Cardio', items: [r('incline-walk', 1, 25, 35, [0, 0], { note: 'Zone 2: you can still talk in short sentences' })] },
     ],
   },
   {
-    id: 'fri', name: 'Upper B · 3D Shoulders & Arms', short: 'Upper B', focus: 'Side delts · Upper chest · Rear delts · Arms', minutes: 70, hero: 'incline-bench-press',
+    id: 'fri', name: 'Upper B · 3D Shoulders & Arms', short: 'Upper B', focus: 'Side delts · Upper chest · Rear delts · Arms', minutes: 75, hero: 'incline-bench-press',
     warmup: UPPER_WARMUP,
     groups: [
-      { title: 'Pull-up skill', items: [r('assisted-pull-up', 2, 5, 8, [120, 120], { note: 'Pull-up day 2 · technique, not failure' })] },
-      { title: 'Main lifts', items: [r('incline-bench-press', 3, 8, 12, [120, 180]), r('dumbbell-shoulder-press', 3, 8, 12, [90, 150], { note: 'Seated, 2 reps in reserve' })] },
-      { title: 'Shoulders', items: [r('cable-lateral-raise', 4, 12, 20, [60, 90], { note: 'Side delts day 2' }), r('reverse-pec-deck', 2, 12, 20, [60, 90], { note: 'Rear delts day 2' })] },
+      { title: 'Pull-up skill', items: [r('assisted-pull-up', 2, 5, 8, [120, 120], { note: 'Pull-ups 2 of 2 · technique, not failure' })] },
+      { title: 'Main lifts', items: [r('incline-bench-press', 3, 8, 12, [120, 180]), r('dumbbell-shoulder-press', 3, 8, 12, [90, 150], { note: 'Seated, 2 reps in reserve, never to failure' })] },
+      { title: 'Shoulders', items: [r('cable-lateral-raise', 4, 12, 20, [60, 90], { note: 'Side delts 2 of 3' }), r('reverse-pec-deck', 3, 12, 20, [60, 90], { note: 'Rear delts 2 of 2' })] },
       { title: 'Arms', items: [r('preacher-curl', 3, 8, 12, [60, 90], { note: 'EZ-bar · control the bottom' }), r('triceps-extension', 3, 10, 15, [60, 90], { note: 'Overhead cable' }), r('triceps-pushdown', 2, 10, 15, [60, 90], { note: 'Rope' })] },
     ],
   },
   {
-    id: 'sat', name: 'Light Legs, Shoulders, Forearms + Conditioning', short: 'Light legs', focus: 'Legs · Side delts · Forearms · Grip', minutes: 75, hero: 'farmers-carry',
+    id: 'sat', name: 'Light Legs, Shoulders, Forearms + Abs', short: 'Light legs', focus: 'Hamstrings · Glutes · Side delts · Forearms · Abs', minutes: 70, hero: 'leg-press',
     warmup: LOWER_WARMUP.slice(0, 3),
+    optionalCardio: 'your daily steps, plus a 5–10 min mobility routine at home this evening',
     groups: [
-      { title: 'Legs', items: [r('leg-press', 3, 12, 15, [90, 120]), r('back-extension', 3, 10, 15, [90, 90], { note: 'Neutral spine · hamstrings and glutes' }), r('seated-leg-curl', 2, 12, 15, [60, 90]), r('seated-calf-raise', 3, 12, 20, [60, 90])] },
-      { title: 'Shoulders & forearms', items: [r('lateral-raise', 3, 15, 20, [60, 60], { note: 'Light · side delts day 3' }), r('wrist-curl', 2, 15, 20, [45, 60], { note: 'Back to back with reverse wrist curls · forearms day 2' }), r('reverse-wrist-curl', 2, 15, 20, [45, 60]), r('farmers-carry', 2, 30, 45, [90, 120])] },
-      { title: 'Abs', items: [r('hanging-knee-raise', 3, 8, 12, [60, 90], { note: 'Abs day 3' })] },
-      { title: 'Cardio', items: [r('incline-walk', 1, 15, 20, [0, 0], { note: 'Brisk walk, cycle or sport' })] },
-      { title: 'Mobility', items: [r('mobility', 1, 5, 10, [0, 0])] },
+      { title: 'Legs · second hinge day', items: [r('leg-press', 3, 12, 15, [90, 120]), r('cable-pull-through', 3, 12, 15, [60, 90], { note: 'RDL alternative · hinge, squeeze the glutes' }), r('seated-leg-curl', 3, 12, 15, [60, 90]), r('seated-calf-raise', 3, 12, 20, [60, 90])] },
+      { title: 'Shoulders', items: [r('lateral-raise', 3, 15, 20, [60, 60], { note: 'Light · side delts 3 of 3' })] },
+      { title: 'Abs', items: [r('hanging-knee-raise', 3, 8, 12, [60, 90], { note: 'Abs 3 of 3 · before carries, while the grip is fresh' })] },
+      { title: 'Grip & forearms', items: [r('farmers-carry', 2, 30, 45, [90, 120]), r('wrist-curl', 2, 15, 20, [45, 60], { note: 'Forearms 2 of 2 · back to back with reverse wrist curls' }), r('reverse-wrist-curl', 2, 15, 20, [45, 60])] },
     ],
   },
   SUN,
 ]
 
-/** Mastery eases in: weeks 1–2 do one set fewer on exercises with 3+ sets. */
-const masteryRamp = (days: PlanDay[], week: number) =>
-  week > 2
-    ? days
-    : days.map((d) => ({
-        ...d,
-        groups: d.groups
-          .map((g) => ({ ...g, items: g.items.filter((it) => it.ex !== 'negative-pull-up').map((it) => (it.sets >= 3 ? { ...it, sets: it.sets - 1 } : it)) }))
-          .filter((g) => g.items.length),
+// Week-by-week adjustments for the first month (coach + physio review):
+//   weeks 1–2: one set fewer on 3+ set exercises; the lifts that load the upper back come back light
+//              (stage 1); no negatives; no wall handstands; hanging raises swapped for dead bugs.
+//   weeks 3–4: full sets, moderate loads on those lifts (stage 2); fewer curl sets; still no negatives.
+//   week 5+:   the full plan, including negatives (assisted pull-ups drop to 3 sets) and wall handstands.
+type Tweak = Partial<Pick<PlanItem, 'ex' | 'sets' | 'min' | 'max' | 'note'>>
+const STAGE_1: Record<string, Tweak> = {
+  squat: { note: 'Weeks 1–2: empty bar or goblet squat, 4+ reps in reserve' },
+  'hip-thrust': { note: 'Weeks 1–2: thick pad, about 60% load, bench below the shoulder blades' },
+  'back-extension': { note: 'Weeks 1–2: bodyweight only' },
+  'dead-hang': { min: 10, max: 20, note: 'Weeks 1–2: feet partly on a box' },
+  'hanging-knee-raise': { ex: 'dead-bug', min: 8, max: 10, note: 'Weeks 1–2 instead of hanging raises' },
+  'farmers-carry': { min: 20, max: 30, note: 'Weeks 1–2: light, about 15–20% of body weight per hand' },
+  'pike-push-up': { note: 'Weeks 1–2: hands on a bench (incline pike)' },
+}
+const STAGE_2: Record<string, Tweak> = {
+  squat: { note: 'Weeks 3–4: moderate load, 3+ reps in reserve' },
+  'hip-thrust': { note: 'Weeks 3–4: moderate plate load, pad on' },
+  'back-extension': { note: 'Weeks 3–4: add a light plate' },
+  'pike-push-up': { note: 'Weeks 3–4: feet on the floor if the incline version felt easy' },
+}
+function masteryWeek(days: PlanDay[], week: number): PlanDay[] {
+  if (week >= 5) return days
+  const stage = week <= 2 ? STAGE_1 : STAGE_2
+  return days.map((d) => ({
+    ...d,
+    groups: d.groups
+      .map((g) => ({
+        ...g,
+        items: g.items
+          .filter((it) => it.ex !== 'negative-pull-up' && it.ex !== 'wall-handstand')
+          .map((it) => {
+            let next: PlanItem = { ...it, ...stage[it.ex] }
+            if (d.id === 'mon' && it.ex === 'diamond-push-up') next = { ...next, ex: 'push-up', min: 6, max: 15, note: 'Month 1: regular push-ups · stop 2 reps short' }
+            if (d.id === 'wed' && it.ex === 'assisted-pull-up') next = { ...next, sets: 4 }
+            if (d.id === 'wed' && (it.ex === 'hammer-curl' || it.ex === 'reverse-curl')) next = { ...next, sets: 1 }
+            if (d.id === 'thu' && it.ex === 'tuck-l-sit') next = { ...next, sets: 3 }
+            if (week <= 2 && next.sets >= 3) next = { ...next, sets: next.sets - 1 }
+            return next
+          }),
       }))
+      .filter((g) => g.items.length),
+  }))
+}
 const MASTERY_5 = fiveOf(MASTERY)
 
 
@@ -343,7 +385,7 @@ export const templateOf = (id?: string): TemplateId => (id === 'athletic' || id 
 export const planKey = (template: TemplateId, extended: boolean) => (template === 'athletic' ? (extended ? 'athletic-extended' : 'athletic') : template)
 
 const daysBase = (fiveDay: boolean, template: TemplateId = 'original', extended = false, week = 1) =>
-  template === 'mastery' ? masteryRamp(fiveDay ? MASTERY_5 : MASTERY, week)
+  template === 'mastery' ? masteryWeek(fiveDay ? MASTERY_5 : MASTERY, week)
   : template === 'athletic' ? (extended ? (fiveDay ? ATHLETIC_EXTENDED_5 : ATHLETIC_EXTENDED) : fiveDay ? ATHLETIC_5 : ATHLETIC) : fiveDay ? FIVE_DAYS : DAYS
 
 export const JS_DAY: DayId[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']

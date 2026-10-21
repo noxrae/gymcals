@@ -6,7 +6,7 @@ test('choose Mastery on Plan: its week shows, Extended is only for Athletic, his
   await page.getByRole('group', { name: 'Weekly plan' }).getByRole('button', { name: 'Mastery' }).click()
   await expect(page.getByText('Switched to the Mastery plan')).toBeVisible()
   await expect(page.getByRole('switch', { name: /Extended/ })).toHaveCount(0)
-  await expect(page.getByText('Legs · Squat, Glutes & Hamstrings')).toBeVisible()
+  await expect(page.getByText('Leg Day · Quads, Glutes & Hamstrings')).toBeVisible()
   await expect(page.getByText(/lighter week 6/)).toBeVisible()
   const s = await stored(page)
   expect(s.settings.plan).toBe('mastery')
@@ -34,5 +34,16 @@ test('Skills shows this month’s targets; passing one is saved and can be undon
   await page.getByRole('button', { name: 'See all months' }).click()
   await expect(page.getByRole('heading', { name: 'Month 3 · coming up' })).toBeVisible()
   await expect(page.getByRole('heading', { name: /Month 4/ })).toHaveCount(0)
+  await noErrors(errors)
+})
+
+test('week 1 of Mastery brings the upper-back lifts back light; week 5 has the full plan', async ({ page }) => {
+  // Start date 2026-10-12 → 14 Oct is week 1.
+  const errors = await open(page, { ...history(), settings: { plan: 'mastery', startDate: '2026-10-12' } }, { at: new Date('2026-10-13T08:00:00'), path: '/day/tue' })
+  await expect(page.getByText(/Weeks 1–2: empty bar or goblet squat/)).toBeVisible()
+  await expect(page.getByText(/Weeks 1–2: thick pad/)).toBeVisible()
+  await page.goto('/#/day/thu')
+  await expect(page.getByText('Chest-to-wall Handstand', { exact: true })).toHaveCount(0)
+  await expect(page.getByText('Dead Bug', { exact: true })).toBeVisible()
   await noErrors(errors)
 })
